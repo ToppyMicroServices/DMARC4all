@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DNS / Email Auth Quick Check</title>
+</head>
+<body style="font-family: system-ui; max-width: 760px; margin: 40px auto; padding: 0 16px;">
+  <h1>DNS / Email Auth Quick Check</h1>
+  <p>手続きは最小：ドメイン名の入力だけで一次診断。修正も“コピペ一回”で完了するよう設計する。</p>
+
+  <h2>入力</h2>
+  <form>
+    <label>Domain: <input name="domain" placeholder="example.com" style="width: 280px;"></label>
+    <button type="submit">Check</button>
+  </form>
+
+  <p style="margin-top:24px; color:#666;">
+    ※このページはLP（入口）であり、診断の自動化は後段（API/サーバレス等）で接続する。
+  </p>
+</body>
+</html>
