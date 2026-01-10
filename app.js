@@ -1048,10 +1048,17 @@ function detectDnsHostingProviderFromNS(nsList) {
 		};
 	}
 
+	function isSubdomainOrEqual(host, baseDomain) {
+		if (!host || !baseDomain) {
+			return false;
+		}
+		return host === baseDomain || host.endsWith('.' + baseDomain);
+	}
+
 	const providers = [
 		{
 			name: 'Cloudflare',
-			match: (h) => h.endsWith('cloudflare.com'),
+			match: (h) => isSubdomainOrEqual(h, 'cloudflare.com'),
 			links: [{ label: tr('Cloudflare: DNSレコードの追加/管理', 'Cloudflare: Manage DNS records'), url: 'https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/' }]
 		},
 		{
@@ -1061,7 +1068,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'Google Cloud DNS',
-			match: (h) => /(^|\.)ns-cloud-[a-d]\d*\.googledomains\.com$/.test(h) || h.endsWith('googledomains.com'),
+			match: (h) => /(^|\.)ns-cloud-[a-d]\d*\.googledomains\.com$/.test(h) || isSubdomainOrEqual(h, 'googledomains.com'),
 			links: [{ label: tr('Google Cloud DNS: レコードセット管理', 'Google Cloud DNS: Records'), url: 'https://cloud.google.com/dns/docs/records' }]
 		},
 		{
@@ -1071,7 +1078,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'GoDaddy',
-			match: (h) => h.endsWith('domaincontrol.com'),
+			match: (h) => isSubdomainOrEqual(h, 'domaincontrol.com'),
 			links: [{ label: tr('GoDaddy: TXTレコードを追加', 'GoDaddy: Add a TXT record'), url: 'https://www.godaddy.com/help/add-a-txt-record-19232' }]
 		},
 		{
