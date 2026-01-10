@@ -2,21 +2,107 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DNS / Email Auth Quick Check</title>
+  <title>Toppy DNS / Email Auth Quick Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" integrity="sha256-0kaYYq3qitkkVZpP/6uKTJwfTpqFNM6OHDbsaYzw9Uw=" crossorigin="anonymous"></script>
+  <script defer src="i18n/ja.js"></script>
+  <script defer src="i18n/en.js"></script>
+  <script defer src="i18n/es.js"></script>
+  <script defer src="i18n/de.js"></script>
+  <script defer src="i18n/ko.js"></script>
+  <script defer src="i18n/vi.js"></script>
+  <script defer src="i18n/th.js"></script>
+  <script defer src="i18n/km.js"></script>
+  <script defer src="i18n/my.js"></script>
+  <script defer src="i18n/id.js"></script>
+  <script defer src="i18n/et.js"></script>
+  <script defer src="i18n/zh.js"></script>
+  <script defer src="i18n/ru.js"></script>
+  <script defer src="i18n/vi_extra.js"></script>
+  <script defer src="i18n/th_extra.js"></script>
+  <script defer src="i18n/km_extra.js"></script>
+  <script defer src="i18n/id_extra.js"></script>
+  <script defer src="i18n/et_extra.js"></script>
+  <script defer src="i18n/zh_extra.js"></script>
+  <script defer src="i18n/ru_extra.js"></script>
+  <script defer src="i18n/es_extra.js"></script>
+  <script defer src="i18n/de_extra.js"></script>
+  <script defer src="i18n/extra_tr_my.js"></script>
+  <script defer src="i18n/extra_tr_ko.js"></script>
+  <script defer src="app.js"></script>
 </head>
-<body style="font-family: system-ui; max-width: 760px; margin: 40px auto; padding: 0 16px;">
-  <h1>DNS / Email Auth Quick Check</h1>
-  <p>手続きは最小：ドメイン名の入力だけで一次診断。修正も“コピペ一回”で完了するよう設計する。</p>
-
-  <h2>入力</h2>
-  <form>
-    <label>Domain: <input name="domain" placeholder="example.com" style="width: 280px;"></label>
-    <button type="submit">Check</button>
-  </form>
-
-  <p style="margin-top:24px; color:#666;">
-    ※このページはLP（入口）であり、診断の自動化は後段（API/サーバレス等）で接続する。
-  </p>
+<body>
+  <div class="shell">
+    <div class="brandbar" aria-label="ToppyMicroServices">
+      <img src="https://www.toppymicros.com/favicon.ico" alt="ToppyMicroServices">
+      <span class="brand-name">ToppyMicroServices</span>
+      <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский">RU</button>
+        </nav>
+        <a class="brand-github" href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg class="brand-github-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+    <section class="hero">
+      <p class="pill" data-i18n="hero.pill">DNS Quick 診断（公開DNSのみ）</p>
+      <div class="flex" style="gap: 12px; align-items: center; flex-wrap: wrap;">
+        <h1 data-i18n="hero.title">業務用メールのなりすまし対策を安全に実施</h1>
+      </div>
+      <p class="tagline" data-i18n="hero.tagline">ドメイン名を入力 → SPF / DKIM / DMARC を一括診断.修正案はコピペ1回・元に戻す手順つきで,安全に実施できる</p>
+      <p class="tiny muted" style="margin-top: 10px;" data-i18n="hero.free">完全無料（登録不要）</p>
+      <p class="tiny muted" style="margin-top: 4px;">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
+      <div class="flex" style="margin-top: 18px; position: relative; z-index: 1;">
+        <div class="card">
+          <h2 style="margin: 0 0 6px;" data-i18n="form.title">Quick 診断</h2>
+          <form id="quick-check-form">
+            <div>
+              <label for="domain" data-i18n="form.domain">ドメイン</label>
+              <input id="domain" name="domain" placeholder="example.com" required>
+            </div>
+            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
+              <input type="checkbox" id="consent" required checked style="width:auto;"> <span data-i18n="form.consent">公開DNS（誰でも閲覧可能な範囲）の確認に同意する</span>
+            </label>
+            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
+              <input type="checkbox" id="subdomain-scan" style="width:auto;"> <span data-i18n="form.subdomain">サブドメイン探索も実行する（任意）</span>
+            </label>
+            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
+              <input type="checkbox" id="dnsbl-check" style="width:auto;"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
+            </label>
+            <div class="grid">
+              <button type="submit" id="go-deep-btn" style="background: linear-gradient(120deg, #22d3ee, #0ea5e9);" data-i18n="form.deep">診断を実行</button>
+            </div>
+            <p class="tiny" data-i18n="form.note">※ 公開DNSの情報のみを使用し,メールの送受信やサーバーへのアクセスは行いません. </p>
+            <p class="tiny" data-i18n="form.privacy">※<strong>プライバシー:</strong> このツール自体は個人情報（氏名・メール本文・ログイン情報等）を収集しません. DNS照会は外部のDoH（DNS-over-HTTPS）提供者へ送信され,提供者側でログ/統計に利用される可能性があります（各社ポリシー参照）</p>
+            <p class="tiny muted" data-i18n="form.privacyFirst">プライバシー優先: 可能なら自前のDNS/DoHを利用（DoH先はコードで差し替え可能）</p>
+            <p class="tiny muted" data-i18n="form.disclaimer">※このページは元々，弊社のDNS設定用に作ったチェックページです. 結果は目安であり最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
+            <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示的に許可を得た範囲でのみ使用すること．</p>
+          </form>
+          <div id="report" class="report" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+  </div>
 </body>
 </html>
+  
