@@ -1098,7 +1098,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'DigitalOcean',
-			match: (h) => h.endsWith('digitalocean.com'),
+			match: (h) => isSubdomainOrEqual(h, 'digitalocean.com'),
 			links: [{ label: tr('DigitalOcean: DNSレコード管理', 'DigitalOcean: Manage DNS records'), url: 'https://docs.digitalocean.com/products/networking/dns/how-to/manage-records/' }]
 		},
 		{
