@@ -45,9 +45,11 @@ Then open:
 1. Push this repository to GitHub.
 2. In GitHub: **Settings → Pages**
 3. Set:
-   - **Source**: “Deploy from a branch”
-   - **Branch**: `main` / `/ (root)`
-4. Save. Pages will serve `index.html` automatically.
+  - **Source**: “GitHub Actions”
+4. Push to `main` (or run **Actions → Deploy static content to Pages** via `workflow_dispatch`).
+5. After the workflow finishes, open the Pages URL shown in the deploy job (or in **Settings → Pages**).
+
+If your default branch is not `main`, update the workflow trigger in `.github/workflows/pages.yml`.
 
 ## Notes / Limitations
 
