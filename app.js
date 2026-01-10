@@ -1093,7 +1093,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'NS1',
-			match: (h) => h.endsWith('nsone.net'),
+			match: (h) => isSubdomainOrEqual(h, 'nsone.net'),
 			links: [{ label: 'NS1: Documentation', url: 'https://ns1.com/documentation' }]
 		},
 		{
