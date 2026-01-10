@@ -1083,7 +1083,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'Namecheap',
-			match: (h) => h.endsWith('namecheapdns.com'),
+			match: (h) => /(^|\.)namecheapdns\.com$/.test(h),
 			links: [{ label: tr('Namecheap: TXTレコードの追加', 'Namecheap: Add a TXT record'), url: 'https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-can-i-set-up-a-txt-record/' }]
 		},
 		{
