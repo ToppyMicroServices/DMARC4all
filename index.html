@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Toppy DNS / Email Auth Quick Check</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,31 +66,31 @@
     </div>
     <section class="hero">
       <p class="pill" data-i18n="hero.pill">DNS Quick 診断（公開DNSのみ）</p>
-      <div class="flex" style="gap: 12px; align-items: center; flex-wrap: wrap;">
+      <div class="flex flex-center-wrap">
         <h1 data-i18n="hero.title">業務用メールのなりすまし対策を安全に実施</h1>
       </div>
       <p class="tagline" data-i18n="hero.tagline">ドメイン名を入力 → SPF / DKIM / DMARC を一括診断.修正案はコピペ1回・元に戻す手順つきで,安全に実施できる</p>
-      <p class="tiny muted" style="margin-top: 10px;" data-i18n="hero.free">完全無料（登録不要）</p>
-      <p class="tiny muted" style="margin-top: 4px;">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
-      <div class="flex" style="margin-top: 18px; position: relative; z-index: 1;">
+      <p class="tiny muted mt-10" data-i18n="hero.free">完全無料（登録不要）</p>
+      <p class="tiny muted mt-4">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
+      <div class="flex mt-18 z-1">
         <div class="card">
-          <h2 style="margin: 0 0 6px;" data-i18n="form.title">Quick 診断</h2>
+          <h2 class="m-0-0-6" data-i18n="form.title">Quick 診断</h2>
           <form id="quick-check-form">
             <div>
               <label for="domain" data-i18n="form.domain">ドメイン</label>
               <input id="domain" name="domain" placeholder="example.com" required>
             </div>
-            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
-              <input type="checkbox" id="consent" required checked style="width:auto;"> <span data-i18n="form.consent">公開DNS（誰でも閲覧可能な範囲）の確認に同意する</span>
+            <label class="flex-label">
+              <input type="checkbox" id="consent" required checked class="w-auto"> <span data-i18n="form.consent">公開DNS（誰でも閲覧可能な範囲）の確認に同意する</span>
             </label>
-            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
-              <input type="checkbox" id="subdomain-scan" style="width:auto;"> <span data-i18n="form.subdomain">サブドメイン探索も実行する（任意）</span>
+            <label class="flex-label">
+              <input type="checkbox" id="subdomain-scan" class="w-auto"> <span data-i18n="form.subdomain">サブドメイン探索も実行する（任意）</span>
             </label>
-            <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-weight:500; text-align:center; width:100%; flex-wrap:wrap;">
-              <input type="checkbox" id="dnsbl-check" style="width:auto;"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
+            <label class="flex-label">
+              <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
             </label>
             <div class="grid">
-              <button type="submit" id="go-deep-btn" style="background: linear-gradient(120deg, #22d3ee, #0ea5e9);" data-i18n="form.deep">診断を実行</button>
+              <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep">診断を実行</button>
             </div>
             <p class="tiny" data-i18n="form.note">※ 公開DNSの情報のみを使用し,メールの送受信やサーバーへのアクセスは行いません. </p>
             <p class="tiny" data-i18n="form.privacy">※<strong>プライバシー:</strong> このツール自体は個人情報（氏名・メール本文・ログイン情報等）を収集しません. DNS照会は外部のDoH（DNS-over-HTTPS）提供者へ送信され,提供者側でログ/統計に利用される可能性があります（各社ポリシー参照）</p>
