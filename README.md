@@ -1,4 +1,4 @@
-# Toppy DNS / Email Auth Quick Check
+# Toppy's DMARC4all (DNS / Email Auth Quick Check)
 
 Browser-only tool to quickly inspect a domain’s email authentication posture (DMARC/SPF/DKIM, plus related checks) using **public DNS only**.
 
