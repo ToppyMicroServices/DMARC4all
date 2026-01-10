@@ -166,7 +166,7 @@ async function rerunLastDiagnosisForLanguage() {
 		const { domain, options, deepFlag } = lastDiagnosisRun;
 		setSafeInnerHTML(report, `
 			<div class="status">${esc(t('report.checking'))}: ${esc(domain)}</div>
-			<p class="muted" style="margin: 8px 0 0;">${esc(t('report.querying'))}${deepFlag ? ` ${esc(t('report.deepEnabled'))}` : ''}</p>
+			<p class="muted m-8-0-0">${esc(t('report.querying'))}${deepFlag ? ` ${esc(t('report.deepEnabled'))}` : ''}</p>
 		`);
 		const r = await runDiagnosis(domain, options);
 		renderResults(r);
@@ -532,10 +532,10 @@ function renderDnsbl(el, dnsbl) {
 
 		return `
 			<div class="finding ${cls}">
-				<div class="mini-title">IP: <span class="mono" style="font-size:12px; padding:2px 6px;">${esc(r.ip)}</span></div>
+				<div class="mini-title">IP: <span class="mono mono-inline">${esc(r.ip)}</span></div>
 				<div class="muted">${summary}</div>
 				${ptrLine}
-				<ul class="list" style="margin-top:8px;">${detail}</ul>
+				<ul class="list mt-8">${detail}</ul>
 			</div>
 		`;
 	}).join('');
@@ -799,12 +799,12 @@ function mkFindingRich(level, title, detailHtml, evidence) {
 
 function mkSection(title, statusText, bodyHtml) {
 	return `
-		<div class="card" style="padding: 16px;">
-			<div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-				<div class="mini-title" style="margin:0;">${esc(title)}</div>
+		<div class="card p-16">
+			<div class="flex-space-between">
+				<div class="mini-title m-0">${esc(title)}</div>
 				<span class="status">${esc(statusText)}</span>
 			</div>
-			<div class="report" style="margin-top: 10px;">${bodyHtml}</div>
+			<div class="report mt-10">${bodyHtml}</div>
 		</div>
 	`;
 }
@@ -1663,22 +1663,22 @@ async function runDiagnosis(domain, opts = {}) {
 			}
 			const logoLine = safeLogo
 				? `<div><strong>l=</strong> <a href="${esc(safeLogo)}" target="_blank" rel="noopener noreferrer">${esc(tags.l)}</a></div>`
-				: `<div><strong>l=</strong> <span class="mono" style="font-size:12px; padding:2px 6px;">${esc(tags.l || t('label.noneParen'))}</span></div>`;
+				: `<div><strong>l=</strong> <span class="mono mono-inline">${esc(tags.l || t('label.noneParen'))}</span></div>`;
 			const aLine = safeA
-				? `<div style="margin-top:6px;"><strong>a=</strong> <a href="${esc(safeA)}" target="_blank" rel="noopener noreferrer">${esc(tags.a)}</a></div>`
-				: `<div style="margin-top:6px;"><strong>a=</strong> <span class="mono" style="font-size:12px; padding:2px 6px;">${esc(tags.a || t('label.noneParen'))}</span></div>`;
+				? `<div class="mt-6"><strong>a=</strong> <a href="${esc(safeA)}" target="_blank" rel="noopener noreferrer">${esc(tags.a)}</a></div>`
+				: `<div class="mt-6"><strong>a=</strong> <span class="mono mono-inline">${esc(tags.a || t('label.noneParen'))}</span></div>`;
 
 			const preview = safeLogo
-				? `<img src="${esc(safeLogo)}" alt="BIMI logo" loading="lazy" referrerpolicy="no-referrer" style="max-width:160px; height:auto; display:block; margin-top:10px;">`
+				? `<img src="${esc(safeLogo)}" alt="BIMI logo" loading="lazy" referrerpolicy="no-referrer" class="bimi-logo">`
 				: '';
 
 			const checksBlock = extra.length
-				? `<div style="margin-top:10px;"><div class="mini-title">${esc(t('label.additionalChecks'))}</div><ul>${extra.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`
+				? `<div class="mt-10"><div class="mini-title">${esc(t('label.additionalChecks'))}</div><ul>${extra.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`
 				: '';
 
 			const note = problems.length
-				? `<div style="margin-top:8px;">${esc(t('label.note'))}: ${esc(problems.join(' / '))}</div>${checksBlock}`
-				: `<div style="margin-top:8px;">${esc(tr('BIMIレコードを検出しました.', 'BIMI record detected.'))}</div>${checksBlock}`;
+				? `<div class="mt-8">${esc(t('label.note'))}: ${esc(problems.join(' / '))}</div>${checksBlock}`
+				: `<div class="mt-8">${esc(tr('BIMIレコードを検出しました.', 'BIMI record detected.'))}</div>${checksBlock}`;
 
 			results.bimi.findings.push(
 				mkFindingRich(
@@ -1983,16 +1983,16 @@ function renderResults(r) {
 		})
 		.slice(0, 3);
 	const topHtml = topSorted.length
-		? `<div class="card" style="padding: 16px;">
-			<div class="mini-title" style="margin:0;">${esc(t('report.top3Title'))}</div>
-			<ul class="list" style="margin-top: 10px;">
+		? `<div class="card p-16">
+			<div class="mini-title m-0">${esc(t('report.top3Title'))}</div>
+			<ul class="list mt-10">
 				${topSorted.map(x => `<li><strong>${esc(x.title)}</strong><div class="muted">${esc(x.action)}</div></li>`).join('')}
 			</ul>
 		</div>`
 		: '';
 
 	setSafeInnerHTML(report, `
-		<div class="mini-title" style="margin: 0 0 8px;">${esc(t('report.resultsTitle'))} <span class="status">${esc(r.domain)}</span></div>
+		<div class="mini-title m-0-0-8">${esc(t('report.resultsTitle'))} <span class="status">${esc(r.domain)}</span></div>
 		<div class="score-banner">
 			<div class="score-left">
 				<div class="score-title">${esc(t('report.overallPostureTitle'))}</div>
@@ -2003,7 +2003,7 @@ function renderResults(r) {
 		<div class="score-breakdown">${chipHtml}</div>
 		${topHtml}
 		${err}
-		<div class="grid two" style="margin-top: 12px;">
+		<div class="grid two mt-12">
 			${mkSection('DMARC', r.dmarc && r.dmarc.record ? statusText('configured') : statusText('missing'), dmarcBody)}
 			${mkSection('SPF', (r.spf && r.spf.records && r.spf.records.length) ? `TXT ${r.spf.records.length}` : statusText('missing'), spfBody)}
 			${mkSection(
@@ -2038,7 +2038,7 @@ async function handleSubmit(event, deepFlag) {
 
 	setSafeInnerHTML(report, `
 		<div class="status">${esc(t('report.checking'))}: ${esc(domain)}</div>
-		<p class="muted" style="margin: 8px 0 0;">${esc(t('report.querying'))}${deepFlag ? ` ${esc(t('report.deepEnabled'))}` : ''}</p>
+		<p class="muted m-8-0-0">${esc(t('report.querying'))}${deepFlag ? ` ${esc(t('report.deepEnabled'))}` : ''}</p>
 	`);
 
 	try {
@@ -2065,7 +2065,7 @@ async function handleSubmit(event, deepFlag) {
 				setSafeInnerHTML(dnsblContainer, `
 					<div class="mini-title">${esc(tr('DNSBL（送信元IP）', 'DNSBL (Sender IP)'))}</div>
 					<div class="muted">${esc(tr('照会に失敗しました（ネットワーク/DoH/制限の可能性）.', 'Lookup failed (possible network/DoH restrictions).'))}</div>
-					<div class="tiny muted" style="margin-top:6px;">${esc(String(e && e.message ? e.message : e))}</div>
+					<div class="tiny muted mt-6">${esc(String(e && e.message ? e.message : e))}</div>
 				`);
 			}
 		}
