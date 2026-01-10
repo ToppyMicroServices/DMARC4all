@@ -1088,7 +1088,7 @@ function detectDnsHostingProviderFromNS(nsList) {
 		},
 		{
 			name: 'DNS Made Easy',
-			match: (h) => h.endsWith('dnsmadeeasy.com'),
+			match: (h) => /(^|\.)dnsmadeeasy\.com$/.test(h),
 			links: [{ label: 'DNS Made Easy: Knowledge Base', url: 'https://support.dnsmadeeasy.com/' }]
 		},
 		{
