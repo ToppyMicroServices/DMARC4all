@@ -4,6 +4,8 @@ Browser-only tool to quickly inspect a domain’s email authentication posture (
 
 This repo is a static site (HTML/CSS/JS). You can open it locally or publish it via GitHub Pages.
 
+It also includes a DMARC RUA service description page and an operational workflow for managing the required external-destination authorization TXT records on Cloudflare.
+
 ## Features
 
 - DMARC / SPF / DKIM quick checks (with evidence snippets)
@@ -32,7 +34,7 @@ Option A (simplest): open `index.html` directly.
 Option B (recommended): run a local static server.
 
 ```bash
-cd toppy-dns-quickcheck
+cd DMARC4all
 python3 -m http.server 8000
 ```
 
@@ -50,6 +52,31 @@ Then open:
 5. After the workflow finishes, open the Pages URL shown in the deploy job (or in **Settings → Pages**).
 
 If your default branch is not `main`, update the workflow trigger in `.github/workflows/pages.yml`.
+
+## DMARC RUA service
+
+- Service page: `rua_service.html`
+- Config (single source of truth): `rua_config.js` (customer-facing destination is injected at runtime)
+- Translations: `i18n/rua_page.js`
+
+### Cloudflare DNS authorization TXT
+
+Workflow: `.github/workflows/manage-rua-auth-txt.yml` (`workflow_dispatch`)
+
+- Name: `<customer_domain>._report._dmarc.dmarc4all.toppymicros.com`
+- Type: `TXT`
+- Value: `v=DMARC1`
+
+Required secrets:
+
+- `CF_API_TOKEN`
+- `CF_ZONE_ID`
+
+The job is intended to be protected via the GitHub Environment `cloudflare-dns`.
+
+### Mail receiving / storage
+
+Mail receiving and R2 storage are handled on Cloudflare side.
 
 ## Notes / Limitations
 

@@ -1,0 +1,232 @@
+name: manage-rua-auth-txt
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "upsert or delete"
+        required: true
+        default: "upsert"
+        type: choice
+        options: [upsert, delete]
+      customer_domain:
+        description: "Customer From domain (e.g., example.com)"
+        required: true
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    # Protect production DNS operations via GitHub Environments.
+    # Configure required reviewers in repo settings for this environment.
+    environment: cloudflare-dns
+    steps:
+      - name: Validate inputs (safety guard)
+        env:
+          CUSTOMER_DOMAIN: ${{ inputs.customer_domain }}
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import os, re, sys
+
+          raw = os.environ.get('CUSTOMER_DOMAIN', '')
+
+          # Reject control characters and any whitespace anywhere (including newlines).
+          if any((ord(ch) < 0x20) or (ord(ch) == 0x7f) for ch in raw):
+            print('Invalid customer_domain: contains control characters', file=sys.stderr)
+            sys.exit(1)
+          if any(ch.isspace() for ch in raw):
+            print('Invalid customer_domain: must not contain whitespace', file=sys.stderr)
+            sys.exit(1)
+
+          # Normalize: lowercase, strip a single trailing dot.
+          d = raw.lower()
+          if d.endswith('.'):
+            d = d[:-1]
+
+          if not d:
+            print('Invalid customer_domain: empty', file=sys.stderr)
+            sys.exit(1)
+          if len(d) > 253:
+            print('Invalid customer_domain: too long', file=sys.stderr)
+            sys.exit(1)
+
+          # Basic domain format check (ASCII LDH labels + dots, at least one dot)
+          label = r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"
+          pat = re.compile(rf"^(?:{label})(?:\\.(?:{label}))+$")
+          if not pat.match(d):
+            print('Invalid customer_domain: must look like a domain name (ASCII letters/digits/hyphen/dot)', file=sys.stderr)
+            print(f'Got: {d}', file=sys.stderr)
+            sys.exit(1)
+
+          # Reject self-domain (and subdomains) to reduce blast radius.
+          if d == 'toppymicros.com' or d.endswith('.toppymicros.com'):
+            print(f'Refusing to operate on our own domain: {d}', file=sys.stderr)
+            sys.exit(1)
+
+          print(f'Validated customer_domain: {d}')
+
+          env_path = os.environ.get('GITHUB_ENV')
+          if not env_path:
+            print('GITHUB_ENV is not set', file=sys.stderr)
+            sys.exit(1)
+          with open(env_path, 'a', encoding='utf-8') as f:
+            f.write(f'CUSTOMER_DOMAIN_NORM={d}\n')
+          PY
+
+      - name: Verify Cloudflare token can read zone
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }} # varsなら vars に
+        run: |
+          set -euo pipefail
+          curl -sS -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID" \
+            | python3 - <<'PY'
+          import json,sys
+          d=json.load(sys.stdin)
+          if not d.get('success'):
+            print('Cloudflare verification failed:', d.get('errors') or d, file=sys.stderr)
+            sys.exit(1)
+          res=d.get('result') or {}
+          print('success: True')
+          print('zone:', res.get('name', '(unknown)'))
+          PY
+
+      - name: Run
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CUSTOMER_DOMAIN_INPUT: ${{ inputs.customer_domain }}
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -euo pipefail
+
+          CUSTOMER_DOMAIN="${CUSTOMER_DOMAIN_NORM:-$CUSTOMER_DOMAIN_INPUT}"
+          NAME_REL="${CUSTOMER_DOMAIN}._report._dmarc"
+          # Safer ops: use a dedicated subdomain for RUA destinations so auth records stay isolated.
+          # This should match the domain part you use in `rua=mailto:...@dmarc4all.toppymicros.com`.
+          AUTH_BASE_DOMAIN="dmarc4all.toppymicros.com"
+          FQDN="${NAME_REL}.${AUTH_BASE_DOMAIN}"
+
+          echo "FQDN=$FQDN"
+
+          export FQDN
+
+          auth_header="Authorization: Bearer ${CF_API_TOKEN}"
+          api="https://api.cloudflare.com/client/v4"
+
+          cf_json_or_fail() {
+            python3 - <<'PY'
+import json,sys
+try:
+  d=json.load(sys.stdin)
+except Exception as e:
+  print('Cloudflare API returned non-JSON:', str(e), file=sys.stderr)
+  sys.exit(1)
+if not d.get('success'):
+  print('Cloudflare API call failed:', d.get('errors') or d, file=sys.stderr)
+  sys.exit(1)
+PY
+          }
+
+          # find record ids (if exist). If duplicates exist, keep one deterministically and delete the rest.
+          ids_out="$(
+            resp="$(curl -sS -H "$auth_header" --get \
+              --data-urlencode "type=TXT" \
+              --data-urlencode "name=$FQDN" \
+              --data-urlencode "per_page=100" \
+              "$api/zones/$CF_ZONE_ID/dns_records")"
+            echo "$resp" | cf_json_or_fail >/dev/null
+            echo "$resp" | python3 - <<'PY'
+import json,sys,os
+FQDN=os.environ.get('FQDN','')
+TARGET_CONTENT='v=DMARC1'
+
+d=json.load(sys.stdin)
+res=d.get('result') or []
+# Exact match by name+type.
+filtered=[r for r in res if r.get('type')=='TXT' and r.get('name')==FQDN]
+
+# Prefer records already having the target content.
+with_target=[r for r in filtered if (r.get('content') or '').strip()==TARGET_CONTENT]
+
+def ids_sorted(rs):
+  return sorted([r.get('id','') for r in rs if r.get('id')])
+
+keep_id=''
+extra_ids=[]
+
+if with_target:
+  ids=ids_sorted(with_target)
+  keep_id=ids[0]
+  extra_ids += ids[1:]
+  # Also treat other same-name TXT records (different content) as duplicates.
+  other=[r for r in filtered if r.get('id') and r.get('id')!=keep_id]
+  extra_ids += [r.get('id') for r in other if r.get('id') and r.get('id') not in extra_ids]
+elif filtered:
+  ids=ids_sorted(filtered)
+  keep_id=ids[0]
+  extra_ids=ids[1:]
+
+# Output format:
+# line1: keep_id (may be empty)
+# line2: space-separated extra ids (may be empty)
+print(keep_id)
+print(' '.join(extra_ids))
+PY
+          )"
+
+          rec_id="$(echo "$ids_out" | sed -n '1p')"
+          dup_ids="$(echo "$ids_out" | sed -n '2p')"
+
+          if [ -n "$dup_ids" ]; then
+            echo "Found duplicate TXT records for $FQDN. Deleting extras: $dup_ids"
+            for id in $dup_ids; do
+              resp="$(curl -sS -X DELETE -H "$auth_header" \
+                "$api/zones/$CF_ZONE_ID/dns_records/$id")"
+              echo "$resp" | cf_json_or_fail >/dev/null
+            done
+            echo "Deduped: $FQDN"
+          fi
+
+          if [ "$ACTION" = "delete" ]; then
+            if [ -z "$rec_id" ]; then
+              echo "No record to delete: $FQDN"
+              exit 0
+            fi
+
+            echo "Deleting: $FQDN (id=$rec_id)"
+            resp="$(curl -sS -X DELETE -H "$auth_header" \
+              "$api/zones/$CF_ZONE_ID/dns_records/$rec_id")"
+            echo "$resp" | cf_json_or_fail >/dev/null
+
+            # Note: duplicates (if any) are already deleted by the dedupe block above.
+            echo "Deleted: $FQDN"
+            exit 0
+          fi
+
+          payload="$(python3 - <<PY
+import json
+print(json.dumps({
+  "type":"TXT",
+  "name":"$FQDN",
+  "content":"v=DMARC1",
+  "ttl":1
+}))
+PY
+          )"
+
+          if [ -n "$rec_id" ]; then
+            resp="$(curl -sS -X PUT -H "$auth_header" -H "Content-Type: application/json" \
+              --data "$payload" \
+              "$api/zones/$CF_ZONE_ID/dns_records/$rec_id")"
+            echo "$resp" | cf_json_or_fail >/dev/null
+            echo "Updated: $FQDN"
+          else
+            resp="$(curl -sS -X POST -H "$auth_header" -H "Content-Type: application/json" \
+              --data "$payload" \
+              "$api/zones/$CF_ZONE_ID/dns_records")"
+            echo "$resp" | cf_json_or_fail >/dev/null
+            echo "Created: $FQDN"
+          fi
