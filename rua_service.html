@@ -78,38 +78,30 @@
       <div class="flex" style="gap: 12px; align-items: center; flex-wrap: wrap;">
         <h1 data-i18n="rua.h1">RUA の受け口 / 停止設計 / データ扱い</h1>
       </div>
-      <p class="tagline" data-i18n="rua.tagline">無料トライアルは 30 日で自動停止します。継続には明示的な opt-in が必要です。停止後は、新たな RUA レポートを（外部宛て承認 DNS の無効化により）受け取らない設計です。</p>
+      <p class="tagline" data-i18n="rua.tagline">無料トライアルは 30 日で自動停止します.継続には明示的な opt-in が必要です.停止後は、新たな RUA レポートを（外部宛て承認 DNS の無効化により）受け取らない設計です</p>
 
       <div class="flex" style="margin-top: 18px; position: relative; z-index: 1;">
         <div style="max-width: 980px; width: 100%; display: flex; flex-direction: column; gap: 12px;">
           <div class="card">
 
           <h2 style="margin: 0 0 6px;" data-i18n="rua.what.title">RUA とは</h2>
-          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.what.body">RUA は DMARC の集計レポート（Aggregate Report）の送信先です。受信側（Gmail / Microsoft / 各社 ISP など）から、通常 1 日 1 回程度、認証結果の集計が XML で届きます。</p>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.what.note">重要: これは「メール本文」ではなく集計メタデータです。ただし、運用上は十分センシティブになり得ます。</p>
-          <p class="tiny" style="margin-top: 10px;" data-i18n-html="rua.what.ruf.html">参考: DMARC には <span class="code">ruf=</span>（フォレンジック/失敗レポート）もありますが、個別メッセージに関する情報を含み得るため、プライバシー/コンプライアンス上は慎重な扱いが必要です。当サービスは <span class="code">rua=</span>（集計）に限定して扱います。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.what.body">RUA は DMARC の集計レポート（Aggregate Report）の送信先です.受信側（Gmail / Microsoft / 各社 ISP など）から、通常 1 日 1 回程度、認証結果の集計が XML で届きます</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.what.note">重要: これは「メール本文」ではなく集計メタデータです.ただし、運用上は十分センシティブになり得ます</p>
+          <p class="tiny" style="margin-top: 10px;" data-i18n-html="rua.what.ruf.html">参考: DMARC には <span class="code">ruf=</span>（フォレンジック/失敗レポート）もありますが、個別メッセージに関する情報を含み得るため、プライバシー/コンプライアンス上は慎重な扱いが必要です.当サービスは <span class="code">rua=</span>（集計）に限定して扱います</p>
 
           </div>
 
           <div class="card">
           <h2 style="margin: 0 0 6px;" data-i18n="rua.setup.title">RUA の設定（顧客側）</h2>
-          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.setup.intro.html">DMARC レコードの <span class="code">rua=</span> に、当サービスで発行される RUA 受信先（<span class="code">mailto:</span>）を設定します。<strong>既存の DMARC 設定（p= / sp= / adkim= / aspf= など）は維持したまま</strong>、<span class="code">rua=</span> だけを追加（または更新）してください。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.setup.intro.html">DMARC レコードの <span class="code">rua=</span> に、当サービスで発行される RUA 受信先（<span class="code">mailto:</span>）を設定します<strong>既存の DMARC 設定（p= / sp= / adkim= / aspf= など）は維持したまま</strong>、<span class="code">rua=</span> だけを追加（または更新）してください</p>
           <ol class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n-html="rua.setup.step1.html"><strong>1)</strong> あなたのドメインの DMARC レコード（通常 <span class="code">_dmarc</span>）を編集します。</li>
-            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step2.html"><strong>2)</strong> <span class="code">rua=mailto:{RUA_EMAIL}</span> を追加（または更新）します（すでに <span class="code">rua=</span> がある場合は mailto を追記できます）。</li>
-            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step3.html"><strong>3)</strong> 一部の受信者は、外部宛て RUA を許可するための承認 DNS を要求します（RFC 7489 §7.1: Verifying External Destinations）。その場合でも、<strong>当サービスが当社ドメイン側で必要な TXT を自動発行</strong>します。あなたの DNS に追加作業は不要です。</li>
+            <li data-i18n-html="rua.setup.step1.html"><strong>1)</strong> あなたのドメインの DMARC レコード（通常 <span class="code">_dmarc</span>）を編集します</li>
+            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step2.html"><strong>2)</strong> <span class="code">rua=mailto:{RUA_EMAIL}</span> を追加（または更新）します（すでに <span class="code">rua=</span> がある場合は mailto を追記できます）</li>
+            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step3.html"><strong>3)</strong> 一部の受信者は、外部宛て RUA を許可するための承認 DNS を要求します（RFC 7489 §7.1: Verifying External Destinations）.その場合でも、<strong>当サービスが当社ドメイン側で必要な TXT を自動発行</strong>します.あなたの DNS に追加作業は不要です</li>
           </ol>
-          <p class="tiny" style="margin: 10px 0 6px;" data-i18n="rua.setup.dmarcLabel">DMARC TXT の例</p>
-          <pre class="mono" style="margin: 0;" data-i18n="rua.setup.dmarcExample">Host: _dmarc.example.com
-Type: TXT
- Value: v=DMARC1; p=none; rua=mailto:{RUA_EMAIL}</pre>
-          <p class="tiny" style="margin: 10px 0 6px;" data-i18n="rua.setup.authLabel">外部宛て RUA の承認 TXT（参考：当社が自動発行）</p>
-          <pre class="mono" style="margin: 0;" data-i18n="rua.setup.authExample">Host: example.com._report._dmarc.{RUA_AUTH_DOMAIN}
-Type: TXT
-Value: v=DMARC1</pre>
-          <p class="tiny muted" style="margin-top: 8px;">※この承認 TXT は <strong>toppymicros.com 側の DNS</strong>に作成されます（あなたのゾーンに追加するものではありません）。</p>
-          <p class="tiny" style="margin-top: 10px;" data-i18n-html="rua.setup.step4.html"><strong>4)</strong> DNS 反映後、通常 24〜48 時間以内にレポートが届き始めます（受信者側のスケジュールにより前後します）。</p>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.setup.note">注意: すでに DMARC レコードがある場合は、他の設定は維持したまま rua= だけを追加してください（複数の mailto を並べることも可能です）。</p>
+
+          <p class="tiny" style="margin-top: 10px;" data-i18n-html="rua.setup.step4.html"><strong>4)</strong> DNS 反映後、通常 24〜48 時間以内にレポートが届き始めます（受信者側のスケジュールにより前後します）</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.setup.note">注意: すでに DMARC レコードがある場合は、他の設定は維持したまま rua= だけを追加してください（複数の mailto を並べることも可能です）</p>
 
           </div>
 
@@ -117,7 +109,7 @@ Value: v=DMARC1</pre>
 
           <h2 style="margin: 0 0 6px;" data-i18n="rua.disclaimer.title">免責事項</h2>
           <p class="tiny" style="margin: 8px 0 0; font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
-            <span data-i18n="rua.disclaimer.body">無料トライアル（30日）。継続はワンクリックの明示 opt-in。ベストエフォート（フェアユース制限）、SLA なし。</span>
+            <span data-i18n="rua.disclaimer.body">無料トライアル（30日）.継続はワンクリックの明示 opt-in.ベストエフォート（フェアユース制限）、SLA なし</span>
           </p>
 
           </div>
@@ -133,43 +125,43 @@ Value: v=DMARC1</pre>
           </ul>
 
           <h2 style="margin: 18px 0 6px;" data-i18n="rua.risk.title">最大のリスク（重要）</h2>
-          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.risk.p1.html">RUA は本文を含みませんが、<strong>送信インフラ（送信元IP・通数・送信サービスの利用状況）</strong>を推測できる材料が含まれます。漏洩すると、攻撃者が送信経路を学習し、標的選定やフィッシング/なりすましの精度向上に悪用される可能性があります。</p>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n-html="rua.risk.p2.html">つまり「本文がない＝安全」ではなく、<strong>組織のメール運用の地図</strong>になり得る、というのが最大のリスクです。</p>
-          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.risk.mitigate.html">このリスクを最小限にするため、当社は <strong>データ最小化（原本XMLの非保存）</strong>、<strong>最小権限のアクセス制御</strong>、<strong>自動処理</strong>、<strong>必要最小限の非可逆集計のみ</strong>、および <strong>停止時の削除・流入停止</strong> を徹底します。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.risk.p1.html">RUA は本文を含みませんが、<strong>送信インフラ（送信元IP・通数・送信サービスの利用状況）</strong>を推測できる材料が含まれます.漏洩すると、攻撃者が送信経路を学習し、標的選定やフィッシング/なりすましの精度向上に悪用される可能性があります</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n-html="rua.risk.p2.html">つまり「本文がない＝安全」ではなく、<strong>組織のメール運用の地図</strong>になり得る、というのが最大のリスクです</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.risk.mitigate.html">このリスクを最小限にするため、当社は <strong>データ最小化（原本XMLの非保存）</strong>、<strong>最小権限のアクセス制御</strong>、<strong>自動処理</strong>、<strong>必要最小限の非可逆集計のみ</strong>、および <strong>停止時の削除・流入停止</strong> を徹底します</p>
 
           <h2 style="margin: 18px 0 6px;" data-i18n="rua.data.title">データの扱い（非保存・自動処理）</h2>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n="rua.data.li1">RUA レポート（XML）は保存しません（永続化なし）。</li>
-            <li data-i18n="rua.data.li2">個別レポートを人が閲覧する運用は想定しません（自動処理）。</li>
-            <li data-i18n="rua.data.li3">表示・改善提案に必要な最小限の「非可逆な集計」のみを生成し、元データは破棄します。</li>
-            <li data-i18n="rua.data.li4">停止時は（もし保存データがあれば）削除し、以後の流入も止めます。</li>
+            <li data-i18n="rua.data.li1">RUA レポート（XML）は保存しません（永続化なし）</li>
+            <li data-i18n="rua.data.li2">個別レポートを人が閲覧する運用は想定しません（自動処理）</li>
+            <li data-i18n="rua.data.li3">表示・改善提案に必要な最小限の「非可逆な集計」のみを生成し、元データは破棄します</li>
+            <li data-i18n="rua.data.li4">停止時は（もし保存データがあれば）削除し、以後の流入も止めます</li>
           </ul>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.data.note">※「非可逆な集計」とは、特定の 1 件のレポート内容に戻せない形（例: 日次の合計カウント）を指します。運用上これすら不要な場合は“集計も保持しない”設計にします。</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.data.note">※「非可逆な集計」とは、特定の 1 件のレポート内容に戻せない形（例: 日次の合計カウント）を指します.運用上これすら不要な場合は“集計も保持しない”設計にします</p>
 
           <h2 style="margin: 18px 0 6px;" data-i18n="rua.gdpr.title">プライバシー / GDPR（要約）</h2>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.gdpr.intro">利用者が把握すべき要点と、EU 一般データ保護規則（GDPR）に沿った当社の方針を要約しています（法的助言ではありません）。</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.gdpr.intro">利用者が把握すべき要点と、EU 一般データ保護規則（GDPR）に沿った当社の方針を要約しています（法的助言ではありません）</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.gdpr.user.title">利用者が把握すべきこと（重要）</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n="rua.gdpr.user.li1">権限と適法性: 管理するドメイン、または明示的に許可を得た範囲でのみ利用してください（RUA 受領先の設定は管理上の行為です）。</li>
-            <li data-i18n="rua.gdpr.user.li2">個人データ該当の可能性: 送信元 IP や（場合により）連絡先メールアドレス等が含まれ、状況によって個人データに該当し得ます。社内ポリシーに従い、必要に応じて法的根拠（正当な利益等）を整理してください。</li>
-            <li data-i18n="rua.gdpr.user.li3">機密扱い: 本文はありませんが、運用状況を推測できる情報です。社内の機密情報として扱うことを推奨します。</li>
-            <li data-i18n="rua.gdpr.user.li4">停止/削除: 停止後は流入を止め、当社側の関連データは原則削除します。DNS 側の停止も必ず実施してください（後述）。</li>
+            <li data-i18n="rua.gdpr.user.li1">権限と適法性: 管理するドメイン、または明示的に許可を得た範囲でのみ利用してください（RUA 受領先の設定は管理上の行為です）</li>
+            <li data-i18n="rua.gdpr.user.li2">個人データ該当の可能性: 送信元 IP や（場合により）連絡先メールアドレス等が含まれ、状況によって個人データに該当し得ます.社内ポリシーに従い、必要に応じて法的根拠（正当な利益等）を整理してください</li>
+            <li data-i18n="rua.gdpr.user.li3">機密扱い: 本文はありませんが、運用状況を推測できる情報です.社内の機密情報として扱うことを推奨します</li>
+            <li data-i18n="rua.gdpr.user.li4">停止/削除: 停止後は流入を止め、当社側の関連データは原則削除します.DNS 側の停止も必ず実施してください（後述）</li>
           </ul>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.gdpr.us.title">当社が適切に対応する点（要点）</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n="rua.gdpr.us.li1">データ最小化: RUA XML 原本は保存せず、必要最小限の非可逆集計のみを扱います。</li>
-            <li data-i18n="rua.gdpr.us.li2">目的外利用なし: 広告/マーケティングに利用しません（RUA のデータにはこれらの目的に利用できる情報は含まれません。加えて、設計上、個別レポートを保存しないため、その目的に利用できるデータを保持しません）。</li>
-            <li data-i18n="rua.gdpr.us.li3">安全管理措置: アクセス制御、最小権限、暗号化等の安全管理措置により機密性・完全性の確保に努めます。</li>
-            <li data-i18n="rua.gdpr.us.li4">委託管理: 外部委託がある場合は GDPR に沿った契約（DPA 等）と管理を行います。</li>
-            <li data-i18n="rua.gdpr.us.li5">削除と協力: 停止/削除やデータ主体の権利行使は、管理者（顧客）からの要請に協力します。</li>
+            <li data-i18n="rua.gdpr.us.li1">データ最小化: RUA XML 原本は保存せず、必要最小限の非可逆集計のみを扱います</li>
+            <li data-i18n="rua.gdpr.us.li2">目的外利用なし: 広告/マーケティングに利用しません（RUA のデータにはこれらの目的に利用できる情報は含まれません.加えて、設計上、個別レポートを保存しないため、その目的に利用できるデータを保持しません）</li>
+            <li data-i18n="rua.gdpr.us.li3">安全管理措置: アクセス制御、最小権限、暗号化等の安全管理措置により機密性・完全性の確保に努めます</li>
+            <li data-i18n="rua.gdpr.us.li4">委託管理: 外部委託がある場合は GDPR に沿った契約（DPA 等）と管理を行います</li>
+            <li data-i18n="rua.gdpr.us.li5">削除と協力: 停止/削除やデータ主体の権利行使は、管理者（顧客）からの要請に協力します</li>
           </ul>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.roles.title">役割（Controller / Processor）</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n-html="rua.roles.li1.html"><strong>顧客（あなた/あなたの組織）:</strong> 通常、RUA の受領・分析の目的と手段を決めるため、GDPR 上の <strong>管理者（Controller）</strong> になります。</li>
-            <li data-i18n-html="rua.roles.li2.html"><strong>当サービス提供者:</strong> 顧客の指示に従って受領・解析するため、通常 <strong>処理者（Processor）</strong> として行動します（DPA/契約で明確化）。</li>
+            <li data-i18n-html="rua.roles.li1.html"><strong>顧客（あなた/あなたの組織）:</strong> 通常、RUA の受領・分析の目的と手段を決めるため、GDPR 上の <strong>管理者（Controller）</strong> になります</li>
+            <li data-i18n-html="rua.roles.li2.html"><strong>当サービス提供者:</strong> 顧客の指示に従って受領・解析するため、通常 <strong>処理者（Processor）</strong> として行動します（DPA/契約で明確化）</li>
           </ul>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.dataTypes.title">取り扱う可能性があるデータ（代表例）</h3>
@@ -178,7 +170,7 @@ Value: v=DMARC1</pre>
             <li data-i18n="rua.dataTypes.li2">送信元 IP アドレスと通数（集計）</li>
             <li data-i18n="rua.dataTypes.li3">レポーティング組織情報（組織名、場合により連絡用メールアドレス等）</li>
           </ul>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.dataTypes.note">注意: IP アドレスや連絡先メールアドレス等は、状況によって個人データ（personal data）に該当し得ます。</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.dataTypes.note">注意: IP アドレスや連絡先メールアドレス等は、状況によって個人データ（personal data）に該当し得ます</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.purpose.title">処理目的</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
@@ -189,35 +181,35 @@ Value: v=DMARC1</pre>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.legal.title">法的根拠（一般的な例）</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n-html="rua.legal.li1.html"><strong>管理者（顧客）側:</strong> 通常は正当な利益（GDPR 6(1)(f): セキュリティ確保）または契約の履行（6(1)(b)）等が想定されます。</li>
-            <li data-i18n-html="rua.legal.li2.html"><strong>処理者（当サービス）側:</strong> 顧客との契約（DPA）に基づき、顧客の文書化された指示に従って処理します（GDPR 28）。</li>
+            <li data-i18n-html="rua.legal.li1.html"><strong>管理者（顧客）側:</strong> 通常は正当な利益（GDPR 6(1)(f): セキュリティ確保）または契約の履行（6(1)(b)）等が想定されます</li>
+            <li data-i18n-html="rua.legal.li2.html"><strong>処理者（当サービス）側:</strong> 顧客との契約（DPA）に基づき、顧客の文書化された指示に従って処理します（GDPR 28）</li>
           </ul>
-          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.legal.note">用途・社内方針により変わるため、正式なプライバシー通知では顧客側での根拠も整理してください。</p>
+          <p class="tiny muted" style="margin-top: 8px;" data-i18n="rua.legal.note">用途・社内方針により変わるため、正式なプライバシー通知では顧客側での根拠も整理してください</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.retention.title">保持期間と削除</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
-            <li data-i18n-html="rua.retention.li1.html"><strong>RUA XML（原本）:</strong> 保存しません（受領後の処理で破棄）。</li>
-            <li data-i18n-html="rua.retention.li2.html"><strong>非可逆な集計:</strong> 表示/改善提案に必要な範囲に限定し、継続がない場合は <strong>30日（トライアル終了）を上限</strong>として削除します（設計目標）。</li>
-            <li data-i18n-html="rua.retention.li3.html"><strong>停止後:</strong> 原則として関連データを削除し、以後の流入を止めます（上記の停止設計）。</li>
+            <li data-i18n-html="rua.retention.li1.html"><strong>RUA XML（原本）:</strong> 保存しません（受領後の処理で破棄）</li>
+            <li data-i18n-html="rua.retention.li2.html"><strong>非可逆な集計:</strong> 表示/改善提案に必要な範囲に限定し、継続がない場合は <strong>30日（トライアル終了）を上限</strong>として削除します（設計目標）</li>
+            <li data-i18n-html="rua.retention.li3.html"><strong>停止後:</strong> 原則として関連データを削除し、以後の流入を止めます（上記の停止設計）</li>
           </ul>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.subprocessors.title">第三者提供 / 委託（Sub-processors）</h3>
-          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.subprocessors.body.html">当サービスがホスティング、ストレージ、監視等を外部事業者に委託する場合、それらは GDPR 上のサブプロセッサ（Sub-processor）になり得ます。正式運用では、<strong>委託先一覧（事業者名/国/目的）</strong>を提示し、必要に応じて契約条項（DPA、SCC 等）を整備します。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.subprocessors.body.html">当サービスがホスティング、ストレージ、監視等を外部事業者に委託する場合、それらは GDPR 上のサブプロセッサ（Sub-processor）になり得ます.正式運用では、<strong>委託先一覧（事業者名/国/目的）</strong>を提示し、必要に応じて契約条項（DPA、SCC 等）を整備します</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.transfer.title">第三国移転（EEA 外への移転）</h3>
-          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.transfer.body">EEA 外に移転される可能性がある構成の場合、適用法に従い、標準契約条項（SCC）等の適切な保護措置を講じます。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.transfer.body">EEA 外に移転される可能性がある構成の場合、適用法に従い、標準契約条項（SCC）等の適切な保護措置を講じます</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.rights.title">データ主体の権利（請求窓口）</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
             <li data-i18n="rua.rights.li1">アクセス、訂正、消去、処理制限、異議申立て、データポータビリティ等（該当する範囲で）</li>
-            <li data-i18n-html="rua.rights.li2.html">通常、請求はまず <strong>管理者（顧客）</strong> が窓口になります。当サービスは処理者として、管理者の要請に協力します。</li>
+            <li data-i18n-html="rua.rights.li2.html">通常、請求はまず <strong>管理者（顧客）</strong> が窓口になります.当サービスは処理者として、管理者の要請に協力します</li>
           </ul>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.contact.title">連絡先</h3>
           <p class="tiny" style="margin-top: 8px;" data-i18n-html="rua.contact.body.html">プライバシー/データ処理に関する問い合わせ: <strong>privacy@toppymicros.com</strong><br>事業者名: <strong>ToppyMicroServices OÜ</strong>（ドメイン: <strong>toppymicros.com</strong>）</p>
 
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.complaints.title">苦情申立て</h3>
-          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.complaints.body">EU/EEA 居住者は、居住地または関連する監督機関（SA）に苦情を申し立てる権利があります。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.complaints.body">EU/EEA 居住者は、居住地または関連する監督機関（SA）に苦情を申し立てる権利があります</p>
 
           <h2 style="margin: 18px 0 6px;" data-i18n="rua.trial.title">トライアルと停止（要点）</h2>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
@@ -229,18 +221,18 @@ Value: v=DMARC1</pre>
           </ul>
 
           <h2 style="margin: 18px 0 6px;" data-i18n="rua.stop.title">停止後の RUA 受信を止める方法</h2>
-          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.stop.intro">推奨順は次の通りです。</p>
+          <p class="tiny" style="margin-top: 8px;" data-i18n="rua.stop.intro">推奨順は次の通りです</p>
           <ol class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
             <li>
               <span data-i18n-html="rua.stop.a.title.html"><strong>A（推奨）:</strong> 外部 RUA 許可 DNS を無効化して送信者側に止めさせる（送信元が“送れない”状態にする）</span>
               <div class="tiny muted" style="margin-top: 6px;">
-                <span data-i18n="rua.stop.a.detail">例: RUA 送信先の許可に使っている TXT / CNAME を無効化し、送信が成立しない状態にする。</span>
+                <span data-i18n="rua.stop.a.detail">例: RUA 送信先の許可に使っている TXT / CNAME を無効化し、送信が成立しない状態にする</span>
               </div>
             </li>
             <li style="margin-top: 10px;">
               <span data-i18n-html="rua.stop.b.title.html"><strong>B:</strong> 受信は受けるが破棄（コスト増、最終手段）</span>
               <div class="tiny muted" style="margin-top: 6px;">
-                <span data-i18n="rua.stop.b.detail">到達したレポートを即時破棄する。停止保証は強いが、ネットワーク/処理コストが増える。</span>
+                <span data-i18n="rua.stop.b.detail">到達したレポートを即時破棄する.停止保証は強いが、ネットワーク/処理コストが増える</span>
               </div>
             </li>
           </ol>
@@ -250,7 +242,7 @@ Value: v=DMARC1</pre>
             <li data-i18n="rua.ui.li1">残日数表示: 「あと◯日」</li>
             <li data-i18n="rua.ui.li2">継続ボタン: “Keep enabled”</li>
             <li data-i18n="rua.ui.li3">即時停止ボタン: “Stop now”</li>
-            <li data-i18n="rua.ui.li4">状態は常にファーストビューで確認でき、スクロールしても見える位置に固定表示します。</li>
+            <li data-i18n="rua.ui.li4">状態は常にファーストビューで確認でき、スクロールしても見える位置に固定表示します</li>
           </ul>
 
           <div class="flex" style="margin-top: 18px; gap: 12px; flex-wrap: wrap;">

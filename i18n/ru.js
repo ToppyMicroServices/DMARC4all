@@ -22,7 +22,7 @@
   "label.evidence": "Доказательство",
   "label.note": "Примечание",
   "label.additionalChecks": "Дополнительные проверки",
-  "label.noneParen": "(нет)",
+  "label.noneParen": "нет",
   "status.configured": "Настроено",
   "status.missing": "Отсутствует",
   "status.unverified": "Не проверено",

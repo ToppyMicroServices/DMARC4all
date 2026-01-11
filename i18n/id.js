@@ -22,7 +22,7 @@
   "label.evidence": "Bukti",
   "label.note": "Catatan",
   "label.additionalChecks": "Pemeriksaan tambahan",
-  "label.noneParen": "(tidak ada)",
+  "label.noneParen": "tidak ada",
   "status.configured": "Terkonfigurasi",
   "status.missing": "Tidak ada",
   "status.unverified": "Belum diverifikasi",

@@ -33,7 +33,7 @@
   "label.evidence": "근거",
   "label.note": "참고",
   "label.additionalChecks": "추가 검사",
-  "label.noneParen": "(없음)",
+  "label.noneParen": "없음",
   "status.configured": "설정됨",
   "status.missing": "미설정",
   "status.unverified": "미확인",

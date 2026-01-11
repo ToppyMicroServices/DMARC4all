@@ -97,6 +97,21 @@
             <p class="tiny muted" data-i18n="form.privacyFirst">プライバシー優先: 可能なら自前のDNS/DoHを利用（DoH先はコードで差し替え可能）</p>
             <p class="tiny muted" data-i18n="form.disclaimer">※このページは元々，弊社のDNS設定用に作ったチェックページです. 結果は目安であり最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
             <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示的に許可を得た範囲でのみ使用すること．</p>
+            <div class="mt-10">
+              <p class="tiny muted">
+                <strong>RUA集約レポート（DMARC）:</strong>
+                <a href="https://dmarc4all.toppymicros.com/" target="_blank" rel="noopener">DMARC4all（RUA受信・解析）</a>
+                ／
+                <a href="https://dmarc4all.toppymicros.com/#rua" target="_blank" rel="noopener">RUAについて</a>
+              </p>
+              <details class="tiny muted">
+                <summary>DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>
+                <pre class="tiny" style="white-space: pre-wrap; margin-top: 6px;">Host: _dmarc.example.com
+Type: TXT
+Value: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com</pre>
+                <p class="tiny muted" style="margin-top: 6px;">※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、<code>rua=</code> だけを追加（または更新）する。</p>
+              </details>
+            </div>
           </form>
           <div id="report" class="report" aria-live="polite"></div>
         </div>
@@ -105,4 +120,3 @@
   </div>
 </body>
 </html>
-  

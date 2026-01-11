@@ -638,6 +638,79 @@ function parseDmarcTags(record) {
 	return out;
 }
 
+function getRuaMailto(domain) {
+	const cfg = window.RUA_CONFIG || {};
+	const direct = String(cfg.RUA_MAILTO || '').trim();
+	const normalizedDomain = normalizeDomain(domain || '');
+	const applyDomain = (value) => {
+		if (!normalizedDomain) return value;
+		return String(value).replace(/YOUR-ID/g, normalizedDomain);
+	};
+	if (direct) {
+		const replaced = applyDomain(direct);
+		return replaced.toLowerCase().startsWith('mailto:') ? replaced : `mailto:${replaced}`;
+	}
+	const email = String(cfg.RUA_EMAIL || '').trim();
+	if (email) return `mailto:${applyDomain(email)}`;
+	if (normalizedDomain) return `mailto:${normalizedDomain}@dmarc4all.toppymicros.com`;
+	return 'mailto:YOUR-ID@dmarc4all.toppymicros.com';
+}
+
+function mergeRuaValue(existingValue, ruaMailto) {
+	const base = String(existingValue || '').trim();
+	if (!base) return ruaMailto;
+	const items = base.split(',').map(x => x.trim()).filter(Boolean);
+	const target = ruaMailto.toLowerCase();
+	const has = items.some(x => x.toLowerCase() === target);
+	return has ? items.join(',') : items.concat([ruaMailto]).join(',');
+}
+
+function updateDmarcRuaRecord(record, ruaMailto) {
+	const parts = String(record || '').split(';').map(x => x.trim()).filter(Boolean);
+	if (!parts.length) return '';
+	let found = false;
+	const updated = parts.map(part => {
+		const idx = part.indexOf('=');
+		if (idx === -1) return part;
+		const key = part.slice(0, idx).trim();
+		if (key.toLowerCase() !== 'rua') return part;
+		found = true;
+		const value = part.slice(idx + 1).trim();
+		return `rua=${mergeRuaValue(value, ruaMailto)}`;
+	});
+	if (!found) updated.push(`rua=${ruaMailto}`);
+	return updated.join('; ');
+}
+
+function buildDmarcRuaExampleHtml(domain, record) {
+	const safeDomain = String(domain || '').trim();
+	if (!safeDomain) return '';
+
+	const ruaMailto = getRuaMailto(safeDomain);
+	const updatedValue = record
+		? updateDmarcRuaRecord(record, ruaMailto)
+		: `v=DMARC1; p=none; rua=${ruaMailto}`;
+	const exampleText = `Host: _dmarc.${safeDomain}\nType: TXT\nValue: ${updatedValue}`;
+
+	const serviceUrl = 'rua_service.html';
+	const ruaUrl = 'rua_service.html#rua';
+	const serviceLabel = tr('DMARC4all（RUA受信・解析）', 'DMARC4all (RUA receive/analyze)');
+	const ruaLabel = tr('RUAについて', 'About RUA');
+	const noteText = tr('※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、rua= だけを追加（または更新）する。', 'Note: keep existing DMARC settings (p=/sp=/adkim=/aspf=/etc.) and only add/update rua.');
+	const detailHtml = `
+		<div class="tiny">
+			${esc(tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'))}:
+			<a href="${esc(serviceUrl)}" target="_blank" rel="noopener noreferrer">${esc(serviceLabel)}</a>
+			／
+			<a href="${esc(ruaUrl)}" target="_blank" rel="noopener noreferrer">${esc(ruaLabel)}</a>
+		</div>
+		<div class="mini-title mt-6">${esc(tr('DMARCに rua= を追加する例（DMARC4all）', 'Example: add rua= (DMARC4all)'))}</div>
+		<div class="mono">${esc(exampleText)}</div>
+		<div class="tiny muted mt-6">${esc(noteText)}</div>
+	`;
+	return mkFindingRich('low', tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'), detailHtml, '');
+}
+
 function spfHasAllQualifier(spf, q) {
 	return new RegExp(`\\${q}all(\\s|$)`, 'i').test(spf);
 }
@@ -811,6 +884,17 @@ function mkFindingRich(level, title, detailHtml, evidence) {
 			${ev}
 		</div>
 	`;
+}
+
+function hasIssueFinding(html) {
+	return /finding\s+(high|med)/.test(String(html || ''));
+}
+
+function prependOkFinding(bodyHtml, ok) {
+	if (!ok) return bodyHtml;
+	const okTitle = tr('設定OK', 'Configured');
+	const okDetail = tr('適切に設定されています', 'Properly configured.');
+	return mkFinding('low', okTitle, okDetail, '') + bodyHtml;
 }
 
 function mkSection(title, statusText, bodyHtml) {
@@ -1310,7 +1394,7 @@ async function runDiagnosis(domain, opts = {}) {
 			let detail = tr('DMARCが設定されている.段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
 			if (p === 'none') { level = 'med'; detail = tr('監視のみ(p=none).集計(rua)を確認しつつ quarantine/reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.'); }
 			if (p === 'quarantine') { level = 'med'; detail = tr('隔離(quarantine).運用影響を確認しつつ reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.'); }
-			if (p === 'reject') { level = 'low'; detail = tr('拒否(reject).例外・転送・サブドメイン(sp)の方針を確認する', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.'); }
+			if (p === 'reject') { level = 'low'; detail = tr('不整合のメールは拒否に指定されている。sp の明示的な指定を定義することを勧める', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.'); }
 			if (!rua) {
 				level = (level === 'low') ? 'med' : level;
 				detail += isJa()
@@ -1688,8 +1772,8 @@ async function runDiagnosis(domain, opts = {}) {
 				? `<div><strong>l=</strong> <a href="${esc(safeLogo)}" target="_blank" rel="noopener noreferrer">${esc(tags.l)}</a></div>`
 				: `<div><strong>l=</strong> <span class="mono mono-inline">${esc(tags.l || t('label.noneParen'))}</span></div>`;
 			const aLine = safeA
-				? `<div class="mt-6"><strong>a=</strong> <a href="${esc(safeA)}" target="_blank" rel="noopener noreferrer">${esc(tags.a)}</a></div>`
-				: `<div class="mt-6"><strong>a=</strong> <span class="mono mono-inline">${esc(tags.a || t('label.noneParen'))}</span></div>`;
+				? `<div class="mt-6"><strong>a=</strong><a href="${esc(safeA)}" target="_blank" rel="noopener noreferrer">${esc(tags.a)}</a></div>`
+				: `<div class="mt-6"><strong>a=</strong><span class="mono mono-inline">${esc(tags.a || t('label.noneParen'))}</span></div>`;
 
 			const preview = safeLogo
 				? `<img src="${esc(safeLogo)}" alt="BIMI logo" loading="lazy" referrerpolicy="no-referrer" class="bimi-logo">`
@@ -1969,21 +2053,47 @@ function renderResults(r) {
 			})()
 		: '';
 
-	const dnsHostBody = ((r.dnsHosting && r.dnsHosting.findings) ? r.dnsHosting.findings.join('') : '') + dnsHostLinks;
-	const registrarBody = ((r.registrar && r.registrar.findings) ? r.registrar.findings.join('') : '');
-	const dmarcBody = ((r.dmarc && r.dmarc.findings) ? r.dmarc.findings.join('') : '');
-	const spfBody = ((r.spf && r.spf.findings) ? r.spf.findings.join('') : '');
+	const dnsHostBodyRaw = ((r.dnsHosting && r.dnsHosting.findings) ? r.dnsHosting.findings.join('') : '') + dnsHostLinks;
+	const registrarBodyRaw = ((r.registrar && r.registrar.findings) ? r.registrar.findings.join('') : '');
+	const dmarcBodyRaw = ((r.dmarc && r.dmarc.findings) ? r.dmarc.findings.join('') : '') + buildDmarcRuaExampleHtml(r.domain, r.dmarc ? r.dmarc.record : '');
+	const spfBodyRaw = ((r.spf && r.spf.findings) ? r.spf.findings.join('') : '');
 	const dkimCnameNote = (r.dkim && r.dkim.usesCname)
 		? `<div class="tiny muted">${esc(t('dkim.cnameDelegationOtherToolsNote'))}</div>`
 		: '';
-	const dkimBody = (((r.dkim && r.dkim.findings) ? r.dkim.findings.join('') : '') + dkimCnameNote);
-	const bimiBody = ((r.bimi && r.bimi.findings) ? r.bimi.findings.join('') : '');
-	const mxBody = ((r.mx && r.mx.findings) ? r.mx.findings.join('') : '');
-	const mtaBody = ((r.mta_sts && r.mta_sts.findings) ? r.mta_sts.findings.join('') : '');
-	const caaBody = ((r.caa && r.caa.findings) ? r.caa.findings.join('') : '');
-	const dnssecBody = ((r.dnssec && r.dnssec.findings) ? r.dnssec.findings.join('') : '');
-	const webBody = ((r.web && r.web.findings) ? r.web.findings.join('') : '');
-	const subBody = ((r.subdomains && r.subdomains.findings) ? r.subdomains.findings.join('') : '');
+	const dkimBodyRaw = (((r.dkim && r.dkim.findings) ? r.dkim.findings.join('') : '') + dkimCnameNote);
+	const bimiBodyRaw = ((r.bimi && r.bimi.findings) ? r.bimi.findings.join('') : '');
+	const mxBodyRaw = ((r.mx && r.mx.findings) ? r.mx.findings.join('') : '');
+	const mtaBodyRaw = ((r.mta_sts && r.mta_sts.findings) ? r.mta_sts.findings.join('') : '');
+	const caaBodyRaw = ((r.caa && r.caa.findings) ? r.caa.findings.join('') : '');
+	const dnssecBodyRaw = ((r.dnssec && r.dnssec.findings) ? r.dnssec.findings.join('') : '');
+	const webBodyRaw = ((r.web && r.web.findings) ? r.web.findings.join('') : '');
+	const subBodyRaw = ((r.subdomains && r.subdomains.findings) ? r.subdomains.findings.join('') : '');
+
+	const dmarcOk = !!(r.dmarc && r.dmarc.record) && !hasIssueFinding(dmarcBodyRaw);
+	const spfOk = !!(r.spf && r.spf.records && r.spf.records.length === 1) && !hasIssueFinding(spfBodyRaw);
+	const dkimOk = !!(r.dkim && Array.isArray(r.dkim.confirmedSelectors) && r.dkim.confirmedSelectors.length) && !hasIssueFinding(dkimBodyRaw);
+	const bimiOk = !!(r.bimi && r.bimi.record) && !hasIssueFinding(bimiBodyRaw);
+	const mxOk = !!(r.mx && r.mx.records && r.mx.records.length) && !hasIssueFinding(mxBodyRaw);
+	const mtaOk = !!(r.mta_sts && r.mta_sts.record && r.mta_sts.tlsrpt) && !hasIssueFinding(mtaBodyRaw);
+	const dnsHostOk = !!(r.dnsHosting && r.dnsHosting.provider) && !hasIssueFinding(dnsHostBodyRaw);
+	const registrarOk = !!(r.registrar && (r.registrar.registrar || (r.registrar.nameservers && r.registrar.nameservers.length))) && !hasIssueFinding(registrarBodyRaw);
+	const caaOk = !!(r.caa && r.caa.records && r.caa.records.length) && !hasIssueFinding(caaBodyRaw);
+	const dnssecOk = !!(r.dnssec && r.dnssec.ds && r.dnssec.ds.length) && !hasIssueFinding(dnssecBodyRaw);
+	const webOk = !!(r.web && Array.isArray(r.web.checks) && r.web.checks.length && r.web.checks.every(x => x && x.ok)) && !hasIssueFinding(webBodyRaw);
+	const subOk = !!(r.subdomains && r.subdomains.enabled) && !hasIssueFinding(subBodyRaw);
+
+	const dnsHostBody = prependOkFinding(dnsHostBodyRaw, dnsHostOk);
+	const registrarBody = prependOkFinding(registrarBodyRaw, registrarOk);
+	const dmarcBody = prependOkFinding(dmarcBodyRaw, dmarcOk);
+	const spfBody = prependOkFinding(spfBodyRaw, spfOk);
+	const dkimBody = prependOkFinding(dkimBodyRaw, dkimOk);
+	const bimiBody = prependOkFinding(bimiBodyRaw, bimiOk);
+	const mxBody = prependOkFinding(mxBodyRaw, mxOk);
+	const mtaBody = prependOkFinding(mtaBodyRaw, mtaOk);
+	const caaBody = prependOkFinding(caaBodyRaw, caaOk);
+	const dnssecBody = prependOkFinding(dnssecBodyRaw, dnssecOk);
+	const webBody = prependOkFinding(webBodyRaw, webOk);
+	const subBody = prependOkFinding(subBodyRaw, subOk);
 
 	const dnsHostStatus = (r.dnsHosting && r.dnsHosting.provider)
 		? `${t('status.estimated')}: ${r.dnsHosting.provider}`
@@ -1991,6 +2101,11 @@ function renderResults(r) {
 	const registrarStatus = (r.registrar && (r.registrar.registrar || (r.registrar.nameservers && r.registrar.nameservers.length)))
 		? t('status.ok')
 		: t('status.unavailableUnknown');
+	const mtaStatus = (r.mta_sts && r.mta_sts.record && r.mta_sts.tlsrpt)
+		? statusText('configured')
+		: (r.mta_sts && r.mta_sts.record)
+			? statusText('partial')
+			: statusText('missing');
 
 	const overall = (r.score && typeof r.score.overall === 'number') ? r.score.overall : 0;
 	const scoreCls = classifyScore(overall);
@@ -2038,7 +2153,7 @@ function renderResults(r) {
 			)}
 			${mkSection('BIMI', (r.bimi && r.bimi.record) ? statusText('configured') : statusText('optionalMissing'), bimiBody)}
 			${mkSection('MX', (r.mx && r.mx.records && r.mx.records.length) ? `MX ${r.mx.records.length}` : statusText('none'), mxBody)}
-			${mkSection('MTA-STS / TLS-RPT', (r.mta_sts && r.mta_sts.record) ? statusText('partial') : statusText('missing'), mtaBody)}
+			${mkSection('MTA-STS / TLS-RPT', mtaStatus, mtaBody)}
 			${mkSection(t('section.dnsHosting'), dnsHostStatus, dnsHostBody)}
 			${mkSection(t('section.registrar'), registrarStatus, registrarBody)}
 			${mkSection('CAA', (r.caa && r.caa.records && r.caa.records.length) ? statusText('configured') : statusText('optionalNone'), caaBody)}

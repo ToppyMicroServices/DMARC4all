@@ -22,7 +22,7 @@
   "label.evidence": "ភស្តុតាង",
   "label.note": "ចំណាំ",
   "label.additionalChecks": "ការត្រួតពិនិត្យបន្ថែម",
-  "label.noneParen": "(គ្មាន)",
+  "label.noneParen": "គ្មាន",
   "status.configured": "បានកំណត់",
   "status.missing": "មិនបានកំណត់",
   "status.unverified": "មិនទាន់ផ្ទៀងផ្ទាត់",

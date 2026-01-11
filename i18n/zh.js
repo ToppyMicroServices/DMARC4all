@@ -22,7 +22,7 @@
   "label.evidence": "依据",
   "label.note": "注意",
   "label.additionalChecks": "附加检查",
-  "label.noneParen": "(无)",
+  "label.noneParen": "无",
   "status.configured": "已配置",
   "status.missing": "未配置",
   "status.unverified": "未验证",

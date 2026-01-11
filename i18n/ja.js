@@ -22,7 +22,7 @@
   "label.evidence": "根拠",
   "label.note": "注意",
   "label.additionalChecks": "追加検査",
-  "label.noneParen": "(なし)",
+  "label.noneParen": "なし",
   "status.configured": "設定あり",
   "status.missing": "未設定",
   "status.unverified": "未確認",

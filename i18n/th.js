@@ -22,7 +22,7 @@
   "label.evidence": "หลักฐาน",
   "label.note": "หมายเหตุ",
   "label.additionalChecks": "การตรวจเพิ่มเติม",
-  "label.noneParen": "(ไม่มี)",
+  "label.noneParen": "ไม่มี",
   "status.configured": "ตั้งค่าแล้ว",
   "status.missing": "ไม่มีการตั้งค่า",
   "status.unverified": "ยังไม่ยืนยัน",

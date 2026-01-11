@@ -22,7 +22,7 @@
   "label.evidence": "Evidence",
   "label.note": "Note",
   "label.additionalChecks": "Additional checks",
-  "label.noneParen": "(none)",
+  "label.noneParen": "none",
   "status.configured": "Configured",
   "status.missing": "Missing",
   "status.unverified": "Unverified",

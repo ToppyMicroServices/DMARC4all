@@ -22,7 +22,7 @@
   "label.evidence": "Nachweis",
   "label.note": "Hinweis",
   "label.additionalChecks": "Zusätzliche Prüfungen",
-  "label.noneParen": "(keine)",
+  "label.noneParen": "keine",
   "status.configured": "Konfiguriert",
   "status.missing": "Fehlt",
   "status.unverified": "Nicht verifiziert",

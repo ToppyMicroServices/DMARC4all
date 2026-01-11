@@ -22,7 +22,7 @@
   "label.evidence": "အထောက်အထား",
   "label.note": "မှတ်ချက်",
   "label.additionalChecks": "ထပ်ဆင့်စစ်ဆေးမှု",
-  "label.noneParen": "(မရှိ)",
+  "label.noneParen": "မရှိ",
   "status.configured": "သတ်မှတ်ပြီး",
   "status.missing": "မသတ်မှတ်ထား",
   "status.unverified": "မစစ်ဆေးရသေး",

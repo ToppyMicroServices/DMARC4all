@@ -22,7 +22,7 @@
   "label.evidence": "Tõend",
   "label.note": "Märkus",
   "label.additionalChecks": "Lisakontrollid",
-  "label.noneParen": "(puudub)",
+  "label.noneParen": "puudub",
   "status.configured": "Seadistatud",
   "status.missing": "Puudub",
   "status.unverified": "Kontrollimata",

@@ -22,7 +22,7 @@
   "label.evidence": "Bằng chứng",
   "label.note": "Ghi chú",
   "label.additionalChecks": "Kiểm tra bổ sung",
-  "label.noneParen": "(không có)",
+  "label.noneParen": "không có",
   "status.configured": "Đã cấu hình",
   "status.missing": "Thiếu",
   "status.unverified": "Chưa xác minh",
