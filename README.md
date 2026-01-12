@@ -59,6 +59,19 @@ If your default branch is not `main`, update the workflow trigger in `.github/wo
 - Config (single source of truth): `rua_config.js` (customer-facing destination is injected at runtime)
 - Translations: `i18n/rua_page.js`
 
+### RUA service flow (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Recipient mail servers] -->|Aggregate reports (XML, zipped)| B[RUA mailbox]
+  B --> C[Intake + quarantine]
+  C --> D[XML validation + parse]
+  D --> E[Aggregate metrics]
+  E --> F[Dashboards/alerts]
+  D --> G[(KV/D1/R2 storage)]
+  C --> H[Reject oversized/zip-bomb payloads]
+```
+
 ### Cloudflare DNS authorization TXT
 
 Workflow: `.github/workflows/manage-rua-auth-txt.yml` (`workflow_dispatch`)
