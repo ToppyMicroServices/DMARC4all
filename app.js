@@ -45,6 +45,7 @@ const DOH_PROVIDERS = [
 const DOH_STORAGE_KEY = 'toppy-doh-resolver';
 const DOH_CUSTOM_KEY = 'toppy-doh-custom';
 const DEFAULT_DOH_ID = 'cloudflare';
+const RESOLVER_MODE = document.documentElement.dataset.resolverMode || 'manual';
 let activeDohEndpoint = null;
 const DKIM_SELECTOR_CANDIDATES = [
 	'selector1',
@@ -335,7 +336,16 @@ function getDohProviderById(id) {
 }
 
 function getSelectedDohEndpoint() {
-	if (!resolverSelect) return getDohProviderById(DEFAULT_DOH_ID);
+	const defaultProvider = getDohProviderById(DEFAULT_DOH_ID);
+	if (RESOLVER_MODE === 'auto') {
+		return {
+			id: defaultProvider.id,
+			name: t(defaultProvider.labelKey),
+			url: defaultProvider.url,
+			kind: defaultProvider.kind
+		};
+	}
+	if (!resolverSelect) return defaultProvider;
 	const id = resolverSelect.value || DEFAULT_DOH_ID;
 	if (id === 'custom') {
 		const url = normalizeDohUrl(resolverCustom ? resolverCustom.value : '');
@@ -352,7 +362,13 @@ function getSelectedDohEndpoint() {
 }
 
 function updateResolverUi() {
-	if (!resolverSelect) return;
+	const defaultProvider = getDohProviderById(DEFAULT_DOH_ID);
+	if (RESOLVER_MODE === 'auto' || !resolverSelect) {
+		if (resolverCustomWrap) resolverCustomWrap.classList.add('hidden');
+		if (resolverNote) resolverNote.textContent = tFormat('form.resolverNotice', { resolver: t(defaultProvider.labelKey) });
+		if (resolverError) resolverError.textContent = '';
+		return;
+	}
 	const id = resolverSelect.value || DEFAULT_DOH_ID;
 	if (resolverCustomWrap) resolverCustomWrap.classList.toggle('hidden', id !== 'custom');
 	const provider = getDohProviderById(id);
@@ -363,7 +379,14 @@ function updateResolverUi() {
 }
 
 function initResolverSelection() {
-	if (!resolverSelect) return;
+	if (RESOLVER_MODE === 'auto') {
+		updateResolverUi();
+		return;
+	}
+	if (!resolverSelect) {
+		updateResolverUi();
+		return;
+	}
 	const saved = (() => {
 		try { return localStorage.getItem(DOH_STORAGE_KEY); } catch { return ''; }
 	})();
@@ -863,32 +886,9 @@ function updateDmarcRuaRecord(record, ruaMailto) {
 	return updated.join('; ');
 }
 
-function buildDmarcRuaExampleHtml(domain, record) {
-	const safeDomain = String(domain || '').trim();
-	if (!safeDomain) return '';
-
-	const ruaMailto = getRuaMailto(safeDomain);
-	const updatedValue = record
-		? updateDmarcRuaRecord(record, ruaMailto)
-		: `v=DMARC1; p=none; rua=${ruaMailto}`;
-	const exampleText = `Host: _dmarc.${safeDomain}\nType: TXT\nValue: ${updatedValue}`;
-
-	const serviceUrl = ENTERPRISE_MODE ? 'rua_service_enterprise.html' : 'rua_service.html';
-	const ruaUrl = `${serviceUrl}#rua`;
-	const serviceLabel = tr('DMARC4all（RUA受信・解析）', 'DMARC4all (RUA receive/analyze)');
-	const ruaLabel = tr('RUAについて', 'About RUA');
-	const noteText = tr('※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、rua= だけを追加（または更新）する。', 'Note: keep existing DMARC settings (p=/sp=/adkim=/aspf=/etc.) and only add/update rua.');
-	const detailHtml = `
-		<div class="tiny">
-			${esc(tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'))}:
-			<a href="${esc(serviceUrl)}" target="_blank" rel="noopener noreferrer">${esc(serviceLabel)}</a>
-			／
-			<a href="${esc(ruaUrl)}" target="_blank" rel="noopener noreferrer">${esc(ruaLabel)}</a>
-		</div>
-		<div class="mini-title mt-6">${esc(tr('DMARCに rua= を追加する例（DMARC4all）', 'Example: add rua= (DMARC4all)'))}</div>
-		<div class="mono">${esc(exampleText)}</div>
-		<div class="tiny muted mt-6">${esc(noteText)}</div>
-	`;
+function buildDmarcRuaExampleHtml() {
+	const whyText = t('rua.card.why');
+	const detailHtml = `<div class="tiny">${esc(whyText)}</div>`;
 	return mkFindingRich('low', tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'), detailHtml, '');
 }
 
@@ -2522,7 +2522,7 @@ function renderResults(r) {
 
 	const dnsHostBodyRaw = ((r.dnsHosting && r.dnsHosting.findings) ? r.dnsHosting.findings.join('') : '') + dnsHostLinks;
 	const registrarBodyRaw = ((r.registrar && r.registrar.findings) ? r.registrar.findings.join('') : '');
-	const dmarcBodyRaw = ((r.dmarc && r.dmarc.findings) ? r.dmarc.findings.join('') : '') + buildDmarcRuaExampleHtml(r.domain, r.dmarc ? r.dmarc.record : '');
+	const dmarcBodyRaw = ((r.dmarc && r.dmarc.findings) ? r.dmarc.findings.join('') : '') + buildDmarcRuaExampleHtml();
 	const spfBodyRaw = ((r.spf && r.spf.findings) ? r.spf.findings.join('') : '');
 	const dkimCnameNote = (r.dkim && r.dkim.usesCname)
 		? `<div class="tiny muted">${esc(t('dkim.cnameDelegationOtherToolsNote'))}</div>`

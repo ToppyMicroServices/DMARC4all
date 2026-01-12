@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (nhận & phân tích RUA)",
   "rua.link.about": "Về RUA",
   "rua.link.spec": "Đặc tả dịch vụ RUA",
+  "rua.card.why": "Thiết lập rua này giúp bạn có thể sử dụng dịch vụ báo cáo của chúng tôi một cách an toàn và miễn phí.",
   "form.resolver": "Resolver (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Xuất Markdown",
   "report.export.note": "Bản xuất chỉ bao gồm kết quả DNS công khai.",
   "report.export.md.title": "Báo cáo DNS DMARC4all",
-  "report.export.sectionStatus": "Trạng thái mục"
+  "report.export.sectionStatus": "Trạng thái mục",
+  "hero.prs.html": "PR sửa lỗi chính tả rất hoan nghênh trên <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "rua.example.summary.html": "Ví dụ: thêm <code>rua=</code> vào DMARC (DMARC4all)",
+  "rua.example.block": "Máy chủ: _dmarc.example.com\nLoại: TXT\nGiá trị: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "Lưu ý: giữ nguyên các thiết lập DMARC hiện có (p=/sp=/adkim=/aspf=/etc.) và chỉ thêm/cập nhật <code>rua=</code>.",
 };
 })();

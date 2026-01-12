@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (RUA vastuvõtt ja analüüs)",
   "rua.link.about": "RUA kohta",
   "rua.link.spec": "RUA teenuse spetsifikatsioon",
+  "rua.card.why": "Selle rua-seade lisamisel saate meie aruandlusteenust turvaliselt ja tasuta kasutada.",
   "form.resolver": "Resolver (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Ekspordi Markdown",
   "report.export.note": "Eksport sisaldab ainult avaliku DNS-i tulemusi.",
   "report.export.md.title": "DMARC4all DNS aruanne",
-  "report.export.sectionStatus": "Sektsioonide olek"
+  "report.export.sectionStatus": "Sektsioonide olek",
+  "hero.prs.html": "Kirjavigade parandamise PR-id on oodatud <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>is.",
+  "rua.example.summary.html": "Näide: lisa <code>rua=</code> DMARC kirjale (DMARC4all)",
+  "rua.example.block": "Host: _dmarc.example.com\nTüüp: TXT\nVäärtus: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "Märkus: säilita olemasolevad DMARC seaded (p=/sp=/adkim=/aspf=/etc.) ja lisa/uuenda ainult <code>rua=</code>.",
 };
 })();

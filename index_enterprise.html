@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja" data-enterprise="true">
+<html lang="ja" data-enterprise="true" data-resolver-mode="auto">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https:;">
@@ -69,7 +69,7 @@
       </div>
       <p class="tagline" data-i18n="hero.tagline">ドメイン名を入力 → 公開DNS（SPF/DKIM/DMARC等）を“推定評価”。結果には確度を表示し、確定にはメールヘッダ確認が必要な場合がある。</p>
       <p class="tiny muted mt-10" data-i18n="hero.free">完全無料（登録不要）</p>
-      <p class="tiny muted mt-4">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
+      <p class="tiny muted mt-4" data-i18n-html="hero.prs.html">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
       <div class="flex mt-18 z-1">
         <div class="card">
           <h2 class="m-0-0-6" data-i18n="form.title">Quick 診断</h2>
@@ -87,19 +87,21 @@
             <label class="flex-label">
               <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
             </label>
-            <div>
-              <label for="resolver-select" data-i18n="form.resolver">Resolver (DoH)</label>
-              <select id="resolver-select">
-                <option value="cloudflare" data-i18n="form.resolver.cloudflare">Cloudflare</option>
-                <option value="quad9" data-i18n="form.resolver.quad9">Quad9</option>
-                <option value="google" data-i18n="form.resolver.google">Google</option>
-                <option value="custom" data-i18n="form.resolver.custom">Custom (URL)</option>
-              </select>
-            </div>
-            <div id="resolver-custom-wrap" class="hidden">
-              <label for="resolver-custom" data-i18n="form.resolver.customLabel">Custom DoH URL</label>
-              <input id="resolver-custom" data-i18n-placeholder="form.resolver.customPlaceholder" placeholder="https://example.com/dns-query">
-              <p class="tiny muted mt-6" data-i18n="form.resolver.customHint">自前のDoH（HTTPS）を指定できます</p>
+            <div class="resolver-controls">
+              <div>
+                <label for="resolver-select" data-i18n="form.resolver">Resolver (DoH)</label>
+                <select id="resolver-select">
+                  <option value="cloudflare" data-i18n="form.resolver.cloudflare">Cloudflare</option>
+                  <option value="quad9" data-i18n="form.resolver.quad9">Quad9</option>
+                  <option value="google" data-i18n="form.resolver.google">Google</option>
+                  <option value="custom" data-i18n="form.resolver.custom">Custom (URL)</option>
+                </select>
+              </div>
+              <div id="resolver-custom-wrap" class="hidden">
+                <label for="resolver-custom" data-i18n="form.resolver.customLabel">Custom DoH URL</label>
+                <input id="resolver-custom" data-i18n-placeholder="form.resolver.customPlaceholder" placeholder="https://example.com/dns-query">
+                <p class="tiny muted mt-6" data-i18n="form.resolver.customHint">自前のDoH（HTTPS）を指定できます</p>
+              </div>
             </div>
             <p class="tiny muted" id="resolver-note"></p>
             <p class="tiny text-warn" id="resolver-error"></p>
@@ -121,11 +123,11 @@
                 <a href="rua_service_enterprise.html" data-i18n="rua.link.spec">RUAサービス仕様</a>
               </p>
               <details class="tiny muted">
-                <summary>DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>
-                <pre class="tiny" style="white-space: pre-wrap; margin-top: 6px;">Host: _dmarc.example.com
+                <summary data-i18n-html="rua.example.summary.html">DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>
+                <pre class="tiny" style="white-space: pre-wrap; margin-top: 6px;" data-i18n="rua.example.block">Host: _dmarc.example.com
 Type: TXT
 Value: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com</pre>
-                <p class="tiny muted" style="margin-top: 6px;">※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、<code>rua=</code> だけを追加（または更新）する。</p>
+                <p class="tiny muted" style="margin-top: 6px;" data-i18n-html="rua.example.note.html">※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、<code>rua=</code> だけを追加（または更新）する。</p>
               </details>
             </div>
           </form>

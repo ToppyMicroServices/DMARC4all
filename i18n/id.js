@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (penerimaan & analisis RUA)",
   "rua.link.about": "Tentang RUA",
   "rua.link.spec": "Spesifikasi layanan RUA",
+  "rua.card.why": "Dengan pengaturan rua ini, Anda dapat menggunakan layanan laporan kami secara aman dan gratis.",
   "form.resolver": "Resolver (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Ekspor Markdown",
   "report.export.note": "Ekspor hanya mencakup hasil DNS publik.",
   "report.export.md.title": "Laporan DNS DMARC4all",
-  "report.export.sectionStatus": "Status bagian"
+  "report.export.sectionStatus": "Status bagian",
+  "hero.prs.html": "PR untuk perbaikan typo dipersilakan di <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "rua.example.summary.html": "Contoh: tambahkan <code>rua=</code> ke DMARC (DMARC4all)",
+  "rua.example.block": "Host: _dmarc.example.com\nTipe: TXT\nNilai: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "Catatan: pertahankan pengaturan DMARC yang ada (p=/sp=/adkim=/aspf=/etc.) dan hanya tambah/perbarui <code>rua=</code>.",
 };
 })();

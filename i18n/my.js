@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (RUA လက်ခံ/ခွဲခြမ်း)",
   "rua.link.about": "RUA အကြောင်း",
   "rua.link.spec": "RUA ဝန်ဆောင်မှု သတ်မှတ်ချက်",
+  "rua.card.why": "ဒီ rua ကို သတ်မှတ်ခြင်းဖြင့် ကျွန်ုပ်တို့၏ အစီရင်ခံစာဝန်ဆောင်မှုကို လုံခြုံပြီး အခမဲ့ အသုံးပြုနိုင်ပါသည်။",
   "form.resolver": "Resolver (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Markdown ထုတ်ယူ",
   "report.export.note": "ထုတ်ယူမှုတွင် လူထု DNS ရလဒ်များသာ ပါသည်။",
   "report.export.md.title": "DMARC4all DNS အစီရင်ခံစာ",
-  "report.export.sectionStatus": "အပိုင်းအခြေအနေ"
+  "report.export.sectionStatus": "အပိုင်းအခြေအနေ",
+  "hero.prs.html": "စာလုံးအမှား ပြင်ဆင်တဲ့ PR များကို <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> တွင် ကြိုဆိုပါတယ်။",
+  "rua.example.summary.html": "ဥပမာ: DMARC တွင် <code>rua=</code> ထည့်ခြင်း (DMARC4all)",
+  "rua.example.block": "ဟော့စ်: _dmarc.example.com\nအမျိုးအစား: TXT\nတန်ဖိုး: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "မှတ်ချက်: မူရင်း DMARC သတ်မှတ်ချက်များ (p=/sp=/adkim=/aspf=/etc.) ကို ထိန်းထားပြီး <code>rua=</code> ကိုသာ ထည့်/ပြင်ပါ။",
 };
 })();

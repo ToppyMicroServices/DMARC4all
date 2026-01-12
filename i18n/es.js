@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (recepción y análisis RUA)",
   "rua.link.about": "Acerca de RUA",
   "rua.link.spec": "Especificación del servicio RUA",
+  "rua.card.why": "Con esta configuración de rua, puedes usar nuestro servicio de informes de forma segura y gratuita.",
   "form.resolver": "Resolver (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Exportar Markdown",
   "report.export.note": "La exportación solo incluye resultados de DNS público.",
   "report.export.md.title": "Informe DNS de DMARC4all",
-  "report.export.sectionStatus": "Estado de secciones"
+  "report.export.sectionStatus": "Estado de secciones",
+  "hero.prs.html": "Se agradecen PRs de correcciones tipográficas en <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "rua.example.summary.html": "Ejemplo: añadir <code>rua=</code> a DMARC (DMARC4all)",
+  "rua.example.block": "Host: _dmarc.example.com\nTipo: TXT\nValor: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "Nota: mantén la configuración DMARC existente (p=/sp=/adkim=/aspf=/etc.) y solo añade/actualiza <code>rua=</code>.",
 };
 })();

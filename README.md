@@ -74,6 +74,12 @@ Required secrets:
 
 The job is intended to be protected via the GitHub Environment `cloudflare-dns`.
 
+### Recommended operations (safe, practical)
+
+- Public repo: keep only Worker code, `public/index.html`, README, and templates (HTML/webloc).
+- Secrets: GitHub Actions Secrets (CI) + Cloudflare Worker Secrets (production).
+- Operational logs: keep in KV/D1/R2 (not in the repo).
+
 ### Mail receiving / storage
 
 Mail receiving and R2 storage are handled on Cloudflare side.

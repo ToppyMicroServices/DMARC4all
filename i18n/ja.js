@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all（RUA受信・解析）",
   "rua.link.about": "RUAについて",
   "rua.link.spec": "RUAサービス仕様",
+  "rua.card.why": "このRua設定を行うことで安全に当社のレポートサービスを無料で安全に利用することができます．",
   "form.resolver": "Resolver（DoH）",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "Markdownを出力",
   "report.export.note": "出力は公開DNSの結果のみを含みます.",
   "report.export.md.title": "DMARC4all DNS診断レポート",
-  "report.export.sectionStatus": "セクションの状態"
+  "report.export.sectionStatus": "セクションの状態",
+  "hero.prs.html": "誤字修正のPRは <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> で歓迎します。",
+  "rua.example.summary.html": "DMARCに <code>rua=</code> を追加する例（DMARC4all）",
+  "rua.example.block": "ホスト: _dmarc.example.com\n種別: TXT\n値: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、<code>rua=</code> だけを追加（または更新）する。",
 };
 })();

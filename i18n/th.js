@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all (รับและวิเคราะห์ RUA)",
   "rua.link.about": "เกี่ยวกับ RUA",
   "rua.link.spec": "สเปกบริการ RUA",
+  "rua.card.why": "ตั้งค่า rua นี้แล้วจะสามารถใช้บริการรายงานของเราได้อย่างปลอดภัยและฟรี",
   "form.resolver": "ตัวแก้ไขชื่อ (DoH)",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "ส่งออก Markdown",
   "report.export.note": "การส่งออกมีเฉพาะผลจาก DNS สาธารณะเท่านั้น.",
   "report.export.md.title": "รายงาน DNS ของ DMARC4all",
-  "report.export.sectionStatus": "สถานะของส่วน"
+  "report.export.sectionStatus": "สถานะของส่วน",
+  "hero.prs.html": "ยินดีรับ PR แก้คำผิดที่ <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "rua.example.summary.html": "ตัวอย่าง: เพิ่ม <code>rua=</code> ให้ DMARC (DMARC4all)",
+  "rua.example.block": "โฮสต์: _dmarc.example.com\nชนิด: TXT\nค่า: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "หมายเหตุ: คงการตั้งค่า DMARC เดิมไว้ (p=/sp=/adkim=/aspf=/etc.) แล้วเพิ่ม/อัปเดตเฉพาะ <code>rua=</code> เท่านั้น.",
 };
 })();

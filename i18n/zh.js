@@ -77,6 +77,7 @@
   "rua.link.service": "DMARC4all（RUA 接收与解析）",
   "rua.link.about": "关于 RUA",
   "rua.link.spec": "RUA 服务规范",
+  "rua.card.why": "设置此 rua 后，您可以安全且免费地使用我们的报告服务。",
   "form.resolver": "解析器（DoH）",
   "form.resolver.cloudflare": "Cloudflare",
   "form.resolver.quad9": "Quad9",
@@ -118,6 +119,10 @@
   "report.export.md": "导出 Markdown",
   "report.export.note": "导出仅包含公开 DNS 结果。",
   "report.export.md.title": "DMARC4all DNS 报告",
-  "report.export.sectionStatus": "分项状态"
+  "report.export.sectionStatus": "分项状态",
+  "hero.prs.html": "欢迎在 <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> 提交错别字修正 PR。",
+  "rua.example.summary.html": "示例：在 DMARC 中添加 <code>rua=</code>（DMARC4all）",
+  "rua.example.block": "主机: _dmarc.example.com\n类型: TXT\n值: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com",
+  "rua.example.note.html": "注：保留现有 DMARC 设置（p=/sp=/adkim=/aspf=/etc.），仅添加/更新 <code>rua=</code>。",
 };
 })();
