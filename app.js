@@ -23,6 +23,12 @@ const dnsblCheck = document.getElementById('dnsbl-check');
 const consentCheckbox = document.getElementById('consent');
 const langSelect = document.getElementById('lang-select');
 const langChoiceButtons = Array.from(document.querySelectorAll('[data-lang-choice]'));
+const ENTERPRISE_MODE = document.documentElement.dataset.enterprise === 'true';
+const resolverSelect = document.getElementById('resolver-select');
+const resolverCustom = document.getElementById('resolver-custom');
+const resolverCustomWrap = document.getElementById('resolver-custom-wrap');
+const resolverNote = document.getElementById('resolver-note');
+const resolverError = document.getElementById('resolver-error');
 let forceDeep = false;
 
 let lastDiagnosisRun = null;
@@ -30,8 +36,29 @@ let languageRerunInProgress = false;
 
 // Go-deep is now the only submit action.
 
-const DOH_ENDPOINTS = [
-	{ name: 'google', url: 'https://dns.google/resolve', kind: 'google' }
+const DOH_PROVIDERS = [
+	{ id: 'cloudflare', labelKey: 'form.resolver.cloudflare', url: 'https://cloudflare-dns.com/dns-query', kind: 'doh-json' },
+	{ id: 'quad9', labelKey: 'form.resolver.quad9', url: 'https://dns.quad9.net/dns-query', kind: 'doh-json' },
+	{ id: 'google', labelKey: 'form.resolver.google', url: 'https://dns.google/resolve', kind: 'doh-json' },
+	{ id: 'custom', labelKey: 'form.resolver.custom', url: '', kind: 'custom' }
+];
+const DOH_STORAGE_KEY = 'toppy-doh-resolver';
+const DOH_CUSTOM_KEY = 'toppy-doh-custom';
+const DEFAULT_DOH_ID = 'cloudflare';
+let activeDohEndpoint = null;
+const DKIM_SELECTOR_CANDIDATES = [
+	'selector1',
+	'selector2',
+	'default',
+	'google',
+	's1',
+	's2',
+	'k1',
+	'k2',
+	'mail',
+	'dkim',
+	'protonmail',
+	'protonmail2'
 ];
 
 function esc(s) {
@@ -57,8 +84,8 @@ function sanitizeHtml(html) {
 	const s = String(html ?? '');
 	if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
 		return window.DOMPurify.sanitize(s, {
-			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'img'],
-			ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel', 'aria-label', 'aria-live', 'src', 'alt', 'loading', 'referrerpolicy'],
+			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'img', 'button'],
+			ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel', 'aria-label', 'aria-live', 'src', 'alt', 'loading', 'referrerpolicy', 'type'],
 			ALLOW_DATA_ATTR: false
 		});
 	}
@@ -145,6 +172,14 @@ function trf(jaTpl, enTpl, vars) {
 	});
 }
 
+function tFormat(key, vars) {
+	const base = t(key);
+	return String(base).replace(/\{(\w+)\}/g, (_, k) => {
+		const v = vars && Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : '';
+		return String(v);
+	});
+}
+
 function statusText(key) {
 	const k = `status.${key}`;
 	const v = t(k);
@@ -221,6 +256,13 @@ function applyI18n() {
 		if (!key) return;
 		el.textContent = t(key);
 	});
+	const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+	placeholders.forEach(el => {
+		const key = el.getAttribute('data-i18n-placeholder');
+		if (!key) return;
+		el.setAttribute('placeholder', t(key));
+	});
+	updateResolverUi();
 }
 
 function initI18n() {
@@ -241,6 +283,7 @@ function initI18n() {
 	}
 	validateI18n();
 	applyI18n();
+	initResolverSelection();
 }
 
 initI18n();
@@ -267,28 +310,101 @@ function normalizeDomain(input) {
 	return d;
 }
 
+function dkimLookupHints(domain) {
+	const base = `_domainkey.${domain}`;
+	return [
+		`dig +short TXT <selector>.${base}`,
+		`dig +short CNAME <selector>.${base}`
+	].join('\n');
+}
+
+function normalizeDohUrl(raw) {
+	const trimmed = String(raw || '').trim();
+	if (!trimmed) return '';
+	try {
+		const url = new URL(trimmed);
+		if (url.protocol !== 'https:') return '';
+		return url.href;
+	} catch {
+		return '';
+	}
+}
+
+function getDohProviderById(id) {
+	return DOH_PROVIDERS.find(p => p.id === id) || DOH_PROVIDERS[0];
+}
+
+function getSelectedDohEndpoint() {
+	if (!resolverSelect) return getDohProviderById(DEFAULT_DOH_ID);
+	const id = resolverSelect.value || DEFAULT_DOH_ID;
+	if (id === 'custom') {
+		const url = normalizeDohUrl(resolverCustom ? resolverCustom.value : '');
+		if (!url) return { error: t('form.resolver.customError') };
+		return { id: 'custom', name: url, url, kind: 'custom' };
+	}
+	const provider = getDohProviderById(id);
+	return {
+		id: provider.id,
+		name: t(provider.labelKey),
+		url: provider.url,
+		kind: provider.kind
+	};
+}
+
+function updateResolverUi() {
+	if (!resolverSelect) return;
+	const id = resolverSelect.value || DEFAULT_DOH_ID;
+	if (resolverCustomWrap) resolverCustomWrap.classList.toggle('hidden', id !== 'custom');
+	const provider = getDohProviderById(id);
+	const customUrl = normalizeDohUrl(resolverCustom ? resolverCustom.value : '');
+	const label = id === 'custom' ? (customUrl || t('form.resolver.custom')) : t(provider.labelKey);
+	if (resolverNote) resolverNote.textContent = tFormat('form.resolverNotice', { resolver: label });
+	if (resolverError) resolverError.textContent = '';
+}
+
+function initResolverSelection() {
+	if (!resolverSelect) return;
+	const saved = (() => {
+		try { return localStorage.getItem(DOH_STORAGE_KEY); } catch { return ''; }
+	})();
+	const savedCustom = (() => {
+		try { return localStorage.getItem(DOH_CUSTOM_KEY); } catch { return ''; }
+	})();
+	const valid = DOH_PROVIDERS.some(p => p.id === saved) ? saved : DEFAULT_DOH_ID;
+	resolverSelect.value = valid;
+	if (resolverCustom) resolverCustom.value = savedCustom || '';
+	updateResolverUi();
+
+	resolverSelect.addEventListener('change', () => {
+		try { localStorage.setItem(DOH_STORAGE_KEY, resolverSelect.value); } catch { /* ignore */ }
+		updateResolverUi();
+	});
+	if (resolverCustom) {
+		resolverCustom.addEventListener('input', () => {
+			try { localStorage.setItem(DOH_CUSTOM_KEY, resolverCustom.value); } catch { /* ignore */ }
+			updateResolverUi();
+		});
+	}
+}
+
 async function dohQuery(name, type) {
 	const errs = [];
+	const ep = (activeDohEndpoint && activeDohEndpoint.url) ? activeDohEndpoint : getDohProviderById(DEFAULT_DOH_ID);
+	const url = `${ep.url}?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), 6500);
+	try {
+		const headers = { 'accept': 'application/dns-json' };
+		const res = await fetch(url, { signal: controller.signal, headers });
+		if (!res.ok) throw new Error(`${ep.id || ep.name || 'doh'}: HTTP ${res.status}`);
 
-	for (const ep of DOH_ENDPOINTS) {
-		const url = `${ep.url}?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
-		const controller = new AbortController();
-		const timer = setTimeout(() => controller.abort(), 6500);
-		try {
-			const headers = {};
-			if (ep.kind === 'cloudflare') headers['accept'] = 'application/dns-json';
-
-			const res = await fetch(url, { signal: controller.signal, headers });
-			if (!res.ok) throw new Error(`${ep.name}: HTTP ${res.status}`);
-
-			const json = await res.json();
-			if (!json || typeof json !== 'object') throw new Error(`${ep.name}: invalid json`);
-			return json;
-		} catch (e) {
-			errs.push(String(e));
-		} finally {
-			clearTimeout(timer);
-		}
+		const json = await res.json();
+		if (!json || typeof json !== 'object') throw new Error(`${ep.id || ep.name || 'doh'}: invalid json`);
+		return json;
+	} catch (e) {
+		errs.push(String(e));
+	} finally {
+		clearTimeout(timer);
 	}
 
 	throw new Error(`DoH query failed: ${errs.join(' | ')}`);
@@ -300,6 +416,16 @@ function extractTXT(json) {
 		.filter(a => a && (a.type === 16 || a.type === 'TXT') && typeof a.data === 'string')
 		.map(a => a.data);
 	return txts.map(t => normalizeTxtData(t));
+}
+
+function extractTXTRecords(json) {
+	const ans = (json && Array.isArray(json.Answer)) ? json.Answer : [];
+	return ans
+		.filter(a => a && (a.type === 16 || a.type === 'TXT') && typeof a.data === 'string')
+		.map(a => ({
+			data: normalizeTxtData(a.data),
+			ttl: Number.isFinite(a.TTL) ? a.TTL : null
+		}));
 }
 
 function normalizeTxtData(data) {
@@ -324,6 +450,56 @@ function extractCNAME(json) {
 		.filter(a => a && (a.type === 5 || a.type === 'CNAME') && typeof a.data === 'string')
 		.map(a => a.data);
 	return names.map(n => String(n).trim().replace(/\.$/, ''));
+}
+
+function extractCNAMERecords(json) {
+	const ans = (json && Array.isArray(json.Answer)) ? json.Answer : [];
+	return ans
+		.filter(a => a && (a.type === 5 || a.type === 'CNAME') && typeof a.data === 'string')
+		.map(a => ({
+			data: String(a.data).trim().replace(/\.$/, ''),
+			ttl: Number.isFinite(a.TTL) ? a.TTL : null
+		}));
+}
+
+async function resolveCnameChain(name, opts = {}) {
+	const maxDepth = Number.isFinite(opts.maxDepth) ? opts.maxDepth : 3;
+	const chain = [];
+	const seen = new Set([name]);
+	let current = name;
+	let loop = false;
+	let truncated = false;
+
+	for (let i = 0; i < maxDepth; i += 1) {
+		let records = [];
+		try {
+			const json = await dohQuery(current, 'CNAME');
+			records = extractCNAMERecords(json);
+		} catch (_) {
+			records = [];
+		}
+		if (!records.length) break;
+		const next = records[0];
+		chain.push({ from: current, to: next.data, ttl: next.ttl });
+		if (seen.has(next.data)) {
+			loop = true;
+			break;
+		}
+		seen.add(next.data);
+		current = next.data;
+	}
+
+	if (chain.length && !loop && chain.length >= maxDepth) truncated = true;
+	return {
+		chain,
+		target: chain.length ? chain[chain.length - 1].to : '',
+		loop,
+		truncated
+	};
+}
+
+function formatCnameChain(chain) {
+	return (chain || []).map(x => `CNAME ${x.from} -> ${x.to}`).join('\n');
 }
 
 function extractA(json) {
@@ -573,6 +749,11 @@ function firstRecordStartingWith(records, prefix) {
 	return (records || []).find(r => String(r).toLowerCase().startsWith(p)) || '';
 }
 
+function firstTxtRecordStartingWith(records, prefix) {
+	const p = prefix.toLowerCase();
+	return (records || []).find(r => r && typeof r.data === 'string' && r.data.toLowerCase().startsWith(p)) || null;
+}
+
 function longestTxtSegment(txt) {
 	const parts = String(txt).split(/\s+/);
 	let max = 0;
@@ -692,8 +873,8 @@ function buildDmarcRuaExampleHtml(domain, record) {
 		: `v=DMARC1; p=none; rua=${ruaMailto}`;
 	const exampleText = `Host: _dmarc.${safeDomain}\nType: TXT\nValue: ${updatedValue}`;
 
-	const serviceUrl = 'rua_service.html';
-	const ruaUrl = 'rua_service.html#rua';
+	const serviceUrl = ENTERPRISE_MODE ? 'rua_service_enterprise.html' : 'rua_service.html';
+	const ruaUrl = `${serviceUrl}#rua`;
 	const serviceLabel = tr('DMARC4all（RUA受信・解析）', 'DMARC4all (RUA receive/analyze)');
 	const ruaLabel = tr('RUAについて', 'About RUA');
 	const noteText = tr('※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、rua= だけを追加（または更新）する。', 'Note: keep existing DMARC settings (p=/sp=/adkim=/aspf=/etc.) and only add/update rua.');
@@ -729,6 +910,93 @@ function spfEstimateLookupRisk(spf) {
 		else if (x === 'ptr' || x.startsWith('ptr:')) count++;
 	}
 	return count;
+}
+
+function spfStripQualifier(token) {
+	if (!token) return '';
+	const ch = token[0];
+	if (ch === '+' || ch === '-' || ch === '~' || ch === '?') return token.slice(1);
+	return token;
+}
+
+function spfParseTokens(spf) {
+	const tokens = String(spf || '').trim().split(/\s+/).filter(Boolean);
+	if (!tokens.length) return [];
+	if (tokens[0].toLowerCase() === 'v=spf1') return tokens.slice(1);
+	return tokens;
+}
+
+function normalizeSpfDomain(name) {
+	return String(name || '').trim().replace(/\.$/, '').toLowerCase();
+}
+
+async function fetchSpfRecord(domain, cache) {
+	const d = normalizeSpfDomain(domain);
+	if (!d) return '';
+	if (cache.has(d)) return cache.get(d);
+	try {
+		const json = await dohQuery(d, 'TXT');
+		const txt = extractTXT(json);
+		const rec = firstRecordStartingWith(txt, 'v=spf1') || '';
+		cache.set(d, rec);
+		return rec;
+	} catch (_) {
+		cache.set(d, '');
+		return '';
+	}
+}
+
+async function buildSpfExpansion(domain, spf, opts = {}) {
+	const maxDepth = Number.isFinite(opts.maxDepth) ? opts.maxDepth : 4;
+	const maxNodes = Number.isFinite(opts.maxNodes) ? opts.maxNodes : 24;
+	const cache = new Map();
+	const lines = [];
+	const loops = new Set();
+	let truncated = false;
+	let nodes = 0;
+
+	async function expandNode(name, record, depth, seen) {
+		if (nodes >= maxNodes) { truncated = true; return; }
+		const indent = '  '.repeat(depth);
+		const lookup = record ? spfEstimateLookupRisk(record) : 0;
+		const recText = record || t('spf.tree.noRecord');
+		lines.push(`${indent}${name} (lookup~${lookup}): ${recText}`);
+		nodes += 1;
+		if (!record) return;
+		if (depth >= maxDepth) { truncated = true; return; }
+
+		const tokens = spfParseTokens(record);
+		for (const raw of tokens) {
+			const term = spfStripQualifier(raw).toLowerCase();
+			let target = '';
+			let label = '';
+			if (term.startsWith('include:')) {
+				target = term.slice('include:'.length);
+				label = 'include';
+			} else if (term.startsWith('redirect=')) {
+				target = term.slice('redirect='.length);
+				label = 'redirect';
+			} else {
+				continue;
+			}
+			target = normalizeSpfDomain(target);
+			if (!target) continue;
+			lines.push(`${indent}  ${label}:${target}`);
+			if (seen.has(target)) {
+				loops.add(target);
+				lines.push(`${indent}    ${t('spf.tree.loopDetected')}`);
+				continue;
+			}
+			const next = new Set(seen);
+			next.add(target);
+			const child = await fetchSpfRecord(target, cache);
+			await expandNode(target, child, depth + 1, next);
+			if (nodes >= maxNodes) { truncated = true; return; }
+		}
+	}
+
+	await expandNode(normalizeSpfDomain(domain), spf, 0, new Set([normalizeSpfDomain(domain)]));
+	return { lines, loops: Array.from(loops), truncated };
 }
 
 function spfCountIp4(spf) {
@@ -866,10 +1134,15 @@ function computeOverallScore(r) {
 function mkFinding(level, title, detail, evidence) {
 	const cls = level === 'high' ? 'finding high' : level === 'med' ? 'finding med' : 'finding low';
 	const ev = evidence ? `<div class="mini-title">${esc(t('label.evidence'))}</div><div class="mono">${esc(evidence)}</div>` : '';
+	const confidence = evidence ? 'high' : 'low';
+	const confLabel = esc(t('label.confidence'));
+	const confText = esc(t(`confidence.${confidence}`));
+	const whyLabel = esc(t('label.why'));
 	return `
 		<div class="${cls}">
 			<div><strong>${esc(title)}</strong></div>
-			<div class="muted">${esc(detail)}</div>
+			<div class="muted"><strong>${whyLabel}:</strong> ${esc(detail)}</div>
+			<div class="tiny muted"><strong>${confLabel}:</strong> ${confText}</div>
 			${ev}
 		</div>
 	`;
@@ -877,10 +1150,15 @@ function mkFinding(level, title, detail, evidence) {
 function mkFindingRich(level, title, detailHtml, evidence) {
 	const cls = level === 'high' ? 'finding high' : level === 'med' ? 'finding med' : 'finding low';
 	const ev = evidence ? `<div class="mini-title">${esc(t('label.evidence'))}</div><div class="mono">${esc(evidence)}</div>` : '';
+	const confidence = evidence ? 'high' : 'low';
+	const confLabel = esc(t('label.confidence'));
+	const confText = esc(t(`confidence.${confidence}`));
+	const whyLabel = esc(t('label.why'));
 	return `
 		<div class="${cls}">
 			<div><strong>${esc(title)}</strong></div>
-			<div class="muted">${detailHtml}</div>
+			<div class="muted"><strong>${whyLabel}:</strong> ${detailHtml}</div>
+			<div class="tiny muted"><strong>${confLabel}:</strong> ${confText}</div>
 			${ev}
 		</div>
 	`;
@@ -895,6 +1173,109 @@ function prependOkFinding(bodyHtml, ok) {
 	const okTitle = tr('設定OK', 'Configured');
 	const okDetail = tr('適切に設定されています', 'Properly configured.');
 	return mkFinding('low', okTitle, okDetail, '') + bodyHtml;
+}
+
+function formatTtl(ttl) {
+	if (Number.isFinite(ttl) && ttl >= 0) return `${ttl}s`;
+	return t('report.repro.ttlUnknown');
+}
+
+function exportFileBase(domain) {
+	const safeDomain = String(domain || 'report').replace(/[^a-z0-9._-]+/gi, '_');
+	const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+	return `${safeDomain}_${stamp}`;
+}
+
+function downloadText(filename, text, mime) {
+	const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	requestAnimationFrame(() => {
+		URL.revokeObjectURL(url);
+		a.remove();
+	});
+}
+
+function buildJsonExport(r) {
+	return JSON.stringify(r, null, 2);
+}
+
+function buildMarkdownReport(r) {
+	const meta = r && r.meta ? r.meta : {};
+	const timestamp = meta.timestamp || new Date().toISOString();
+	const resolver = meta.resolver || t('report.repro.resolverUnknown');
+	const overall = (r.score && typeof r.score.overall === 'number') ? r.score.overall : '';
+
+	const top = (r.priority && Array.isArray(r.priority)) ? r.priority : [];
+	const topSorted = top
+		.slice(0)
+		.sort((a, b) => {
+			const w = { high: 3, med: 2, low: 1 };
+			return (w[b.level] || 0) - (w[a.level] || 0);
+		})
+		.slice(0, 3);
+	const topLines = topSorted.length
+		? topSorted.map(x => `- ${x.title}: ${x.action}`)
+		: [`- ${t('label.noneParen')}`];
+
+	const sections = [
+		{ name: 'DMARC', status: (r.dmarc && r.dmarc.record) ? statusText('configured') : statusText('missing') },
+		{ name: 'SPF', status: (r.spf && r.spf.records && r.spf.records.length) ? `TXT ${r.spf.records.length}` : statusText('missing') },
+		{ name: 'DKIM', status: (r.dkim && r.dkim.selectors && r.dkim.selectors.length) ? t('status.candidates').replace('{n}', String(r.dkim.selectors.length)) : statusText('unverified') },
+		{ name: 'BIMI', status: (r.bimi && r.bimi.record) ? statusText('configured') : statusText('optionalMissing') },
+		{ name: 'MX', status: (r.mx && r.mx.records && r.mx.records.length) ? `MX ${r.mx.records.length}` : statusText('none') },
+		{ name: 'MTA-STS / TLS-RPT', status: (r.mta_sts && r.mta_sts.record && r.mta_sts.tlsrpt) ? statusText('configured') : statusText('missing') }
+	];
+	const sectionLines = sections.map(s => `- ${s.name}: ${s.status}`);
+
+	const records = (meta.records && Array.isArray(meta.records)) ? meta.records : [];
+	const recordLines = records.length
+		? records.map(rec => {
+				const ttl = formatTtl(rec.ttl);
+				const header = `- ${rec.name} ${rec.type} (${t('report.repro.ttl')}: ${ttl})`;
+				const value = rec.value ? `\n  \`\`\`\n  ${rec.value}\n  \`\`\`` : '';
+				return `${header}${value}`;
+			})
+		: [`- ${t('report.repro.none')}`];
+
+	return [
+		`# ${t('report.export.md.title')}`,
+		'',
+		`- ${t('form.domain')}: ${r.domain}`,
+		`- ${t('report.repro.time')}: ${timestamp}`,
+		`- ${t('report.repro.resolver')}: ${resolver}`,
+		`- ${t('report.overallPostureTitle')}: ${overall}`,
+		'',
+		`## ${t('report.top3Title')}`,
+		...topLines,
+		'',
+		`## ${t('report.export.sectionStatus')}`,
+		...sectionLines,
+		'',
+		`## ${t('report.repro.records')}`,
+		...recordLines
+	].join('\n');
+}
+
+function wireExportButtons(r) {
+	if (!report) return;
+	const jsonBtn = report.querySelector('.export-json');
+	const mdBtn = report.querySelector('.export-md');
+	const base = exportFileBase(r.domain);
+	if (jsonBtn) {
+		jsonBtn.addEventListener('click', () => {
+			downloadText(`${base}.json`, buildJsonExport(r), 'application/json;charset=utf-8');
+		});
+	}
+	if (mdBtn) {
+		mdBtn.addEventListener('click', () => {
+			downloadText(`${base}.md`, buildMarkdownReport(r), 'text/markdown;charset=utf-8');
+		});
+	}
 }
 
 function mkSection(title, statusText, bodyHtml) {
@@ -1250,6 +1631,11 @@ function detectDnsHostingProviderFromNS(nsList) {
 async function runDiagnosis(domain, opts = {}) {
 	const results = {
 		domain,
+		meta: {
+			timestamp: new Date().toISOString(),
+			resolver: activeDohEndpoint && (activeDohEndpoint.name || activeDohEndpoint.url) ? (activeDohEndpoint.name || activeDohEndpoint.url) : '',
+			records: []
+		},
 		priority: [],
 		registrar: { registrar: '', registrarUrl: '', registrarIana: '', nameservers: [], rdapUrl: '', findings: [] },
 		dnsHosting: { ns: [], provider: '', confidence: '', reason: '', links: [], findings: [] },
@@ -1267,41 +1653,52 @@ async function runDiagnosis(domain, opts = {}) {
 		errors: []
 	};
 
-	try {
-		const { url, json } = await rdapLookupDomain(domain);
-		results.registrar.rdapUrl = url;
-		const x = rdapExtractRegistrar(json);
-		results.registrar.registrar = x.registrar;
-		results.registrar.registrarUrl = x.registrarUrl;
-		results.registrar.registrarIana = x.registrarIana;
-		results.registrar.nameservers = x.nameservers;
+	if (!ENTERPRISE_MODE) {
+		try {
+			const { url, json } = await rdapLookupDomain(domain);
+			results.registrar.rdapUrl = url;
+			const x = rdapExtractRegistrar(json);
+			results.registrar.registrar = x.registrar;
+			results.registrar.registrarUrl = x.registrarUrl;
+			results.registrar.registrarIana = x.registrarIana;
+			results.registrar.nameservers = x.nameservers;
 
-		const lines = [];
-		if (x.registrar) lines.push(`Registrar: ${x.registrar}`);
-		if (x.registrarUrl) lines.push(`Registrar URL: ${x.registrarUrl}`);
-		if (x.registrarIana) lines.push(`Registrar IANA: ${x.registrarIana}`);
-		if (x.nameservers && x.nameservers.length) {
-			for (const ns of x.nameservers.slice(0, 12)) lines.push(`Name Server: ${ns}`);
-			if (x.nameservers.length > 12) lines.push(`Name Server: ... (+${x.nameservers.length - 12})`);
+			const lines = [];
+			if (x.registrar) lines.push(`Registrar: ${x.registrar}`);
+			if (x.registrarUrl) lines.push(`Registrar URL: ${x.registrarUrl}`);
+			if (x.registrarIana) lines.push(`Registrar IANA: ${x.registrarIana}`);
+			if (x.nameservers && x.nameservers.length) {
+				for (const ns of x.nameservers.slice(0, 12)) lines.push(`Name Server: ${ns}`);
+				if (x.nameservers.length > 12) lines.push(`Name Server: ... (+${x.nameservers.length - 12})`);
+			}
+			if (!lines.length) lines.push(tr('RDAPからレジストラ情報を抽出できなかった', 'Could not extract registrar info from RDAP'));
+
+			results.registrar.findings.push(
+				mkFinding(
+					x.registrar ? 'low' : 'med',
+					x.registrar ? tr('レジストラを取得', 'Registrar found') : tr('レジストラ情報が不明', 'Registrar unknown'),
+					tr('RDAP（HTTPS）で取得.環境によってはCORS/ネットワーク制限で失敗する場合がある', 'Fetched via RDAP (HTTPS). May fail due to CORS or network restrictions.'),
+					lines.join('\n') + `\n\nRDAP: ${url}`
+				)
+			);
+		} catch (e) {
+			results.errors.push(`RDAP 取得に失敗: ${String(e)}`);
+			results.registrar.findings.push(
+				mkFinding(
+					'med',
+					tr('レジストラ（WHOIS/RDAP）の取得に失敗', 'Failed to retrieve registrar (WHOIS/RDAP)'),
+					tr('RDAP(HTTPS)の照会がブロック/失敗した可能性.ローカルで whois を実行して確認する', 'RDAP (HTTPS) lookup may be blocked/failed. Verify with local whois.'),
+					`whois ${domain} | egrep -i 'Registrar|Sponsoring Registrar|Registrar URL|Registrar IANA|Name Server'`
+				)
+			);
 		}
-		if (!lines.length) lines.push(tr('RDAPからレジストラ情報を抽出できなかった', 'Could not extract registrar info from RDAP'));
-
+	} else {
 		results.registrar.findings.push(
 			mkFinding(
-				x.registrar ? 'low' : 'med',
-				x.registrar ? tr('レジストラを取得', 'Registrar found') : tr('レジストラ情報が不明', 'Registrar unknown'),
-				tr('RDAP（HTTPS）で取得.環境によってはCORS/ネットワーク制限で失敗する場合がある', 'Fetched via RDAP (HTTPS). May fail due to CORS or network restrictions.'),
-				lines.join('\n') + `\n\nRDAP: ${url}`
-			)
-		);
-	} catch (e) {
-		results.errors.push(`RDAP 取得に失敗: ${String(e)}`);
-		results.registrar.findings.push(
-			mkFinding(
-				'med',
-				tr('レジストラ（WHOIS/RDAP）の取得に失敗', 'Failed to retrieve registrar (WHOIS/RDAP)'),
-				tr('RDAP(HTTPS)の照会がブロック/失敗した可能性.ローカルで whois を実行して確認する', 'RDAP (HTTPS) lookup may be blocked/failed. Verify with local whois.'),
-				`whois ${domain} | egrep -i 'Registrar|Sponsoring Registrar|Registrar URL|Registrar IANA|Name Server'`
+				'low',
+				tr('レジストラ照会を省略', 'Registrar lookup skipped'),
+				tr('EnterpriseモードではRDAP照会を行わず,第三者通信を抑制', 'RDAP lookup is disabled in enterprise mode to reduce third-party requests.'),
+				''
 			)
 		);
 	}
@@ -1356,9 +1753,14 @@ async function runDiagnosis(domain, opts = {}) {
 	// DMARC
 	try {
 		const json = await dohQuery(`_dmarc.${domain}`, 'TXT');
-		const txt = extractTXT(json);
+		const txtRecords = extractTXTRecords(json);
+		const txt = txtRecords.map(r => r.data);
 		const record = firstRecordStartingWith(txt, 'v=DMARC1');
 		results.dmarc.record = record;
+		if (record) {
+			const ttl = (txtRecords.find(r => r.data === record) || {}).ttl ?? null;
+			results.meta.records.push({ name: `_dmarc.${domain}`, type: 'TXT', ttl, value: record });
+		}
 
 		if (!record) {
 			results.dmarc.findings.push(
@@ -1409,6 +1811,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(level, title, detail, `TXT _dmarc.${domain}\n${record}`)
 			);
 		}
+		results.dmarc.findings.push(
+			mkFindingRich(
+				'low',
+				t('dmarc.staged.title'),
+				t('dmarc.staged.detailHtml'),
+				''
+			)
+		);
 	} catch (e) {
 		results.errors.push(`DMARC 取得に失敗: ${String(e)}`);
 		results.dmarc.findings.push(mkFinding('med', tr('DMARCの取得に失敗', 'Failed to retrieve DMARC'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), `dig +short TXT _dmarc.${domain}`));
@@ -1417,9 +1827,16 @@ async function runDiagnosis(domain, opts = {}) {
 	// SPF
 	try {
 		const json = await dohQuery(domain, 'TXT');
-		const txt = extractTXT(json);
-		const spfRecords = txt.filter(x => String(x).toLowerCase().startsWith('v=spf1'));
+		const txtRecords = extractTXTRecords(json);
+		const txt = txtRecords.map(r => r.data);
+		const spfRecordObjs = txtRecords.filter(r => String(r.data).toLowerCase().startsWith('v=spf1'));
+		const spfRecords = spfRecordObjs.map(r => r.data);
 		results.spf.records = spfRecords;
+		if (spfRecordObjs.length) {
+			for (const rec of spfRecordObjs) {
+				results.meta.records.push({ name: domain, type: 'TXT', ttl: rec.ttl ?? null, value: rec.data });
+			}
+		}
 
 		if (spfRecords.length === 0) {
 			results.spf.findings.push(
@@ -1489,10 +1906,26 @@ async function runDiagnosis(domain, opts = {}) {
 			}
 			if (lookup >= 10) {
 				const lookupLabel = tr('推定lookup', 'Estimated lookups');
-				results.spf.findings.push(mkFinding('med', tr('SPF: DNS lookup 上限リスク', 'SPF: DNS lookup limit risk'), tr('include/redirect/exists などで 10 lookup を超えると PermError になる可能性がある', 'If include/redirect/exists pushes lookups beyond 10, SPF may fail with PermError.'), `${lookupLabel}=${lookup}\n${spf}`));
-						}
+				results.spf.findings.push(mkFinding('med', t('spf.lookup.limit.title'), t('spf.lookup.limit.detail'), `${lookupLabel}=${lookup}\n${spf}`));
+			}
 			if (maxSeg > 250) {
 				results.spf.findings.push(mkFinding('med', tr('SPF: 文字列が長い', 'SPF: record is long'), tr('TXTは分割されることがある.DNS応答の結合や設定画面の分割仕様に注意', 'TXT records may be split. Ensure your tooling/UI correctly joins segments.'), `maxSegmentLen≈${maxSeg}\n${spf}`));
+			}
+			try {
+				const expansion = await buildSpfExpansion(domain, spf, { maxDepth: 4, maxNodes: 24 });
+				if (expansion.lines.length) {
+					const lookupLabel = tr('推定lookup', 'Estimated lookups');
+					const evidence = [`${lookupLabel}=${lookup}`, ...expansion.lines].join('\n');
+					results.spf.findings.push(mkFinding('low', t('spf.tree.title'), t('spf.tree.detail'), evidence));
+				}
+				if (expansion.loops && expansion.loops.length) {
+					results.spf.findings.push(mkFinding('med', t('spf.loop.title'), t('spf.loop.detail'), expansion.loops.join('\n')));
+				}
+				if (expansion.truncated) {
+					results.spf.findings.push(mkFinding('low', t('spf.tree.truncated.title'), t('spf.tree.truncated.detail'), ''));
+				}
+			} catch (_) {
+				// ignore SPF expansion errors
 			}
 		}
 	} catch (e) {
@@ -1502,40 +1935,60 @@ async function runDiagnosis(domain, opts = {}) {
 
 	// DKIM
 	try {
-		const candidates = ['selector1', 'selector2', 'default', 'google', 'protonmail', 'protonmail2'];
+		const candidates = DKIM_SELECTOR_CANDIDATES;
 		const found = [];
 		const cnameOnly = [];
 		for (const sel of candidates) {
 			const name = `${sel}._domainkey.${domain}`;
-			let txt = [];
-			let cn = [];
+			let txtRecords = [];
+			let cnameInfo = { chain: [], target: '', loop: false, truncated: false };
+			let delegatedTxtRecord = null;
 			try {
 				const jTxt = await dohQuery(name, 'TXT');
-				txt = extractTXT(jTxt);
+				txtRecords = extractTXTRecords(jTxt);
 			} catch (_) { /* ignore */ }
-			try {
-				const jCname = await dohQuery(name, 'CNAME');
-				cn = extractCNAME(jCname);
-			} catch (_) { /* ignore */ }
+			const dkimTxtRecord = firstTxtRecordStartingWith(txtRecords, 'v=DKIM1');
+			const dkimTxt = dkimTxtRecord ? dkimTxtRecord.data : '';
+			if (dkimTxtRecord) {
+				results.meta.records.push({ name, type: 'TXT', ttl: dkimTxtRecord.ttl ?? null, value: dkimTxtRecord.data });
+			}
 
-			const dkimTxt = firstRecordStartingWith(txt, 'v=DKIM1');
-			let cnTarget = (cn && cn.length) ? (cn[0] || '') : '';
-			let delegatedTxt = '';
-			if (!dkimTxt && cnTarget) {
-				try {
-					const jDelegated = await dohQuery(cnTarget, 'TXT');
-					const delegated = extractTXT(jDelegated);
-					delegatedTxt = firstRecordStartingWith(delegated, 'v=DKIM1');
-				} catch (_) {
-					delegatedTxt = '';
+			if (!dkimTxt) {
+				cnameInfo = await resolveCnameChain(name, { maxDepth: 3 });
+				if (cnameInfo.chain.length) {
+					for (const hop of cnameInfo.chain) {
+						results.meta.records.push({ name: hop.from, type: 'CNAME', ttl: hop.ttl ?? null, value: hop.to });
+					}
+				}
+				if (cnameInfo.target) {
+					try {
+						const jDelegated = await dohQuery(cnameInfo.target, 'TXT');
+						const delegatedRecords = extractTXTRecords(jDelegated);
+						delegatedTxtRecord = firstTxtRecordStartingWith(delegatedRecords, 'v=DKIM1');
+						if (delegatedTxtRecord) {
+							results.meta.records.push({ name: cnameInfo.target, type: 'TXT', ttl: delegatedTxtRecord.ttl ?? null, value: delegatedTxtRecord.data });
+						}
+					} catch (_) {
+						delegatedTxtRecord = null;
+					}
 				}
 			}
 
+			const delegatedTxt = delegatedTxtRecord ? delegatedTxtRecord.data : '';
+			const cnTarget = cnameInfo.target || '';
+
 			if (dkimTxt || delegatedTxt) {
-				found.push({ selector: sel, name, txt: dkimTxt || '', cn: cnTarget, delegatedTxt });
+				found.push({
+					selector: sel,
+					name,
+					txt: dkimTxt || '',
+					cn: cnTarget,
+					delegatedTxt,
+					cnameChain: cnameInfo.chain || []
+				});
 			} else if (cnTarget) {
 				// Avoid false positives: a CNAME alone doesn't guarantee DKIM is correctly configured.
-				cnameOnly.push({ selector: sel, name, cn: cnTarget });
+				cnameOnly.push({ selector: sel, name, cn: cnTarget, cnameChain: cnameInfo.chain || [] });
 			}
 		}
 
@@ -1550,17 +2003,7 @@ async function runDiagnosis(domain, opts = {}) {
 						'med',
 						t('dkim.cnameDelegationDetectedUnverified.title'),
 						t('dkim.cnameDelegationDetectedUnverified.detail'),
-						cnameOnly.map(x => `CNAME ${x.name} -> ${x.cn}`).join('\n')
-					)
-				);
-				// If CNAME delegation exists, don't treat DKIM as fully missing.
-				// Verification may still require checking sender settings or message headers.
-				results.dkim.findings.push(
-					mkFinding(
-						'med',
-						t('dkim.recommendVerifyRealMessage.title'),
-						t('dkim.recommendVerifyRealMessage.detail'),
-						''
+						cnameOnly.map(x => formatCnameChain(x.cnameChain || []) || `CNAME ${x.name} -> ${x.cn}`).join('\n')
 					)
 				);
 			}
@@ -1568,19 +2011,20 @@ async function runDiagnosis(domain, opts = {}) {
 				results.dkim.findings.push(
 					mkFinding(
 						'high',
-						tr('DKIM の公開キーが見つからない', 'DKIM public key not found'),
-						tr('送信基盤側でDKIM署名が有効でも,公開キーが無いと検証できない.Microsoft 365 / Google / 送信SaaS の設定を確認', 'Even if DKIM signing is enabled, verification requires a published public key. Check Microsoft 365 / Google / your sending SaaS settings.'),
-						`dig +short TXT selector1._domainkey.${domain}`
+						tr('DKIM の公開キーが確認できない', 'DKIM public key not confirmed'),
+						tr('一般的な selector（selector1/selector2/default/google）の TXT/CNAME では v=DKIM1 を確認できなかった.DKIM は <selector>._domainkey.<your-domain> 配下に公開し,apex の TXT/SPF に DKIM が出ないのは仕様.Microsoft 365 は selector1/selector2 の CNAME が多く,Google Workspace は google._domainkey の TXT が一般的.送信基盤の設定で実際の selector を確認.※DKIM selector は DNS から列挙できないため,カスタム selector だと本ツールでは検出できず FN の可能性がある', 'No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.'),
+						dkimLookupHints(domain)
 					)
 				);
 			}
 		} else {
 			for (const x of found) {
+				const cnameChainText = formatCnameChain(x.cnameChain || []);
 				const evidence = x.txt
 					? `TXT ${x.name}\n${x.txt}`
 					: (x.delegatedTxt
-						? `CNAME ${x.name}\n${x.cn}\n\nTXT ${x.cn}\n${x.delegatedTxt}`
-						: `CNAME ${x.name}\n${x.cn}`);
+						? `${cnameChainText}\n\nTXT ${x.cn}\n${x.delegatedTxt}`.trim()
+						: `${cnameChainText || `CNAME ${x.name} -> ${x.cn}`}`);
 				let detail = x.txt
 					? tr('DKIMキー(TXT)が存在', 'DKIM key (TXT) present')
 					: (x.delegatedTxt
@@ -1600,14 +2044,22 @@ async function runDiagnosis(domain, opts = {}) {
 						'low',
 						t('dkim.cnameDelegationUnverified.title'),
 						t('dkim.cnameDelegationUnverified.detail'),
-						cnameOnly.map(x => `CNAME ${x.name} -> ${x.cn}`).join('\n')
+						cnameOnly.map(x => formatCnameChain(x.cnameChain || []) || `CNAME ${x.name} -> ${x.cn}`).join('\n')
 					)
 				);
 			}
 		}
+		results.dkim.findings.push(
+			mkFinding(
+				'low',
+				t('dkim.messageUnverified.title'),
+				t('dkim.messageUnverified.detail'),
+				''
+			)
+		);
 	} catch (e) {
 		results.errors.push(`DKIM 取得に失敗: ${String(e)}`);
-		results.dkim.findings.push(mkFinding('med', tr('DKIMの取得に失敗', 'Failed to retrieve DKIM'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), `dig +short TXT selector1._domainkey.${domain}`));
+		results.dkim.findings.push(mkFinding('med', tr('DKIMの取得に失敗', 'Failed to retrieve DKIM'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), dkimLookupHints(domain)));
 	}
 
 	// BIMI
@@ -1615,20 +2067,23 @@ async function runDiagnosis(domain, opts = {}) {
 		const candidates = [`default._bimi.${domain}`, `_bimi.${domain}`];
 		let record = '';
 		let usedName = '';
-		let lastTxt = [];
+		let recordInfo = null;
 		for (const name of candidates) {
 			const json = await dohQuery(name, 'TXT');
-			const txt = extractTXT(json);
-			lastTxt = txt;
-			const r = firstRecordStartingWith(txt, 'v=BIMI1');
+			const txtRecords = extractTXTRecords(json);
+			const r = firstTxtRecordStartingWith(txtRecords, 'v=BIMI1');
 			if (r) {
-				record = r;
+				record = r.data;
 				usedName = name;
+				recordInfo = { name, ttl: r.ttl ?? null, value: r.data };
 				break;
 			}
 		}
 		results.bimi.record = record;
 		results.bimi.name = usedName || candidates[0];
+		if (recordInfo) {
+			results.meta.records.push({ name: recordInfo.name, type: 'TXT', ttl: recordInfo.ttl, value: recordInfo.value });
+		}
 
 		if (!record) {
 			results.bimi.findings.push(
@@ -1660,9 +2115,13 @@ async function runDiagnosis(domain, opts = {}) {
 			const safeA = sanitizeUrl(tags.a);
 			const aLower = String(tags.a || '').toLowerCase();
 			const aIsKnownNonUrl = (aLower === 'self' || aLower === 'none');
+			const allowExternalBimiFetch = !ENTERPRISE_MODE;
 
 			// --- BIMI additional checks (best-effort; may be limited by CORS) ---
-			if (tags.l && String(tags.l).toLowerCase().startsWith('https://') && safeLogo) {
+			if (!allowExternalBimiFetch && tags.l) {
+				extra.push(tr('外部ロゴ取得はEnterpriseモードで無効', 'External logo fetch is disabled in enterprise mode.'));
+			}
+			if (allowExternalBimiFetch && tags.l && String(tags.l).toLowerCase().startsWith('https://') && safeLogo) {
 				if (!looksLikeSvgUrl(tags.l)) {
 					level = 'med';
 					problems.push(tr('l= はSVG（.svg）を指すのが一般的', 'l= typically points to an SVG (.svg)'));
@@ -1819,16 +2278,24 @@ async function runDiagnosis(domain, opts = {}) {
 	// MTA-STS / TLS-RPT
 	try {
 		const jSts = await dohQuery(`_mta-sts.${domain}`, 'TXT');
-		const stsTxt = extractTXT(jSts);
-		results.mta_sts.record = firstRecordStartingWith(stsTxt, 'v=STSv1');
+		const stsTxtRecords = extractTXTRecords(jSts);
+		const stsRecord = firstTxtRecordStartingWith(stsTxtRecords, 'v=STSv1');
+		results.mta_sts.record = stsRecord ? stsRecord.data : '';
+		if (stsRecord) {
+			results.meta.records.push({ name: `_mta-sts.${domain}`, type: 'TXT', ttl: stsRecord.ttl ?? null, value: stsRecord.data });
+		}
 	} catch (_) {
 		results.mta_sts.record = '';
 	}
 
 	try {
 		const jTls = await dohQuery(`_smtp._tls.${domain}`, 'TXT');
-		const tlsTxt = extractTXT(jTls);
-		results.mta_sts.tlsrpt = firstRecordStartingWith(tlsTxt, 'v=TLSRPTv1');
+		const tlsTxtRecords = extractTXTRecords(jTls);
+		const tlsRecord = firstTxtRecordStartingWith(tlsTxtRecords, 'v=TLSRPTv1');
+		results.mta_sts.tlsrpt = tlsRecord ? tlsRecord.data : '';
+		if (tlsRecord) {
+			results.meta.records.push({ name: `_smtp._tls.${domain}`, type: 'TXT', ttl: tlsRecord.ttl ?? null, value: tlsRecord.data });
+		}
 	} catch (_) {
 		results.mta_sts.tlsrpt = '';
 	}
@@ -2129,6 +2596,33 @@ function renderResults(r) {
 		</div>`
 		: '';
 
+	const meta = r.meta || {};
+	const metaTimestamp = meta.timestamp || '';
+	const metaResolver = meta.resolver || t('report.repro.resolverUnknown');
+	const metaRecords = Array.isArray(meta.records) ? meta.records : [];
+	const recordLines = metaRecords.map(rec => {
+		const ttl = formatTtl(rec.ttl);
+		const value = rec.value ? `\n${rec.value}` : '';
+		return `${rec.name} ${rec.type} ttl=${ttl}${value}`;
+	});
+	const recordHtml = recordLines.length
+		? `<div class="mono tiny">${esc(recordLines.join('\n\n'))}</div>`
+		: `<div class="muted">${esc(t('report.repro.none'))}</div>`;
+	const reproHtml = `
+		<div class="card p-16">
+			<div class="mini-title m-0">${esc(t('report.repro.title'))}</div>
+			<div class="muted">${esc(t('report.repro.time'))}: <span class="mono mono-inline">${esc(metaTimestamp || t('label.noneParen'))}</span></div>
+			<div class="muted">${esc(t('report.repro.resolver'))}: <span class="mono mono-inline">${esc(metaResolver || t('label.noneParen'))}</span></div>
+			<div class="mini-title mt-10">${esc(t('report.repro.records'))}</div>
+			${recordHtml}
+			<div class="export-actions">
+				<button type="button" class="btn-ghost export-json">${esc(t('report.export.json'))}</button>
+				<button type="button" class="btn-ghost export-md">${esc(t('report.export.md'))}</button>
+			</div>
+			<div class="tiny muted">${esc(t('report.export.note'))}</div>
+		</div>
+	`;
+
 	setSafeInnerHTML(report, `
 		<div class="mini-title m-0-0-8">${esc(t('report.resultsTitle'))} <span class="status">${esc(r.domain)}</span></div>
 		<div class="score-banner">
@@ -2141,6 +2635,7 @@ function renderResults(r) {
 		<div class="score-breakdown">${chipHtml}</div>
 		${topHtml}
 		${err}
+		${reproHtml}
 		<div class="grid two mt-12">
 			${mkSection('DMARC', r.dmarc && r.dmarc.record ? statusText('configured') : statusText('missing'), dmarcBody)}
 			${mkSection('SPF', (r.spf && r.spf.records && r.spf.records.length) ? `TXT ${r.spf.records.length}` : statusText('missing'), spfBody)}
@@ -2163,6 +2658,8 @@ function renderResults(r) {
 		</div>
 		<p class="footnote">${esc(t('report.publicDnsOnlyFootnote'))}</p>
 	`);
+
+	wireExportButtons(r);
 }
 
 async function handleSubmit(event, deepFlag) {
@@ -2173,6 +2670,14 @@ async function handleSubmit(event, deepFlag) {
 		setSafeInnerHTML(report, `<div class="finding med"><strong>${esc(tr('入力エラー', 'Input error'))}</strong><div class="muted">${esc(tr('ドメイン名（例: example.com）を入力する', 'Enter a domain name (e.g. example.com).'))}</div></div>`);
 		return;
 	}
+	const doh = getSelectedDohEndpoint();
+	if (doh && doh.error) {
+		if (resolverError) resolverError.textContent = doh.error;
+		if (resolverCustom && resolverSelect && resolverSelect.value === 'custom') resolverCustom.focus();
+		return;
+	}
+	activeDohEndpoint = doh;
+	if (resolverError) resolverError.textContent = '';
 
 	setSafeInnerHTML(report, `
 		<div class="status">${esc(t('report.checking'))}: ${esc(domain)}</div>
@@ -2211,7 +2716,7 @@ async function handleSubmit(event, deepFlag) {
 		setSafeInnerHTML(report, `
 			<div class="finding high"><strong>${esc(tr('診断に失敗', 'Check failed'))}</strong><div class="muted">${esc(String(e))}</div></div>
 			<div class="mini-title">${esc(tr('代替', 'Alternative'))}</div>
-			<div class="mono">dig +short TXT _dmarc.${esc(domain)}\ndig +short TXT ${esc(domain)}\ndig +short TXT selector1._domainkey.${esc(domain)}</div>
+			<div class="mono">dig +short TXT _dmarc.${esc(domain)}\ndig +short TXT ${esc(domain)}\n${esc(dkimLookupHints(domain))}</div>
 		`);
 	}
 

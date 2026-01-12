@@ -31,6 +31,8 @@
   "DKIM delegated via CNAME (v=DKIM1 found at target)": "DKIM didelegasikan via CNAME (v=DKIM1 ditemukan di target)",
   "DKIM key (TXT) present": "Kunci DKIM (TXT) ada",
   "DKIM public key not found": "Kunci publik DKIM tidak ditemukan",
+  "DKIM public key not confirmed": "Kunci publik DKIM belum terkonfirmasi",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "v=DKIM1 tidak ditemukan pada selector umum (selector1/selector2/default/google) melalui TXT/CNAME. DKIM dipublikasikan di <selector>._domainkey.<your-domain> dan secara desain tidak muncul pada TXT/SPF apex. Microsoft 365 sering menggunakan CNAME (selector1/selector2) dan Google Workspace sering menggunakan TXT (mis. google._domainkey). Konfirmasi selector sebenarnya di pengaturan pengirim Anda. Catatan: selector DKIM tidak dapat dienumerasi lewat DNS, sehingga selector kustom dapat menyebabkan false negative pada alat ini.",
   "DKIM unverified/missing": "DKIM belum terverifikasi/tidak ada",
   "DMARC is configured. Review staged rollout, exceptions, and alignment.": "DMARC sudah dikonfigurasi. Tinjau rollout bertahap, pengecualian, dan alignment.",
   "DMARC is p=none": "DMARC adalah p=none",

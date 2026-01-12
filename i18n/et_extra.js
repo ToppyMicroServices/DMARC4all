@@ -31,6 +31,8 @@
   "DKIM delegated via CNAME (v=DKIM1 found at target)": "DKIM delegeeritud CNAME kaudu (v=DKIM1 leiti sihtkohast)",
   "DKIM key (TXT) present": "DKIM võti (TXT) olemas",
   "DKIM public key not found": "DKIM avalikku võtit ei leitud",
+  "DKIM public key not confirmed": "DKIM avalik võti pole kinnitatud",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "Üldiste selektorite (selector1/selector2/default/google) TXT/CNAME kaudu v=DKIM1 ei leitud. DKIM avaldatakse <selector>._domainkey.<your-domain> all ja see ei ilmu apex TXT/SPF-is (see on ootuspärane). Microsoft 365 kasutab sageli CNAME-e (selector1/selector2) ja Google Workspace sageli TXT-i (nt google._domainkey). Kontrolli tegelikku selektorit saatja seadetes. Märkus: DKIM selektoreid ei saa DNS-ist loetleda, seega võivad kohandatud selektorid selles tööriistas anda valenegatiive.",
   "DKIM unverified/missing": "DKIM kontrollimata/puudub",
   "DMARC is configured. Review staged rollout, exceptions, and alignment.": "DMARC on seadistatud. Vaata üle etapiviisiline kasutuselevõtt, erandid ja alignment.",
   "DMARC is p=none": "DMARC on p=none",

@@ -31,6 +31,8 @@
   "DKIM delegated via CNAME (v=DKIM1 found at target)": "DKIM 通过 CNAME 委派（在目标处找到 v=DKIM1）",
   "DKIM key (TXT) present": "存在 DKIM 密钥（TXT）",
   "DKIM public key not found": "未找到 DKIM 公钥",
+  "DKIM public key not confirmed": "DKIM 公钥未确认",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "在常见 selector（selector1/selector2/default/google）上通过 TXT/CNAME 未发现 v=DKIM1。DKIM 发布在 <selector>._domainkey.<your-domain> 下，按设计不会出现在 apex 的 TXT/SPF 中。Microsoft 365 通常使用 CNAME（selector1/selector2），Google Workspace 通常使用 TXT（例如 google._domainkey）。请在发送方设置中确认实际 selector。注意：DKIM selector 无法通过 DNS 枚举，因此自定义 selector 可能导致本工具出现假阴性。",
   "DKIM unverified/missing": "DKIM 未验证/缺失",
   "DMARC is configured. Review staged rollout, exceptions, and alignment.": "DMARC 已配置.请检查分阶段推进,例外情况与对齐（alignment）.",
   "DMARC is p=none": "DMARC 为 p=none",

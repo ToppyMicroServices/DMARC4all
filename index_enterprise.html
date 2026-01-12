@@ -1,15 +1,13 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" data-enterprise="true">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Toppy DNS / Email Auth Quick Check</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" integrity="sha256-0kaYYq3qitkkVZpP/6uKTJwfTpqFNM6OHDbsaYzw9Uw=" crossorigin="anonymous"></script>
+  <script defer src="vendor/dompurify.min.js"></script>
   <script defer src="i18n/ja.js"></script>
   <script defer src="i18n/en.js"></script>
   <script defer src="i18n/es.js"></script>
@@ -39,7 +37,7 @@
 <body>
   <div class="shell">
     <div class="brandbar" aria-label="ToppyMicroServices">
-      <img src="https://www.toppymicros.com/favicon.ico" alt="ToppyMicroServices">
+      <img src="assets/favicon.ico" alt="ToppyMicroServices">
       <span class="brand-name">ToppyMicroServices</span>
       <div class="brand-actions">
         <nav class="lang-switch" aria-label="Language">
@@ -120,7 +118,7 @@
                 ／
                 <a href="https://dmarc4all.toppymicros.com/#rua" target="_blank" rel="noopener" data-i18n="rua.link.about">RUAについて</a>
                 ／
-                <a href="rua_service.html" data-i18n="rua.link.spec">RUAサービス仕様</a>
+                <a href="rua_service_enterprise.html" data-i18n="rua.link.spec">RUAサービス仕様</a>
               </p>
               <details class="tiny muted">
                 <summary>DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>

@@ -75,6 +75,8 @@
   "Sakura Internet: Support": "Sakura Internet: Support",
   "Xserver: Support": "Xserver: Support",
   "DKIM public key not found": "DKIM public key မတွေ့ပါ",
+  "DKIM public key not confirmed": "DKIM public key ကို မအတည်ပြုနိုင်ပါ",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "TXT/CNAME မှတစ်ဆင့် ပုံမှန် selector (selector1/selector2/default/google) များတွင် v=DKIM1 မတွေ့ပါ။ DKIM ကို <selector>._domainkey.<your-domain> အောက်တွင် ထုတ်ပြန်ထားပြီး apex TXT/SPF မှာတော့ ဒီဇိုင်းအရ မပေါ်ပါ။ Microsoft 365 သည် CNAME (selector1/selector2) ကို မကြာခဏ အသုံးပြုပြီး Google Workspace သည် TXT (ဥပမာ google._domainkey) ကို မကြာခဏ အသုံးပြုသည်။ sender ဆက်တင်တွင် အမှန်တကယ် selector ကို အတည်ပြုပါ။ မှတ်ချက်: DKIM selector များကို DNS မှ စာရင်းထုတ်မရသောကြောင့် custom selector များသည် ဒီကိရိယာတွင် false negative ဖြစ်နိုင်သည်။",
   "Even if DKIM signing is enabled, verification requires a published public key. Check Microsoft 365 / Google / your sending SaaS settings.": "DKIM signing ကို ဖွင့်ထားသော်လည်း verification အတွက် public key ကို DNS တွင် ထုတ်ပြန်ထားရပါမည်။ Microsoft 365 / Google / ပို့ဆောင်ရေး SaaS ဆက်တင်များကို စစ်ဆေးပါ။",
   "DKIM: CNAME present but DKIM not verified": "DKIM: CNAME ရှိသော်လည်း DKIM ကို အတည်မပြုနိုင်ပါ",
   "DKIM: CNAME delegation detected (unverified)": "DKIM: CNAME delegation ကို တွေ့ရှိ (မအတည်ပြုနိုင်)",

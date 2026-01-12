@@ -31,6 +31,8 @@
   "DKIM delegated via CNAME (v=DKIM1 found at target)": "DKIM បញ្ជូនតាម CNAME (រកឃើញ v=DKIM1 នៅគោលដៅ)",
   "DKIM key (TXT) present": "មាន DKIM key (TXT)",
   "DKIM public key not found": "រកមិនឃើញ DKIM public key",
+  "DKIM public key not confirmed": "មិនអាចផ្ទៀងផ្ទាត់ public key DKIM",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "មិនឃើញ v=DKIM1 នៅ selector ទូទៅ (selector1/selector2/default/google) តាម TXT/CNAME។ DKIM ត្រូវបានបោះពុម្ពនៅក្រោម <selector>._domainkey.<your-domain> ហើយតាមលក្ខណៈរចនា វាមិនបង្ហាញនៅ TXT/SPF របស់ apex ទេ។ Microsoft 365 ជាញឹកញាប់ប្រើ CNAME (selector1/selector2) និង Google Workspace ជាញឹកញាប់ប្រើ TXT (ឧ. google._domainkey)។ សូមបញ្ជាក់ selector ពិតនៅក្នុងការកំណត់ sender របស់អ្នក។ ចំណាំ៖ selector DKIM មិនអាចបញ្ជីតាម DNS បានទេ ដូច្នេះ selector ផ្ទាល់ខ្លួនអាចបណ្តាលឲ្យមាន false negative នៅក្នុងឧបករណ៍នេះ។",
   "DKIM unverified/missing": "DKIM មិនទាន់ផ្ទៀងផ្ទាត់/មិនមាន",
   "DMARC is configured. Review staged rollout, exceptions, and alignment.": "DMARC បានកំណត់រួច។ សូមពិនិត្យការបង្ហាញជាដំណាក់កាល ករណីលើកលែង និង alignment។",
   "DMARC is p=none": "DMARC ជា p=none",

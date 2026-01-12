@@ -71,6 +71,8 @@
   "Sakura Internet: Support": "Sakura Internet: 지원",
   "Xserver: Support": "Xserver: 지원",
   "DKIM public key not found": "DKIM 공개키를 찾지 못했습니다",
+  "DKIM public key not confirmed": "DKIM 공개키를 확인하지 못했습니다",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "일반적인 셀렉터(selector1/selector2/default/google)의 TXT/CNAME에서 v=DKIM1을 찾지 못했습니다. DKIM은 <selector>._domainkey.<your-domain>에 게시되며 apex TXT/SPF에는 원래 나타나지 않습니다. Microsoft 365는 보통 CNAME(selector1/selector2)을, Google Workspace는 보통 TXT(예: google._domainkey)을 사용합니다. 발신자 설정에서 실제 셀렉터를 확인하세요. 참고: DKIM 셀렉터는 DNS로 열거할 수 없으므로 사용자 정의 셀렉터는 이 도구에서 false negative를 일으킬 수 있습니다.",
   "Even if DKIM signing is enabled, verification requires a published public key. Check Microsoft 365 / Google / your sending SaaS settings.": "DKIM 서명이 활성화되어도 검증하려면 공개키를 DNS에 게시해야 합니다. Microsoft 365 / Google / 사용 중인 발신 SaaS 설정을 확인하세요.",
   "DKIM: CNAME present but DKIM not verified": "DKIM: CNAME은 있으나 DKIM을 확인하지 못했습니다",
   "DKIM: CNAME delegation detected (unverified)": "DKIM: CNAME 위임 감지(미확인)",

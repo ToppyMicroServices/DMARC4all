@@ -20,9 +20,9 @@ It also includes a DMARC RUA service description page and an operational workflo
 - It queries **public DNS** via DNS-over-HTTPS (DoH) endpoints.
 - No server-side component: input is processed in your browser.
 - Network requests go to:
-  - DoH endpoints (currently: Google DoH)
-  - `cdn.jsdelivr.net` (DOMPurify)
-  - Google Fonts
+  - DoH endpoints (selected in the UI; default: Cloudflare)
+  - `cdn.jsdelivr.net` (DOMPurify, public build only)
+  - Google Fonts (public build only)
   - (Optional) BIMI logo URL (only if it is `https://`)
 
 ## Usage
@@ -90,7 +90,13 @@ Apache License 2.0 (Apache-2.0). See `LICENSE`.
 
 ## Privacy notes (DoH)
 
-This tool sends DNS queries for the entered domain to an external DNS-over-HTTPS (DoH) provider. That provider may log and/or aggregate queries according to its policy. If you want to minimize third-party visibility, run the tool against a DoH endpoint you control, or modify the DoH provider list in `app.js`.
+This tool sends DNS queries for the entered domain to the selected DNS-over-HTTPS (DoH) provider. That provider may log and/or aggregate queries according to its policy. If you want to minimize third-party visibility, select a DoH endpoint you control in the UI, or modify the DoH provider list in `app.js`.
+
+### Enterprise/offline build
+
+- Entry points: `index_enterprise.html`, `rua_service_enterprise.html`
+- External requests are limited to the selected DoH endpoint (no CDN/Google Fonts).
+- RDAP lookups and external BIMI logo fetches are disabled to reduce third-party traffic.
 
 ## Docs
 

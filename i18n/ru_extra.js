@@ -31,6 +31,8 @@
   "DKIM delegated via CNAME (v=DKIM1 found at target)": "DKIM делегирован через CNAME (v=DKIM1 найден в целевом TXT)",
   "DKIM key (TXT) present": "Ключ DKIM (TXT) присутствует",
   "DKIM public key not found": "Публичный ключ DKIM не найден",
+  "DKIM public key not confirmed": "Публичный ключ DKIM не подтверждён",
+  "No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.": "v=DKIM1 не найден на типичных селекторах (selector1/selector2/default/google) через TXT/CNAME. DKIM публикуется в <selector>._domainkey.<your-domain> и по дизайну не появляется в apex TXT/SPF. Microsoft 365 часто использует CNAME (selector1/selector2), а Google Workspace — TXT (например, google._domainkey). Проверьте фактический селектор в настройках отправителя. Примечание: селекторы DKIM нельзя перечислить через DNS, поэтому пользовательские селекторы могут приводить к ложным отрицаниям в этом инструменте.",
   "DKIM unverified/missing": "DKIM не подтверждён/отсутствует",
   "DMARC is configured. Review staged rollout, exceptions, and alignment.": "DMARC настроен. Проверьте поэтапное внедрение, исключения и alignment.",
   "DMARC is p=none": "DMARC: p=none",
