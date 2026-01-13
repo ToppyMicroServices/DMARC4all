@@ -80,9 +80,9 @@
     <section class="hero">
       <p class="pill" data-i18n="hero.pill">DNS Quick 診断（公開DNSのみ）</p>
       <div class="flex flex-center-wrap">
-        <h1 data-i18n="hero.title">業務用メールのなりすまし対策を、公開DNSベースで事前点検</h1>
+        <h1 data-i18n="hero.title">業務用メールのなりすまし対策を,公開DNS情報から簡易チェック</h1>
       </div>
-      <p class="tagline" data-i18n="hero.tagline">ドメイン名を入力 → 公開DNS（SPF/DKIM/DMARC等）を“推定評価”。結果には確度を表示し、確定にはメールヘッダ確認が必要な場合がある。</p>
+      <p class="tagline" data-i18n="hero.tagline"公開DNSに設定されたSPF / DKIM / DMARC 情報をもとに,なりすまし対策の有無を推定評価します</p>
       <p class="tiny muted mt-10" data-i18n="hero.free">完全無料（登録不要）</p>
       <p class="tiny muted mt-4" data-i18n-html="hero.prs.html">PRs for typos are welcome on <a href="https://github.com/thinksyncs/toppy-dns-quickcheck" target="_blank" rel="noopener">GitHub</a>.</p>
       <div class="flex mt-18 z-1">
@@ -118,30 +118,25 @@
                 <p class="tiny muted mt-6" data-i18n="form.resolver.customHint">自前のDoH（HTTPS）を指定できます</p>
               </div>
             </div>
-            <p class="tiny muted" id="resolver-note"></p>
             <p class="tiny text-warn" id="resolver-error"></p>
             <div class="grid">
               <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep">診断を実行</button>
             </div>
-            <p class="tiny" data-i18n="form.note">※ 公開DNSの情報のみを使用し,メールの送受信やサーバーへのアクセスは行いません. </p>
-            <p class="tiny" data-i18n="form.privacy">※プライバシー: このツール自体は個人情報（氏名・メール本文・ログイン情報等）を収集しません. DNS照会は選択したDoH提供者へ送信され,提供者側でログ/統計に利用される可能性があります（各社ポリシー参照）</p>
-            <p class="tiny muted" data-i18n="form.privacyFirst">プライバシー優先: Resolver（DoH）で自前のエンドポイントを選択（またはコードで差し替え）</p>
-            <p class="tiny muted" data-i18n="form.disclaimer">※このページは元々，弊社のDNS設定用に作ったチェックページです. 結果は目安であり最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
-            <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示的に許可を得た範囲でのみ使用すること．</p>
+            <p class="tiny" data-i18n="form.note">※公開DNSのみを参照し,メール送受信やサーバーアクセスは行いません.</p>
+            <p class="tiny" data-i18n="form.privacy">※個人情報は収集しません.DNS照会は選択したDoHリゾルバ（既定: Cloudflare）に送信され,提供者側でログ/統計利用される可能性があります（各社ポリシー参照）.</p>
+            <p class="tiny muted" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
+            <p class="tiny muted" id="resolver-note"></p>
+            <p class="tiny muted" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
+            <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示許可のある範囲でのみ使用してください．</p>
             <div class="mt-10">
               <p class="tiny muted">
                 <strong data-i18n="rua.link.label">RUA集約レポート（DMARC）:</strong>
-                <a href="https://dmarc4all.toppymicros.com/" target="_blank" rel="noopener" data-i18n="rua.link.service">DMARC4all（RUA受信・解析）</a>
-                ／
-                <a href="https://dmarc4all.toppymicros.com/#rua" target="_blank" rel="noopener" data-i18n="rua.link.about">RUAについて</a>
-                ／
-                <a href="rua_service_enterprise.html" data-i18n="rua.link.spec">RUAサービス仕様</a>
+                <a href="rua_service_enterprise.html" data-i18n="rua.link.spec">RUAサービス(無料)の紹介</a>
               </p>
               <details class="tiny muted">
                 <summary data-i18n-html="rua.example.summary.html">DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>
-                <pre class="tiny" style="white-space: pre-wrap; margin-top: 6px;" data-i18n="rua.example.block">Host: _dmarc.example.com
-Type: TXT
-Value: v=DMARC1; p=none; rua=mailto:YOUR-ID@dmarc4all.toppymicros.com</pre>
+                <pre class="tiny" style="white-space: pre-wrap; margin-top: 6px;" data-i18n="rua.example.block">v=DMARC1のTXTに追加:
+rua=mailto:example.com@dmarc4all.toppymicros.com</pre>
                 <p class="tiny muted" style="margin-top: 6px;" data-i18n-html="rua.example.note.html">※既存のDMARC設定（p= / sp= / adkim= / aspf= など）は維持したまま、<code>rua=</code> だけを追加（または更新）する。</p>
               </details>
             </div>

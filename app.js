@@ -857,7 +857,7 @@ function getRuaMailto(domain) {
 	const email = String(cfg.RUA_EMAIL || '').trim();
 	if (email) return `mailto:${applyDomain(email)}`;
 	if (normalizedDomain) return `mailto:${normalizedDomain}@dmarc4all.toppymicros.com`;
-	return 'mailto:YOUR-ID@dmarc4all.toppymicros.com';
+	return 'mailto:example.com@dmarc4all.toppymicros.com';
 }
 
 function mergeRuaValue(existingValue, ruaMailto) {
@@ -888,8 +888,34 @@ function updateDmarcRuaRecord(record, ruaMailto) {
 
 function buildDmarcRuaExampleHtml() {
 	const whyText = t('rua.card.why');
-	const detailHtml = `<div class="tiny">${esc(whyText)}</div>`;
-	return mkFindingRich('low', tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'), detailHtml, '');
+	const specLabel = esc(t('rua.link.spec'));
+	const specUrl = 'rua_service.html';
+	const summaryHtml = t('rua.example.summary.html');
+	const noteHtml = t('rua.example.note.html');
+	const exampleText = esc(t('rua.example.block'));
+
+	const specLink = `<a href="${esc(specUrl)}">${specLabel}</a>`;
+	const linksHtml = `
+		<div class="tiny muted mt-6">
+			${specLink}
+		</div>
+	`;
+	const exampleHtml = `
+		<div class="mini-title mt-10">${summaryHtml}</div>
+		<div class="mono tiny">${exampleText}</div>
+		<div class="tiny muted">${noteHtml}</div>
+	`;
+	const detailHtml = `<div class="tiny">${esc(whyText)}</div>${linksHtml}${exampleHtml}`;
+	const detail = detailJaOr(
+		mkDetail(
+			'RUA集約レポートの受信設定',
+			whyText,
+			'',
+			{ adviceHtml: `${linksHtml}${exampleHtml}` }
+		),
+		detailHtml
+	);
+	return mkFindingRich('low', tr('RUA集約レポート（DMARC）', 'RUA aggregate reports (DMARC)'), detail, '', false);
 }
 
 function spfHasAllQualifier(spf, q) {
@@ -1131,34 +1157,76 @@ function computeOverallScore(r) {
 	return { score: clamp(score, 0, 100), chips, spfScore: spfRes.score, spfChips: spfRes.chips };
 }
 
+function mkDetail(state, reason, advice, options = {}) {
+	return {
+		state,
+		reason,
+		advice,
+		stateHtml: options.stateHtml,
+		reasonHtml: options.reasonHtml,
+		adviceHtml: options.adviceHtml
+	};
+}
+
+function detailJaOr(jaDetail, fallbackDetail) {
+	return isJa() ? jaDetail : fallbackDetail;
+}
+
+function buildFindingDetail(detail, options = {}) {
+	const allowHtml = !!options.allowHtml;
+	const whyLabel = esc(t('label.why'));
+	const stateLabel = esc(t('label.state'));
+	const adviceLabel = esc(t('label.advice'));
+	if (!detail || typeof detail === 'string') {
+		const content = allowHtml ? String(detail || '') : esc(detail || '');
+		return `<div class="muted"><strong>${whyLabel}:</strong> ${content}</div>`;
+	}
+	const lines = [];
+	const pushLine = (label, value, isHtml) => {
+		if (!value) return;
+		lines.push(`<div><strong>${label}:</strong> ${isHtml ? value : esc(value)}</div>`);
+	};
+	if (detail.stateHtml) pushLine(stateLabel, detail.stateHtml, true);
+	else pushLine(stateLabel, detail.state, false);
+	if (detail.reasonHtml) pushLine(whyLabel, detail.reasonHtml, true);
+	else pushLine(whyLabel, detail.reason, false);
+	if (detail.adviceHtml) pushLine(adviceLabel, detail.adviceHtml, true);
+	else pushLine(adviceLabel, detail.advice, false);
+	if (!lines.length) {
+		const content = allowHtml ? '' : '';
+		return `<div class="muted"><strong>${whyLabel}:</strong> ${content}</div>`;
+	}
+	return `<div class="muted">${lines.join('')}</div>`;
+}
+
 function mkFinding(level, title, detail, evidence) {
 	const cls = level === 'high' ? 'finding high' : level === 'med' ? 'finding med' : 'finding low';
 	const ev = evidence ? `<div class="mini-title">${esc(t('label.evidence'))}</div><div class="mono">${esc(evidence)}</div>` : '';
 	const confidence = evidence ? 'high' : 'low';
 	const confLabel = esc(t('label.confidence'));
 	const confText = esc(t(`confidence.${confidence}`));
-	const whyLabel = esc(t('label.why'));
+	const detailHtml = buildFindingDetail(detail, { allowHtml: false });
 	return `
 		<div class="${cls}">
 			<div><strong>${esc(title)}</strong></div>
-			<div class="muted"><strong>${whyLabel}:</strong> ${esc(detail)}</div>
+			${detailHtml}
 			<div class="tiny muted"><strong>${confLabel}:</strong> ${confText}</div>
 			${ev}
 		</div>
 	`;
 }
-function mkFindingRich(level, title, detailHtml, evidence) {
+function mkFindingRich(level, title, detail, evidence, showConfidence = true) {
 	const cls = level === 'high' ? 'finding high' : level === 'med' ? 'finding med' : 'finding low';
 	const ev = evidence ? `<div class="mini-title">${esc(t('label.evidence'))}</div><div class="mono">${esc(evidence)}</div>` : '';
 	const confidence = evidence ? 'high' : 'low';
 	const confLabel = esc(t('label.confidence'));
 	const confText = esc(t(`confidence.${confidence}`));
-	const whyLabel = esc(t('label.why'));
+	const detailHtml = buildFindingDetail(detail, { allowHtml: true });
 	return `
 		<div class="${cls}">
 			<div><strong>${esc(title)}</strong></div>
-			<div class="muted"><strong>${whyLabel}:</strong> ${detailHtml}</div>
-			<div class="tiny muted"><strong>${confLabel}:</strong> ${confText}</div>
+			${detailHtml}
+			${showConfidence ? `<div class="tiny muted"><strong>${confLabel}:</strong> ${confText}</div>` : ''}
 			${ev}
 		</div>
 	`;
@@ -1767,7 +1835,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(
 					'high',
 					tr('DMARC なし（なりすまし耐性が弱い）', 'DMARC missing (weak anti-spoofing)'),
-					tr('DMARCレコードが見つからない.まずは監視用(p=none)で開始し,段階的に強化する', 'No DMARC record found. Start with monitoring (p=none) and tighten gradually.'),
+					detailJaOr(
+						mkDetail(
+							'DMARC未設定',
+							'受信側に方針が伝わらず,なりすまし対策が弱い',
+							'p=none で開始し,段階的に強化する'
+						),
+						tr('DMARCレコードが見つからない.まずは監視用(p=none)で開始し,段階的に強化する', 'No DMARC record found. Start with monitoring (p=none) and tighten gradually.')
+					),
 					`dig +short TXT _dmarc.${domain}`
 				)
 			);
@@ -1775,7 +1850,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(
 					'med',
 					tr('推奨（安全な初手）', 'Recommendation (safe first step)'),
-					tr('p=none で開始し,集計レポート(rua)を受け取れるメールボックスを用意してから quarantine/reject へ段階移行する', 'Start with p=none, set up a mailbox for aggregate reports (rua), then move to quarantine/reject in stages.'),
+					detailJaOr(
+						mkDetail(
+							'導入の初手',
+							'誤判定を抑えながら強化できる',
+							'p=none で rua を受け取り,quarantine/reject へ段階移行'
+						),
+						tr('p=none で開始し,集計レポート(rua)を受け取れるメールボックスを用意してから quarantine/reject へ段階移行する', 'Start with p=none, set up a mailbox for aggregate reports (rua), then move to quarantine/reject in stages.')
+					),
 					isJa()
 						? `例:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1"\n\n検証:\ndig +short TXT _dmarc.${domain}\n\n戻す:\n追加したTXTを削除`
 						: `Example:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1"\n\nVerify:\ndig +short TXT _dmarc.${domain}\n\nRollback:\nRemove the TXT record you added`
@@ -1793,19 +1875,35 @@ async function runDiagnosis(domain, opts = {}) {
 			let level = 'low';
 			const pLabel = p || tr('(不明)', '(unknown)');
 			let title = `DMARC: p=${pLabel}`;
-			let detail = tr('DMARCが設定されている.段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
-			if (p === 'none') { level = 'med'; detail = tr('監視のみ(p=none).集計(rua)を確認しつつ quarantine/reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.'); }
-			if (p === 'quarantine') { level = 'med'; detail = tr('隔離(quarantine).運用影響を確認しつつ reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.'); }
-			if (p === 'reject') { level = 'low'; detail = tr('不整合のメールは拒否に指定されている。sp の明示的な指定を定義することを勧める', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.'); }
+			let legacyDetail = tr('DMARCが設定されている.段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
+			if (p === 'none') { level = 'med'; legacyDetail = tr('監視のみ(p=none).集計(rua)を確認しつつ quarantine/reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.'); }
+			if (p === 'quarantine') { level = 'med'; legacyDetail = tr('隔離(quarantine).運用影響を確認しつつ reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.'); }
+			if (p === 'reject') { level = 'low'; legacyDetail = tr('不整合のメールは拒否に指定されている。sp の明示的な指定を定義することを勧める', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.'); }
 			if (!rua) {
 				level = (level === 'low') ? 'med' : level;
-				detail += isJa()
+				legacyDetail += isJa()
 					? '（rua が無い/空のため,運用上の可視化が弱い）'
 					: ' (rua is missing/empty; operational visibility is limited)';
 			}
 			if (sp && sp.toLowerCase() === 'none') { level = (level === 'low') ? 'med' : level; }
 			if (adkim === 's' || aspf === 's') { /* strict is fine */ }
-			if (pct && pct !== '100') { detail += `（pct=${pct}）`; }
+			if (pct && pct !== '100') { legacyDetail += `（pct=${pct}）`; }
+
+			let advice = '運用方針と例外を確認';
+			if (p === 'none') advice = 'ruaを確認しつつ段階強化';
+			if (p === 'quarantine') advice = '運用影響を見つつrejectを検討';
+			if (p === 'reject') advice = 'sp/例外/アラインメントを確認';
+			if (!rua) advice += ' / rua追加を検討';
+			if (sp && sp.toLowerCase() === 'none') advice += ' / spを見直し';
+			if (pct && pct !== '100') advice += ` / pct=${pct}`;
+			const detail = detailJaOr(
+				mkDetail(
+					`p=${pLabel}`,
+					'DMARC方針が受信時の扱いに直結する',
+					advice
+				),
+				legacyDetail
+			);
 
 			results.dmarc.findings.push(
 				mkFinding(level, title, detail, `TXT _dmarc.${domain}\n${record}`)
@@ -1815,13 +1913,36 @@ async function runDiagnosis(domain, opts = {}) {
 			mkFindingRich(
 				'low',
 				t('dmarc.staged.title'),
-				t('dmarc.staged.detailHtml'),
-				''
+				detailJaOr(
+					mkDetail(
+						'段階導入の推奨ステップ',
+						'誤判定と運用影響を抑えながら強化できる',
+						'',
+						{ adviceHtml: t('dmarc.staged.detailHtml') }
+					),
+					t('dmarc.staged.detailHtml')
+				),
+				'',
+				false
 			)
 		);
 	} catch (e) {
 		results.errors.push(`DMARC 取得に失敗: ${String(e)}`);
-		results.dmarc.findings.push(mkFinding('med', tr('DMARCの取得に失敗', 'Failed to retrieve DMARC'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), `dig +short TXT _dmarc.${domain}`));
+		results.dmarc.findings.push(
+			mkFinding(
+				'med',
+				tr('DMARCの取得に失敗', 'Failed to retrieve DMARC'),
+				detailJaOr(
+					mkDetail(
+						'DMARC取得失敗',
+						'DNS照会に失敗した可能性',
+						'再実行かdigで確認'
+					),
+					tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed')
+				),
+				`dig +short TXT _dmarc.${domain}`
+			)
+		);
 	}
 
 	// SPF
@@ -1843,7 +1964,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(
 					'med',
 					tr('SPF なし', 'SPF missing'),
-					tr('SPFが無いと SPF 単体での送信元制御はできない.送信元（Microsoft 365/Google/各種SaaS）を洗い出してから安全に設計する', 'Without SPF you cannot control senders via SPF alone. Inventory your senders (Microsoft 365/Google/SaaS) and design safely.'),
+					detailJaOr(
+						mkDetail(
+							'SPF未設定',
+							'送信元の制御ができない',
+							'送信元を棚卸ししてSPFを作成'
+						),
+						tr('SPFが無いと SPF 単体での送信元制御はできない.送信元（Microsoft 365/Google/各種SaaS）を洗い出してから安全に設計する', 'Without SPF you cannot control senders via SPF alone. Inventory your senders (Microsoft 365/Google/SaaS) and design safely.')
+					),
 					`dig +short TXT ${domain}`
 				)
 			);
@@ -1851,7 +1979,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(
 					'low',
 					tr('推奨（安全な進め方）', 'Recommendation (safe rollout)'),
-					tr('まず送信元を棚卸し→ include/送信IP を追加→ 最後に ~all/-all を確定する（いきなり -all を入れると正規メールが落ちる可能性）', 'Inventory senders → add include/sender IPs → then finalize ~all/-all. Avoid jumping straight to -all to prevent dropping legitimate mail.'),
+					detailJaOr(
+						mkDetail(
+							'導入の推奨手順',
+							'誤判定を避けて導入できる',
+							'送信元確認→include/IP追加→最後に~all/-all'
+						),
+						tr('まず送信元を棚卸し→ include/送信IP を追加→ 最後に ~all/-all を確定する（いきなり -all を入れると正規メールが落ちる可能性）', 'Inventory senders → add include/sender IPs → then finalize ~all/-all. Avoid jumping straight to -all to prevent dropping legitimate mail.')
+					),
 					isJa()
 						? `検証:\ndig +short TXT ${domain}\n\n戻す:\n追加したTXTを削除 or 以前のTXTへ戻す`
 						: `Verify:\ndig +short TXT ${domain}\n\nRollback:\nRemove the TXT record you added, or restore the previous TXT`
@@ -1862,7 +1997,14 @@ async function runDiagnosis(domain, opts = {}) {
 				mkFinding(
 					'high',
 					tr('SPF が複数（無効/不定の可能性）', 'Multiple SPF records (may be invalid/ambiguous)'),
-					tr('SPFは通常1レコードにまとめる必要がある.複数あると評価が不定になりやすい', 'SPF should usually be consolidated into a single record; multiple records can lead to ambiguous evaluation.'),
+					detailJaOr(
+						mkDetail(
+							'SPFが複数',
+							'評価が不定になりやすい',
+							'1レコードに統合する'
+						),
+						tr('SPFは通常1レコードにまとめる必要がある.複数あると評価が不定になりやすい', 'SPF should usually be consolidated into a single record; multiple records can lead to ambiguous evaluation.')
+					),
 					spfRecords.join('\n')
 				)
 			);
@@ -1877,52 +2019,241 @@ async function runDiagnosis(domain, opts = {}) {
 					mkFinding(
 						'med',
 						tr('SPF: IP直書きのみ（運用リスク）', 'SPF: IP-only (operational risk)'),
-						tr('IP直書きだけのSPFは,送信基盤のIP変更/追加に追随できないと正規メールがFailしやすい.複数SaaS（Microsoft 365/Google/配信サービス等）を使う場合は include/送信経路の棚卸しを推奨.固定IP運用なら,変更管理（追加/廃止時の手順）と段階導入（~all→-all）をセットで運用する', 'IP-only SPF is brittle: if sender IPs change and SPF is not updated, legitimate mail may fail. If you use multiple SaaS senders, prefer include-based design and a sender inventory. If you truly have fixed IPs, pair it with change-management and staged rollout (~all → -all).'),
+						detailJaOr(
+							mkDetail(
+								'IP直書きのみ',
+								'IP変更に弱く誤判定が起きやすい',
+								'include設計か変更管理を整備'
+							),
+							tr('IP直書きだけのSPFは,送信基盤のIP変更/追加に追随できないと正規メールがFailしやすい.複数SaaS（Microsoft 365/Google/配信サービス等）を使う場合は include/送信経路の棚卸しを推奨.固定IP運用なら,変更管理（追加/廃止時の手順）と段階導入（~all→-all）をセットで運用する', 'IP-only SPF is brittle: if sender IPs change and SPF is not updated, legitimate mail may fail. If you use multiple SaaS senders, prefer include-based design and a sender inventory. If you truly have fixed IPs, pair it with change-management and staged rollout (~all → -all).')
+						),
 						spf
 					)
 				);
 			}
 
 			if (spfHasAllQualifier(spf, '+')) {
-				results.spf.findings.push(mkFinding('high', t('spf.all.plus.title'), t('spf.all.plus.detail'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'high',
+						t('spf.all.plus.title'),
+						detailJaOr(
+							mkDetail(
+								'+all',
+								'誰でも送信可能になる',
+								'+allをやめて送信元を限定'
+							),
+							t('spf.all.plus.detail')
+						),
+						spf
+					)
+				);
 			} else if (spfHasAllQualifier(spf, '?')) {
-				results.spf.findings.push(mkFinding('med', t('spf.all.qmark.title'), t('spf.all.qmark.detail'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						t('spf.all.qmark.title'),
+						detailJaOr(
+							mkDetail(
+								'?all',
+								'判定が弱く効果が薄い',
+								'~all/-allへの移行を検討'
+							),
+							t('spf.all.qmark.detail')
+						),
+						spf
+					)
+				);
 			} else if (spfHasAllQualifier(spf, '~')) {
-				results.spf.findings.push(mkFinding('low', t('spf.all.tilde.title'), t('spf.all.tilde.detail'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'low',
+						t('spf.all.tilde.title'),
+						detailJaOr(
+							mkDetail(
+								'~all',
+								'ソフトFailで監視寄り',
+								'運用確認後に-allを検討'
+							),
+							t('spf.all.tilde.detail')
+						),
+						spf
+					)
+				);
 			} else if (spfHasAllQualifier(spf, '-')) {
-				results.spf.findings.push(mkFinding('low', t('spf.all.minus.title'), t('spf.all.minus.detail'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'low',
+						t('spf.all.minus.title'),
+						detailJaOr(
+							mkDetail(
+								'-all',
+								'Failで拒否される',
+								'送信元の漏れがないか確認'
+							),
+							t('spf.all.minus.detail')
+						),
+						spf
+					)
+				);
 			} else {
-				results.spf.findings.push(mkFinding('med', t('spf.all.missing.title'), t('spf.all.missing.detail'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						t('spf.all.missing.title'),
+						detailJaOr(
+							mkDetail(
+								'all指定なし',
+								'評価が曖昧になる',
+								'allを明示する'
+							),
+							t('spf.all.missing.detail')
+						),
+						spf
+					)
+				);
 			}
 
 			if (analysis.ptr) {
-				results.spf.findings.push(mkFinding('med', tr('SPF: ptr を使用', 'SPF: uses ptr'), tr('ptr は推奨されないことが多い（不安定/コスト/誤判定の原因）.可能なら削除/代替を検討', 'ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						tr('SPF: ptr を使用', 'SPF: uses ptr'),
+						detailJaOr(
+							mkDetail(
+								'ptr使用',
+								'不安定/誤判定の原因になりやすい',
+								'削除/代替を検討'
+							),
+							tr('ptr は推奨されないことが多い（不安定/コスト/誤判定の原因）.可能なら削除/代替を検討', 'ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.')
+						),
+						spf
+					)
+				);
 			}
 			if (analysis.exists) {
-				results.spf.findings.push(mkFinding('med', tr('SPF: exists を使用', 'SPF: uses exists'), tr('exists は複雑化しやすい.意図を明確にし,lookup上限に注意する', 'exists can add complexity. Make intent explicit and watch the lookup limit.'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						tr('SPF: exists を使用', 'SPF: uses exists'),
+						detailJaOr(
+							mkDetail(
+								'exists使用',
+								'複雑化しやすい',
+								'必要性を確認しlookup上限に注意'
+							),
+							tr('exists は複雑化しやすい.意図を明確にし,lookup上限に注意する', 'exists can add complexity. Make intent explicit and watch the lookup limit.')
+						),
+						spf
+					)
+				);
 			}
 			if (analysis.redirect) {
-				results.spf.findings.push(mkFinding('low', tr('SPF: redirect を使用', 'SPF: uses redirect'), tr('一元管理に便利だが,lookup上限(10)に注意する', 'Useful for centralized management, but mind the lookup limit (10).'), spf));
+				results.spf.findings.push(
+					mkFinding(
+						'low',
+						tr('SPF: redirect を使用', 'SPF: uses redirect'),
+						detailJaOr(
+							mkDetail(
+								'redirect使用',
+								'lookup上限に影響する',
+								'上限(10)に注意'
+							),
+							tr('一元管理に便利だが,lookup上限(10)に注意する', 'Useful for centralized management, but mind the lookup limit (10).')
+						),
+						spf
+					)
+				);
 			}
 			if (lookup >= 10) {
 				const lookupLabel = tr('推定lookup', 'Estimated lookups');
-				results.spf.findings.push(mkFinding('med', t('spf.lookup.limit.title'), t('spf.lookup.limit.detail'), `${lookupLabel}=${lookup}\n${spf}`));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						t('spf.lookup.limit.title'),
+						detailJaOr(
+							mkDetail(
+								'lookup上限リスク',
+								'PermErrorの恐れがある',
+								'include/redirectを整理'
+							),
+							t('spf.lookup.limit.detail')
+						),
+						`${lookupLabel}=${lookup}\n${spf}`
+					)
+				);
 			}
 			if (maxSeg > 250) {
-				results.spf.findings.push(mkFinding('med', tr('SPF: 文字列が長い', 'SPF: record is long'), tr('TXTは分割されることがある.DNS応答の結合や設定画面の分割仕様に注意', 'TXT records may be split. Ensure your tooling/UI correctly joins segments.'), `maxSegmentLen≈${maxSeg}\n${spf}`));
+				results.spf.findings.push(
+					mkFinding(
+						'med',
+						tr('SPF: 文字列が長い', 'SPF: record is long'),
+						detailJaOr(
+							mkDetail(
+								'SPFが長い',
+								'TXT分割で誤結合の恐れ',
+								'分割仕様を確認'
+							),
+							tr('TXTは分割されることがある.DNS応答の結合や設定画面の分割仕様に注意', 'TXT records may be split. Ensure your tooling/UI correctly joins segments.')
+						),
+						`maxSegmentLen≈${maxSeg}\n${spf}`
+					)
+				);
 			}
 			try {
 				const expansion = await buildSpfExpansion(domain, spf, { maxDepth: 4, maxNodes: 24 });
 				if (expansion.lines.length) {
 					const lookupLabel = tr('推定lookup', 'Estimated lookups');
 					const evidence = [`${lookupLabel}=${lookup}`, ...expansion.lines].join('\n');
-					results.spf.findings.push(mkFinding('low', t('spf.tree.title'), t('spf.tree.detail'), evidence));
+					results.spf.findings.push(
+						mkFinding(
+							'low',
+							t('spf.tree.title'),
+							detailJaOr(
+								mkDetail(
+									'include/redirect展開',
+									'lookup増加やループを可視化',
+									'結果を参考に整理'
+								),
+								t('spf.tree.detail')
+							),
+							evidence
+						)
+					);
 				}
 				if (expansion.loops && expansion.loops.length) {
-					results.spf.findings.push(mkFinding('med', t('spf.loop.title'), t('spf.loop.detail'), expansion.loops.join('\n')));
+					results.spf.findings.push(
+						mkFinding(
+							'med',
+							t('spf.loop.title'),
+							detailJaOr(
+								mkDetail(
+									'参照ループ疑い',
+									'評価が失敗しやすい',
+									'参照チェーンを修正'
+								),
+								t('spf.loop.detail')
+							),
+							expansion.loops.join('\n')
+						)
+					);
 				}
 				if (expansion.truncated) {
-					results.spf.findings.push(mkFinding('low', t('spf.tree.truncated.title'), t('spf.tree.truncated.detail'), ''));
+					results.spf.findings.push(
+						mkFinding(
+							'low',
+							t('spf.tree.truncated.title'),
+							detailJaOr(
+								mkDetail(
+									'展開打ち切り',
+									'深さ/件数の上限に到達',
+									'必要なら参照を整理'
+								),
+								t('spf.tree.truncated.detail')
+							),
+							''
+						)
+					);
 				}
 			} catch (_) {
 				// ignore SPF expansion errors
@@ -1930,7 +2261,21 @@ async function runDiagnosis(domain, opts = {}) {
 		}
 	} catch (e) {
 		results.errors.push(`SPF 取得に失敗: ${String(e)}`);
-		results.spf.findings.push(mkFinding('med', tr('SPFの取得に失敗', 'Failed to retrieve SPF'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), `dig +short TXT ${domain}`));
+		results.spf.findings.push(
+			mkFinding(
+				'med',
+				tr('SPFの取得に失敗', 'Failed to retrieve SPF'),
+				detailJaOr(
+					mkDetail(
+						'SPF取得失敗',
+						'DNS照会に失敗した可能性',
+						'再実行かdigで確認'
+					),
+					tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed')
+				),
+				`dig +short TXT ${domain}`
+			)
+		);
 	}
 
 	// DKIM
@@ -2002,7 +2347,14 @@ async function runDiagnosis(domain, opts = {}) {
 					mkFinding(
 						'med',
 						t('dkim.cnameDelegationDetectedUnverified.title'),
-						t('dkim.cnameDelegationDetectedUnverified.detail'),
+						detailJaOr(
+							mkDetail(
+								'CNAME委任を検出（未確認）',
+								'DNS上で v=DKIM1 を確認できない',
+								'送信基盤の設定やヘッダで確認'
+							),
+							t('dkim.cnameDelegationDetectedUnverified.detail')
+						),
 						cnameOnly.map(x => formatCnameChain(x.cnameChain || []) || `CNAME ${x.name} -> ${x.cn}`).join('\n')
 					)
 				);
@@ -2012,7 +2364,14 @@ async function runDiagnosis(domain, opts = {}) {
 					mkFinding(
 						'high',
 						tr('DKIM の公開キーが確認できない', 'DKIM public key not confirmed'),
-						tr('一般的な selector（selector1/selector2/default/google）の TXT/CNAME では v=DKIM1 を確認できなかった.DKIM は <selector>._domainkey.<your-domain> 配下に公開し,apex の TXT/SPF に DKIM が出ないのは仕様.Microsoft 365 は selector1/selector2 の CNAME が多く,Google Workspace は google._domainkey の TXT が一般的.送信基盤の設定で実際の selector を確認.※DKIM selector は DNS から列挙できないため,カスタム selector だと本ツールでは検出できず FN の可能性がある', 'No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.'),
+						detailJaOr(
+							mkDetail(
+								'DKIMキー未確認',
+								'署名の検証ができない',
+								'送信基盤でselectorを確認し公開'
+							),
+							tr('一般的な selector（selector1/selector2/default/google）の TXT/CNAME では v=DKIM1 を確認できなかった.DKIM は <selector>._domainkey.<your-domain> 配下に公開し,apex の TXT/SPF に DKIM が出ないのは仕様.Microsoft 365 は selector1/selector2 の CNAME が多く,Google Workspace は google._domainkey の TXT が一般的.送信基盤の設定で実際の selector を確認.※DKIM selector は DNS から列挙できないため,カスタム selector だと本ツールでは検出できず FN の可能性がある', 'No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.')
+						),
 						dkimLookupHints(domain)
 					)
 				);
@@ -2036,14 +2395,35 @@ async function runDiagnosis(domain, opts = {}) {
 					if (bits && bits < 1024) detail += trf('（鍵長が短い可能性: ~{bits}bit）', ' (key size may be short: ~{bits}bit)', { bits });
 					else if (bits && bits >= 2048) detail += trf('（鍵長推定: ~{bits}bit）', ' (estimated key size: ~{bits}bit)', { bits });
 				}
-				results.dkim.findings.push(mkFinding('low', `DKIM: ${x.selector}`, detail, evidence));
+				results.dkim.findings.push(
+					mkFinding(
+						'low',
+						`DKIM: ${x.selector}`,
+						detailJaOr(
+							mkDetail(
+								detail,
+								'送信者認証に必要',
+								'鍵長/更新方針を確認'
+							),
+							detail
+						),
+						evidence
+					)
+				);
 			}
 			if (cnameOnly.length) {
 				results.dkim.findings.push(
 					mkFinding(
 						'low',
 						t('dkim.cnameDelegationUnverified.title'),
-						t('dkim.cnameDelegationUnverified.detail'),
+						detailJaOr(
+							mkDetail(
+								'CNAME委任（未確認セレクタあり）',
+								'DNSだけでは署名の有無が確定できない',
+								'送信基盤やヘッダで確認'
+							),
+							t('dkim.cnameDelegationUnverified.detail')
+						),
 						cnameOnly.map(x => formatCnameChain(x.cnameChain || []) || `CNAME ${x.name} -> ${x.cn}`).join('\n')
 					)
 				);
@@ -2053,13 +2433,34 @@ async function runDiagnosis(domain, opts = {}) {
 			mkFinding(
 				'low',
 				t('dkim.messageUnverified.title'),
-				t('dkim.messageUnverified.detail'),
+				detailJaOr(
+					mkDetail(
+						'実メール未検証',
+						'DNSだけでは整合を確定できない',
+						'DKIM-Signatureヘッダで確認'
+					),
+					t('dkim.messageUnverified.detail')
+				),
 				''
 			)
 		);
 	} catch (e) {
 		results.errors.push(`DKIM 取得に失敗: ${String(e)}`);
-		results.dkim.findings.push(mkFinding('med', tr('DKIMの取得に失敗', 'Failed to retrieve DKIM'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), dkimLookupHints(domain)));
+		results.dkim.findings.push(
+			mkFinding(
+				'med',
+				tr('DKIMの取得に失敗', 'Failed to retrieve DKIM'),
+				detailJaOr(
+					mkDetail(
+						'DKIM取得失敗',
+						'DNS照会に失敗した可能性',
+						'再実行かdigで確認'
+					),
+					tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed')
+				),
+				dkimLookupHints(domain)
+			)
+		);
 	}
 
 	// BIMI
