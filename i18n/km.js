@@ -138,7 +138,7 @@
   "report.export.note": "ការនាំចេញមានតែលទ្ធផល DNS សាធារណៈប៉ុណ្ណោះ។",
   "report.export.md.title": "របាយការណ៍ DNS របស់ DMARC4all",
   "report.export.sectionStatus": "ស្ថានភាពផ្នែក",
-  "hero.prs.html": "សូមស្វាគមន៍ PR សម្រាប់កែអក្សរខុសនៅ <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "hero.prs.html": "សូមស្វាគមន៍ PR សម្រាប់កែអក្សរខុសនៅ <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>.",
   "rua.example.summary.html": "ឧទាហរណ៍: បន្ថែម <code>rua=</code> ទៅ DMARC (DMARC4all)",
   "rua.example.block": "បន្ថែមទៅ TXT v=DMARC1:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "ចំណាំ: រក្សាទុកការកំណត់ DMARC ដើម (p=/sp=/adkim=/aspf=/etc.) ហើយបន្ថែម/កែតែ <code>rua=</code> ប៉ុណ្ណោះ។",

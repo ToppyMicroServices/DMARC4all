@@ -138,7 +138,7 @@
   "report.export.note": "Bản xuất chỉ bao gồm kết quả DNS công khai.",
   "report.export.md.title": "Báo cáo DNS DMARC4all",
   "report.export.sectionStatus": "Trạng thái mục",
-  "hero.prs.html": "PR sửa lỗi chính tả rất hoan nghênh trên <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "hero.prs.html": "PR sửa lỗi chính tả rất hoan nghênh trên <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>.",
   "rua.example.summary.html": "Ví dụ: thêm <code>rua=</code> vào DMARC (DMARC4all)",
   "rua.example.block": "Thêm vào TXT v=DMARC1:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "Lưu ý: giữ nguyên các thiết lập DMARC hiện có (p=/sp=/adkim=/aspf=/etc.) và chỉ thêm/cập nhật <code>rua=</code>.",

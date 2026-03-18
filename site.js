@@ -15,6 +15,5 @@
  */
 
 import { registerPwa } from './src/pwa.js';
-import './src/core.js';
 
 registerPwa();

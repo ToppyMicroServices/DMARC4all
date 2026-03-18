@@ -19,6 +19,7 @@ It also includes a DMARC RUA service description page and an operational workflo
 - Optional: DNSBL sender-IP quick check (best-effort)
 - Optional: BIMI lookup (`_bimi.<domain>`), parses `l=` (logo URL) and `a=`
 - MTA-STS / TLS-RPT, MX, CAA, DNSSEC indicators, lightweight HTTPS probes
+- Installable PWA shell for repeat use on desktop/mobile
 - Multi-language UI (language selector)
 
 ## Privacy / Safety
@@ -28,8 +29,8 @@ It also includes a DMARC RUA service description page and an operational workflo
 - No server-side component: input is processed in your browser.
 - Network requests go to:
   - DoH endpoints (selected in the UI; default: Cloudflare)
-  - `cdn.jsdelivr.net` (DOMPurify, public build only)
-  - Google Fonts (public build only)
+  - `rdap.org` (registrar lookup, public build only)
+  - The checked domain itself for lightweight HTTPS reachability probes
   - (Optional) BIMI logo URL (only if it is `https://`)
 
 ## Usage
@@ -60,6 +61,12 @@ Then open:
 6. After the workflow finishes, open the Pages URL shown in the deploy job (or in **Settings → Pages**).
 
 Current public site: https://dmarc4all.toppymicros.com/
+
+### PWA / install
+
+- The public site can be installed as a PWA from supported browsers.
+- The service worker caches the local app shell and translation assets for faster repeat visits.
+- DNS lookups, RDAP lookups, and other live diagnostics still require network access and are not served from cache.
 
 ### Release
 

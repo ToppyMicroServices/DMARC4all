@@ -138,7 +138,7 @@
   "report.export.note": "การส่งออกมีเฉพาะผลจาก DNS สาธารณะเท่านั้น.",
   "report.export.md.title": "รายงาน DNS ของ DMARC4all",
   "report.export.sectionStatus": "สถานะของส่วน",
-  "hero.prs.html": "ยินดีรับ PR แก้คำผิดที่ <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "hero.prs.html": "ยินดีรับ PR แก้คำผิดที่ <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>.",
   "rua.example.summary.html": "ตัวอย่าง: เพิ่ม <code>rua=</code> ให้ DMARC (DMARC4all)",
   "rua.example.block": "เพิ่มใน TXT v=DMARC1:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "หมายเหตุ: คงการตั้งค่า DMARC เดิมไว้ (p=/sp=/adkim=/aspf=/etc.) แล้วเพิ่ม/อัปเดตเฉพาะ <code>rua=</code> เท่านั้น.",

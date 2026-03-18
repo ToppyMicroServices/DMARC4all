@@ -138,7 +138,7 @@
   "report.export.note": "Eksport sisaldab ainult avaliku DNS-i tulemusi.",
   "report.export.md.title": "DMARC4all DNS aruanne",
   "report.export.sectionStatus": "Sektsioonide olek",
-  "hero.prs.html": "Kirjavigade parandamise PR-id on oodatud <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>is.",
+  "hero.prs.html": "Kirjavigade parandamise PR-id on oodatud <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>is.",
   "rua.example.summary.html": "Näide: lisa <code>rua=</code> DMARC kirjale (DMARC4all)",
   "rua.example.block": "Lisa v=DMARC1 TXT-ile:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "Märkus: säilita olemasolevad DMARC seaded (p=/sp=/adkim=/aspf=/etc.) ja lisa/uuenda ainult <code>rua=</code>.",

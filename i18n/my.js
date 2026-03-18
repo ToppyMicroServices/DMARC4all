@@ -138,7 +138,7 @@
   "report.export.note": "ထုတ်ယူမှုတွင် လူထု DNS ရလဒ်များသာ ပါသည်။",
   "report.export.md.title": "DMARC4all DNS အစီရင်ခံစာ",
   "report.export.sectionStatus": "အပိုင်းအခြေအနေ",
-  "hero.prs.html": "စာလုံးအမှား ပြင်ဆင်တဲ့ PR များကို <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> တွင် ကြိုဆိုပါတယ်။",
+  "hero.prs.html": "စာလုံးအမှား ပြင်ဆင်တဲ့ PR များကို <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a> တွင် ကြိုဆိုပါတယ်။",
   "rua.example.summary.html": "ဥပမာ: DMARC တွင် <code>rua=</code> ထည့်ခြင်း (DMARC4all)",
   "rua.example.block": "v=DMARC1 TXT မှာ ထည့်ပါ:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "မှတ်ချက်: မူရင်း DMARC သတ်မှတ်ချက်များ (p=/sp=/adkim=/aspf=/etc.) ကို ထိန်းထားပြီး <code>rua=</code> ကိုသာ ထည့်/ပြင်ပါ။",

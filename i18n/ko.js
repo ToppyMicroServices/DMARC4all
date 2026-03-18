@@ -149,7 +149,7 @@
   "report.export.note": "내보내기는 공개 DNS 결과만 포함합니다.",
   "report.export.md.title": "DMARC4all DNS 보고서",
   "report.export.sectionStatus": "섹션 상태",
-  "hero.prs.html": "오타 수정 PR은 <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>에서 환영합니다.",
+  "hero.prs.html": "오타 수정 PR은 <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>에서 환영합니다.",
   "rua.example.summary.html": "예시: DMARC에 <code>rua=</code> 추가 (DMARC4all)",
   "rua.example.block": "v=DMARC1 TXT에 추가:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "참고: 기존 DMARC 설정(p=/sp=/adkim=/aspf=/etc.)은 유지하고 <code>rua=</code>만 추가/갱신하세요.",

@@ -138,7 +138,7 @@
   "report.export.note": "出力には公開DNSの結果のみが含まれます。",
   "report.export.md.title": "DMARC4all DNS診断レポート",
   "report.export.sectionStatus": "セクションの状態",
-  "hero.prs.html": "誤字修正のPRは <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> で歓迎します。",
+  "hero.prs.html": "誤字修正のPRは <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a> で歓迎します。",
   "rua.example.summary.html": "DMARCに <code>rua=</code> を追加する例（DMARC4all）",
   "rua.example.block": "v=DMARC1のTXTに追加:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "既存のDMARC設定（p= / sp= / adkim= / aspf= など）はそのままにして、<code>rua=</code> だけを追加または更新してください。",

@@ -138,7 +138,7 @@
   "report.export.note": "Ekspor hanya mencakup hasil DNS publik.",
   "report.export.md.title": "Laporan DNS DMARC4all",
   "report.export.sectionStatus": "Status bagian",
-  "hero.prs.html": "PR untuk perbaikan typo dipersilakan di <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "hero.prs.html": "PR untuk perbaikan typo dipersilakan di <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>.",
   "rua.example.summary.html": "Contoh: tambahkan <code>rua=</code> ke DMARC (DMARC4all)",
   "rua.example.block": "Tambahkan ke TXT v=DMARC1:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "Catatan: pertahankan pengaturan DMARC yang ada (p=/sp=/adkim=/aspf=/etc.) dan hanya tambah/perbarui <code>rua=</code>.",

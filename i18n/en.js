@@ -138,7 +138,7 @@
   "report.export.note": "Exports include public DNS results only.",
   "report.export.md.title": "DMARC4all DNS report",
   "report.export.sectionStatus": "Section status",
-  "hero.prs.html": "PRs for typos are welcome on <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a>.",
+  "hero.prs.html": "PRs for typos are welcome on <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a>.",
   "rua.example.summary.html": "Example: add <code>rua=</code> to DMARC (DMARC4all)",
   "rua.example.block": "Add to the v=DMARC1 TXT record:\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "Note: keep existing DMARC settings (p=/sp=/adkim=/aspf=/etc.) and only add/update <code>rua=</code>.",

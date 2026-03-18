@@ -138,7 +138,7 @@
   "report.export.note": "导出仅包含公开 DNS 结果。",
   "report.export.md.title": "DMARC4all DNS 报告",
   "report.export.sectionStatus": "分项状态",
-  "hero.prs.html": "欢迎在 <a href='https://github.com/thinksyncs/toppy-dns-quickcheck' target='_blank' rel='noopener'>GitHub</a> 提交错别字修正 PR。",
+  "hero.prs.html": "欢迎在 <a href='https://github.com/ToppyMicroServices/DMARC4all' target='_blank' rel='noopener'>GitHub</a> 提交错别字修正 PR。",
   "rua.example.summary.html": "示例：在 DMARC 中添加 <code>rua=</code>（DMARC4all）",
   "rua.example.block": "添加到 v=DMARC1 的 TXT：\nrua=mailto:example.com@dmarc4all.toppymicros.com",
   "rua.example.note.html": "注：保留现有 DMARC 设置（p=/sp=/adkim=/aspf=/etc.），仅添加/更新 <code>rua=</code>。",

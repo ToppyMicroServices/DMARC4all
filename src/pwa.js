@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-import { registerPwa } from './src/pwa.js';
-import './src/core.js';
+let pwaRegistered = false;
 
-registerPwa();
+export function registerPwa() {
+	if (pwaRegistered) return;
+	pwaRegistered = true;
+
+	if (!('serviceWorker' in navigator)) return;
+	if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('./sw.js').catch((error) => {
+			console.warn('[pwa] service worker registration failed:', error);
+		});
+	}, { once: true });
+}
