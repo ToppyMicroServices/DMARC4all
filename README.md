@@ -82,6 +82,19 @@ git push origin main --follow-tags
 gh release create v0.1.0 --generate-notes
 ```
 
+### Test
+
+Run the lightweight regression suite with:
+
+```bash
+npm test
+```
+
+This runs:
+
+- Node built-in tests for the extracted JS modules
+- Python `unittest` coverage for the Cloudflare TXT management script
+
 ## DMARC RUA service
 
 - Service page: `rua_service.html`

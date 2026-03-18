@@ -18,8 +18,9 @@ export const LANG_STORAGE_KEY = 'toppy-lang';
 export const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko'];
 
 export function createI18n(options = {}) {
-	const I18N = options.I18N || window.I18N || {};
-	const EXTRA_TR = options.EXTRA_TR || window.EXTRA_TR || {};
+	const browserWindow = typeof window !== 'undefined' ? window : globalThis.window;
+	const I18N = options.I18N || browserWindow?.I18N || {};
+	const EXTRA_TR = options.EXTRA_TR || browserWindow?.EXTRA_TR || {};
 	let currentLang = options.defaultLang || 'ja';
 
 	function t(key) {

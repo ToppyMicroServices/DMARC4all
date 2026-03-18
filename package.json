@@ -1,0 +1,8 @@
+{
+  "name": "dmarc4all",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test && python3 -m unittest discover -s tests -p 'test_*.py'"
+  }
+}
