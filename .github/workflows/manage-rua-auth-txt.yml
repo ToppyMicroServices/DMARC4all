@@ -28,7 +28,7 @@ jobs:
     environment: cloudflare-dns
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify Cloudflare token can read zone
         env:
