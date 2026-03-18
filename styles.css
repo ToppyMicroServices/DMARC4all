@@ -412,3 +412,60 @@ button:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(15, 23,
 .btn-gradient {
   background: linear-gradient(120deg, #22d3ee, #0ea5e9);
 }
+
+.pwa-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: min(420px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.pwa-toast__body {
+  display: grid;
+  gap: 4px;
+  color: #0f172a;
+}
+
+.pwa-toast__body strong {
+  font-size: 14px;
+}
+
+.pwa-toast__body div {
+  color: #475569;
+  font-size: 13px;
+}
+
+.pwa-toast__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pwa-toast__button {
+  min-width: 88px;
+}
+
+@media (max-width: 640px) {
+  .pwa-toast {
+    grid-template-columns: 1fr;
+  }
+
+  .pwa-toast__actions {
+    justify-content: stretch;
+  }
+
+  .pwa-toast__button {
+    flex: 1 1 0;
+  }
+}

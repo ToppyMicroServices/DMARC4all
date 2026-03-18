@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
+const OFFLINE_FALLBACK = '/offline.html';
 
 const PRECACHE_PATHS = [
 	'/',
 	'/index.html',
 	'/index_enterprise.html',
+	'/offline.html',
 	'/rua_service.html',
 	'/rua_service_enterprise.html',
 	'/app.js',
@@ -34,8 +36,12 @@ const PRECACHE_PATHS = [
 	'/rua_config.js',
 	'/rua_i18n.js',
 	'/src/core.js',
+	'/src/diagnose.js',
+	'/src/diagnostics.js',
 	'/src/dom.js',
+	'/src/i18n.js',
 	'/src/pwa.js',
+	'/src/render.js',
 	'/src/safe-html.js',
 	'/i18n/de.js',
 	'/i18n/de_extra.js',
@@ -98,6 +104,12 @@ self.addEventListener('activate', (event) => {
 	);
 });
 
+self.addEventListener('message', (event) => {
+	if (event.data && event.data.type === 'SKIP_WAITING') {
+		self.skipWaiting();
+	}
+});
+
 self.addEventListener('fetch', (event) => {
 	const { request } = event;
 	if (request.method !== 'GET') return;
@@ -121,9 +133,11 @@ async function networkFirst(request) {
 		const response = await fetch(request);
 		cache.put(request, response.clone());
 		return response;
-	} catch (_) {
+	} catch {
 		const cached = await cache.match(request);
 		if (cached) return cached;
+		const offline = await cache.match(OFFLINE_FALLBACK);
+		if (offline) return offline;
 		return cache.match('/index.html');
 	}
 }

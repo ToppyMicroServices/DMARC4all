@@ -66,6 +66,8 @@ Current public site: https://dmarc4all.toppymicros.com/
 
 - The public site can be installed as a PWA from supported browsers.
 - The service worker caches the local app shell and translation assets for faster repeat visits.
+- If the shell is opened without connectivity, it falls back to `offline.html` and explains that live DNS/RDAP checks still need network access.
+- When a new shell is available, the app shows an in-page reload prompt instead of silently staying on an old cache.
 - DNS lookups, RDAP lookups, and other live diagnostics still require network access and are not served from cache.
 
 ### Release
@@ -102,6 +104,7 @@ flowchart LR
 ### Cloudflare DNS authorization TXT
 
 Workflow: `.github/workflows/manage-rua-auth-txt.yml` (`workflow_dispatch`)
+Implementation script: `.github/scripts/manage_rua_auth_txt.py`
 
 - Name: `<customer_domain>._report._dmarc.dmarc4all.toppymicros.com`
 - Type: `TXT`
@@ -143,6 +146,14 @@ This tool sends DNS queries for the entered domain to the selected DNS-over-HTTP
 - Entry points: `index_enterprise.html`, `rua_service_enterprise.html`
 - External requests are limited to the selected DoH endpoint (no CDN/Google Fonts).
 - RDAP lookups and external BIMI logo fetches are disabled to reduce third-party traffic.
+
+## Code Layout
+
+- `src/core.js`: UI wiring, resolver selection, and submit flow
+- `src/diagnose.js`: main diagnosis runner/orchestration
+- `src/diagnostics.js`: DNS/network/protocol helper functions
+- `src/render.js`: findings, report sections, exports, and DNSBL rendering
+- `src/i18n.js`: translation state and helpers
 
 ## Docs
 
