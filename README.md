@@ -6,6 +6,13 @@ This repo is a static site (HTML/CSS/JS). You can open it locally or publish it 
 
 It also includes a DMARC RUA service description page and an operational workflow for managing the required external-destination authorization TXT records on Cloudflare.
 
+## Branch / Release Policy
+
+- Public repo: `main` is the only production branch.
+- GitHub Pages deploys from `main` via `.github/workflows/pages.yml`.
+- Releases are cut from `main` using annotated tags (for example: `v0.1.0`).
+- Keep non-public or experimental work in a separate private remote/repo instead of a public `develop` branch.
+
 ## Features
 
 - DMARC / SPF / DKIM quick checks (with evidence snippets)
@@ -45,13 +52,26 @@ Then open:
 ### GitHub Pages
 
 1. Push this repository to GitHub.
-2. In GitHub: **Settings → Pages**
-3. Set:
+2. Keep `main` as the default branch and production branch.
+3. In GitHub: **Settings → Pages**
+4. Set:
   - **Source**: “GitHub Actions”
-4. Push to `main` (or run **Actions → Deploy static content to Pages** via `workflow_dispatch`).
-5. After the workflow finishes, open the Pages URL shown in the deploy job (or in **Settings → Pages**).
+5. Push to `main` (or run **Actions → Deploy static content to Pages** via `workflow_dispatch`).
+6. After the workflow finishes, open the Pages URL shown in the deploy job (or in **Settings → Pages**).
 
-If your default branch is not `main`, update the workflow trigger in `.github/workflows/pages.yml`.
+Current public site: https://dmarc4all.toppymicros.com/
+
+### Release
+
+Create releases from `main` only.
+
+```bash
+git checkout main
+git pull --ff-only origin main
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin main --follow-tags
+gh release create v0.1.0 --generate-notes
+```
 
 ## DMARC RUA service
 
@@ -63,7 +83,7 @@ If your default branch is not `main`, update the workflow trigger in `.github/wo
 
 ```mermaid
 flowchart LR
-  A[Recipient mail servers] -->|Aggregate reports (XML, zipped)| B[RUA mailbox]
+  A[Recipient mail servers] -- Aggregate reports (XML, zipped) --> B[RUA mailbox]
   B --> C[Intake + quarantine]
   C --> D[XML validation + parse]
   D --> E[Aggregate metrics]
