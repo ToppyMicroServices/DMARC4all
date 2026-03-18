@@ -107,7 +107,11 @@ export function createRenderer(deps) {
 	function prependOkFinding(bodyHtml, ok) {
 		if (!ok) return bodyHtml;
 		const okTitle = tr('設定OK', 'Configured');
-		const okDetail = tr('適切に設定されています', 'Properly configured.');
+		const okDetail = mkDetail(
+			tr('必要な設定を確認済み', 'Required setup confirmed'),
+			tr('この項目で必要な設定が確認できているため、追加の修正は不要です。', 'The required setup for this area is already in place, so no corrective action is needed right now.'),
+			tr('現在は適切に設定されています。', 'It is currently configured appropriately.')
+		);
 		return mkFinding('low', okTitle, okDetail, '') + bodyHtml;
 	}
 

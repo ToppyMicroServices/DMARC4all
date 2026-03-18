@@ -37,7 +37,7 @@ function sanitizeHtml(html) {
 	const s = String(html ?? '');
 	if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
 		return window.DOMPurify.sanitize(s, {
-			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'img', 'button'],
+			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'img', 'button', 'code'],
 			ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel', 'aria-label', 'aria-live', 'src', 'alt', 'loading', 'referrerpolicy', 'type'],
 			ALLOW_DATA_ATTR: false
 		});

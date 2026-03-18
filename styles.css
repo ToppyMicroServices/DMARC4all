@@ -221,6 +221,16 @@ button {
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
 }
 button:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18); }
+button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+  box-shadow: none;
+}
+button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
 .btn-ghost {
   background: #fff;
   color: #0f172a;
@@ -272,6 +282,23 @@ button:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(15, 23,
   margin: 0;
   text-align: left;
   line-height: 1.45;
+}
+.form-notes {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+.form-notes summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  user-select: none;
+}
+.form-notes[open] summary {
+  margin-bottom: 6px;
 }
 .badge-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .badge {

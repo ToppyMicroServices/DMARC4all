@@ -21,6 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d1b2a">
   <title>Toppy DNS / Email Auth Quick Check</title>
+  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -56,7 +57,7 @@
 <body>
   <div class="shell">
     <div class="brandbar" aria-label="ToppyMicroServices">
-      <img src="assets/favicon.ico" alt="ToppyMicroServices">
+      <img src="apple-touch-icon.png" alt="ToppyMicroServices">
       <span class="brand-name">ToppyMicroServices</span>
       <div class="brand-actions">
         <nav class="lang-switch" aria-label="Language">
@@ -126,12 +127,15 @@
             <div class="grid">
               <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep">診断を実行</button>
             </div>
-            <p class="tiny" data-i18n="form.note">※公開DNSのみを参照し,メール送受信やサーバーアクセスは行いません.</p>
-            <p class="tiny" data-i18n="form.privacy">※個人情報は収集しません.DNS照会は選択したDoHリゾルバ（既定: Cloudflare）に送信され,提供者側でログ/統計利用される可能性があります（各社ポリシー参照）.</p>
-            <p class="tiny muted" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
-            <p class="tiny muted" id="resolver-note"></p>
-            <p class="tiny muted" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
-            <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示許可のある範囲でのみ使用してください．</p>
+            <details class="form-notes">
+              <summary data-i18n="form.moreInfo">Usage notes & privacy</summary>
+              <p class="tiny mt-8" data-i18n="form.note">※公開DNSのみを参照し,メール送受信やサーバーアクセスは行いません.</p>
+              <p class="tiny" data-i18n="form.privacy">※個人情報は収集しません.DNS照会は選択したDoHリゾルバ（既定: Cloudflare）に送信され,提供者側でログ/統計利用される可能性があります（各社ポリシー参照）.</p>
+              <p class="tiny muted" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
+              <p class="tiny muted" id="resolver-note"></p>
+              <p class="tiny muted" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
+              <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示許可のある範囲でのみ使用してください．</p>
+            </details>
             <div class="mt-10">
               <p class="tiny muted">
                 <strong data-i18n="rua.link.label">RUA集約レポート（DMARC）:</strong>

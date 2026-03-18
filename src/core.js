@@ -24,6 +24,7 @@ import { createRenderer } from './render.js';
 const {
 	form,
 	report,
+	goDeepBtn,
 	subdomainScan,
 	dnsblCheck,
 	consentCheckbox,
@@ -39,6 +40,7 @@ const {
 
 let lastDiagnosisRun = null;
 let languageRerunInProgress = false;
+let diagnosisInProgress = false;
 
 const DOH_PROVIDERS = [
 	{ id: 'cloudflare', labelKey: 'form.resolver.cloudflare', url: 'https://cloudflare-dns.com/dns-query', kind: 'doh-json' },
@@ -242,12 +244,25 @@ function applyI18n() {
 		if (!key) return;
 		el.textContent = t(key);
 	});
+	document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+		const key = el.getAttribute('data-i18n-html');
+		if (!key) return;
+		setSafeInnerHTML(el, t(key));
+	});
 	document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
 		const key = el.getAttribute('data-i18n-placeholder');
 		if (!key) return;
 		el.setAttribute('placeholder', t(key));
 	});
+	updateDiagnosisButtonState();
 	updateResolverUi();
+}
+
+function updateDiagnosisButtonState() {
+	if (!goDeepBtn) return;
+	goDeepBtn.disabled = diagnosisInProgress;
+	goDeepBtn.setAttribute('aria-busy', diagnosisInProgress ? 'true' : 'false');
+	goDeepBtn.textContent = diagnosisInProgress ? `${t('report.checking')}...` : t('form.deep');
 }
 
 function setLang(lang) {
@@ -326,6 +341,7 @@ async function dohQuery(name, type) {
 
 async function handleSubmit(event, deepFlag) {
 	if (event) event.preventDefault();
+	if (diagnosisInProgress) return;
 	const raw = document.getElementById('domain').value;
 	const domain = normalizeDomain(raw);
 	if (!domain) {
@@ -340,6 +356,9 @@ async function handleSubmit(event, deepFlag) {
 	}
 	activeDohEndpoint = doh;
 	if (resolverError) resolverError.textContent = '';
+	diagnosisInProgress = true;
+	updateDiagnosisButtonState();
+	if (form) form.setAttribute('aria-busy', 'true');
 
 	setSafeInnerHTML(report, `
 		<div class="status">${esc(t('report.checking'))}: ${esc(domain)}</div>
@@ -379,6 +398,10 @@ async function handleSubmit(event, deepFlag) {
 			<div class="mini-title">${esc(tr('代替', 'Alternative'))}</div>
 			<div class="mono">dig +short TXT _dmarc.${esc(domain)}\ndig +short TXT ${esc(domain)}\n${esc(dkimLookupHints(domain))}</div>
 		`);
+	} finally {
+		diagnosisInProgress = false;
+		updateDiagnosisButtonState();
+		if (form) form.setAttribute('aria-busy', 'false');
 	}
 
 	report.scrollIntoView({ behavior: 'smooth', block: 'start' });
