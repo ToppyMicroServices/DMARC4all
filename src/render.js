@@ -24,7 +24,8 @@ export function createRenderer(deps) {
 		setSafeInnerHTML,
 		statusText,
 		t,
-		tr
+		tr,
+		trf
 	} = deps;
 
 	function mkDetail(state, reason, advice, options = {}) {

@@ -87,6 +87,35 @@ test('detectMailProvider recognizes Google Workspace patterns', () => {
 	assert.ok(result.signals.some((item) => item.includes('Google')));
 });
 
+test('detectMailProvider recognizes generic SaaS mail patterns', () => {
+	const result = detectMailProvider({
+		mxRecords: ['10 mx1.us.mimecast.com.'],
+		spfRecords: ['v=spf1 include:sendgrid.net include:mailgun.org ~all'],
+		dkimSelectors: ['s1'],
+		dkimUsesCname: false
+	});
+
+	assert.equal(result.id, 'generic');
+	assert.equal(result.name, 'Generic / SaaS mail stack');
+	assert.equal(result.confidence, 'Medium');
+	assert.ok(result.signals.some((item) => item.includes('third-party sender')));
+});
+
+test('detectMailProvider falls back when no strong signal exists', () => {
+	const result = detectMailProvider({
+		mxRecords: ['10 mail.example.net.'],
+		spfRecords: ['v=spf1 ip4:192.0.2.10 -all'],
+		dkimSelectors: ['custom2026'],
+		dkimUsesCname: false
+	});
+
+	assert.equal(result.id, 'generic');
+	assert.equal(result.name, 'Generic / custom mail stack');
+	assert.equal(result.confidence, 'Low');
+	assert.match(result.reason, /No strong Microsoft 365 or Google Workspace signal/);
+	assert.deepEqual(result.signals, []);
+});
+
 test('buildSpfExpansion follows includes and surfaces loops', async () => {
 	const records = new Map([
 		['example.com', 'v=spf1 include:_spf.example.net -all'],

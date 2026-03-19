@@ -92,7 +92,8 @@ const renderer = createRenderer({
 	setSafeInnerHTML,
 	statusText,
 	t,
-	tr
+	tr,
+	trf
 });
 
 const {
