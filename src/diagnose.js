@@ -22,6 +22,7 @@ import {
 	checkBimiSvgRequirements,
 	computeOverallScore,
 	detectDnsHostingProviderFromNS,
+	detectMailProvider,
 	dkimLookupHints,
 	extractA,
 	extractAAAA,
@@ -119,6 +120,7 @@ export function createDiagnosisRunner(deps) {
 			},
 			priority: [],
 			fixups: [],
+			mailProvider: { id: 'generic', name: 'Generic / custom mail stack', confidence: 'Low', reason: '', signals: [] },
 			registrar: { registrar: '', registrarUrl: '', registrarIana: '', nameservers: [], rdapUrl: '', findings: [] },
 			dnsHosting: { ns: [], provider: '', confidence: '', reason: '', links: [], findings: [] },
 			subdomains: { enabled: false, found: [], findings: [] },
@@ -1185,7 +1187,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'DMARC',
 						host: `_dmarc.${domain}`,
 						type: 'TXT',
-						value: dmarcValue,
+						currentValue: tr('未設定', 'Not set'),
+						suggestedValue: dmarcValue,
 						copyText: buildTxtFixRecord(`_dmarc.${domain}`, dmarcValue)
 					}],
 					verify: `dig +short TXT _dmarc.${domain}`,
@@ -1213,7 +1216,8 @@ export function createDiagnosisRunner(deps) {
 							label: 'DMARC',
 							host: `_dmarc.${domain}`,
 							type: 'TXT',
-							value: stagedValue,
+							currentValue: results.dmarc.record,
+							suggestedValue: stagedValue,
 							copyText: buildTxtFixRecord(`_dmarc.${domain}`, stagedValue)
 						}],
 						verify: `dig +short TXT _dmarc.${domain}`,
@@ -1236,7 +1240,8 @@ export function createDiagnosisRunner(deps) {
 							label: 'DMARC',
 							host: `_dmarc.${domain}`,
 							type: 'TXT',
-							value: ruaRecord,
+							currentValue: results.dmarc.record,
+							suggestedValue: ruaRecord,
 							copyText: buildTxtFixRecord(`_dmarc.${domain}`, ruaRecord)
 						}],
 						verify: `dig +short TXT _dmarc.${domain}`,
@@ -1260,7 +1265,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'SPF draft',
 						host: domain,
 						type: 'TXT',
-						value: 'v=spf1 include:MAIL-SERVICE-1 include:MAIL-SERVICE-2 ~all',
+						currentValue: tr('未設定', 'Not set'),
+						suggestedValue: 'v=spf1 include:MAIL-SERVICE-1 include:MAIL-SERVICE-2 ~all',
 						copyText: buildTxtFixRecord(domain, 'v=spf1 include:MAIL-SERVICE-1 include:MAIL-SERVICE-2 ~all')
 					}],
 					verify: `dig +short TXT ${domain}`,
@@ -1281,7 +1287,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'SPF draft',
 						host: domain,
 						type: 'TXT',
-						value: draft,
+						currentValue: results.spf.records.join('\n'),
+						suggestedValue: draft,
 						copyText: buildTxtFixRecord(domain, draft)
 					}],
 					verify: `dig +short TXT ${domain}`,
@@ -1302,7 +1309,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'SPF',
 						host: domain,
 						type: 'TXT',
-						value: saferSpf,
+						currentValue: spf,
+						suggestedValue: saferSpf,
 						copyText: buildTxtFixRecord(domain, saferSpf)
 					}],
 					verify: `dig +short TXT ${domain}`,
@@ -1344,7 +1352,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'MTA-STS',
 						host: `_mta-sts.${domain}`,
 						type: 'TXT',
-						value: mtaStsValue,
+						currentValue: tr('未設定', 'Not set'),
+						suggestedValue: mtaStsValue,
 						copyText: buildTxtFixRecord(`_mta-sts.${domain}`, mtaStsValue)
 					}],
 					verify: `dig +short TXT _mta-sts.${domain}\n\nhttps://mta-sts.${domain}/.well-known/mta-sts.txt`,
@@ -1362,7 +1371,8 @@ export function createDiagnosisRunner(deps) {
 						label: 'TLS-RPT',
 						host: `_smtp._tls.${domain}`,
 						type: 'TXT',
-						value: tlsRptValue,
+						currentValue: tr('未設定', 'Not set'),
+						suggestedValue: tlsRptValue,
 						copyText: buildTxtFixRecord(`_smtp._tls.${domain}`, tlsRptValue)
 					}],
 					verify: `dig +short TXT _smtp._tls.${domain}`,
@@ -1373,6 +1383,12 @@ export function createDiagnosisRunner(deps) {
 			// ignore recommendation synthesis failures
 		}
 
+		results.mailProvider = detectMailProvider({
+			mxRecords: results.mx.records,
+			spfRecords: results.spf.records,
+			dkimSelectors: results.dkim.selectors || [],
+			dkimUsesCname: !!results.dkim.usesCname
+		});
 		results.fixups = remediation;
 		return results;
 	};

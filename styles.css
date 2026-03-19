@@ -617,6 +617,12 @@ html[data-resolver-mode="auto"] #resolver-error {
   gap: 12px;
 }
 
+.trust-grid,
+.guide-grid {
+  display: grid;
+  gap: 12px;
+}
+
 .action-card {
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(255, 255, 255, 0.95)),
@@ -696,6 +702,63 @@ html[data-resolver-mode="auto"] #resolver-error {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
+}
+
+.trust-card,
+.provider-card,
+.guide-card {
+  background:
+    linear-gradient(180deg, rgba(15, 118, 110, 0.04), rgba(255, 255, 255, 0.95)),
+    rgba(255, 255, 255, 0.95);
+}
+
+.trust-copy {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.diff-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.diff-block {
+  display: grid;
+  gap: 6px;
+}
+
+.flow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.flow-step {
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.flow-step.active {
+  color: #0f172a;
+  border-color: rgba(15, 118, 110, 0.18);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.flow-step.current {
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.18);
+}
+
+.flow-arrow {
+  color: #94a3b8;
+  font-weight: 700;
 }
 
 .report-grid {
@@ -1031,6 +1094,12 @@ html[data-resolver-mode="auto"] #resolver-error {
   }
 
   .action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trust-grid,
+  .guide-grid,
+  .diff-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

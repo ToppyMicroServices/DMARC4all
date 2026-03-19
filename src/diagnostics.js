@@ -166,6 +166,92 @@ export function extractMX(json) {
 		.map((item) => String(item.data).trim());
 }
 
+export function detectMailProvider({ mxRecords = [], spfRecords = [], dkimSelectors = [], dkimUsesCname = false } = {}) {
+	const mxJoined = (mxRecords || []).join('\n').toLowerCase();
+	const spfJoined = (spfRecords || []).join('\n').toLowerCase();
+	const selectors = (dkimSelectors || []).map((item) => String(item || '').toLowerCase());
+	const signals = [];
+
+	const score = {
+		m365: 0,
+		googleWorkspace: 0,
+		genericSaas: 0
+	};
+
+	if (/protection\.outlook\.com/.test(mxJoined)) {
+		score.m365 += 3;
+		signals.push('MX: protection.outlook.com');
+	}
+	if (/spf\.protection\.outlook\.com/.test(spfJoined)) {
+		score.m365 += 3;
+		signals.push('SPF: include:spf.protection.outlook.com');
+	}
+	if (dkimUsesCname && selectors.some((item) => item === 'selector1' || item === 'selector2')) {
+		score.m365 += 1;
+		signals.push('DKIM: selector1/selector2 via CNAME');
+	}
+
+	if (/(^|\s)\d+\s+aspmx\.l\.google\.com\.?$/m.test(mxJoined) || /google\.com$|googlemail\.com$|aspmx\.l\.google\.com/.test(mxJoined)) {
+		score.googleWorkspace += 3;
+		signals.push('MX: Google Workspace pattern');
+	}
+	if (/_spf\.google\.com/.test(spfJoined)) {
+		score.googleWorkspace += 3;
+		signals.push('SPF: include:_spf.google.com');
+	}
+	if (selectors.includes('google')) {
+		score.googleWorkspace += 1;
+		signals.push('DKIM: google selector');
+	}
+
+	if (/(sendgrid|mailgun|amazonses|spf\.mandrillapp\.com|servers\.mcsv\.net|pphosted|mimecast|barracudanetworks|secureserver\.net|yahoodns|mailchannels)/.test(spfJoined)) {
+		score.genericSaas += 2;
+		signals.push('SPF: third-party sender include');
+	}
+	if (/(mimecast|pphosted|proofpoint|barracuda|messagelabs|mailchannels)/.test(mxJoined)) {
+		score.genericSaas += 2;
+		signals.push('MX: third-party mail gateway');
+	}
+
+	const ranking = Object.entries(score).sort((a, b) => b[1] - a[1]);
+	const [id, value] = ranking[0];
+	if (!value) {
+		return {
+			id: 'generic',
+			name: 'Generic / custom mail stack',
+			confidence: 'Low',
+			reason: 'No strong Microsoft 365 or Google Workspace signal was detected from MX/SPF/DKIM.',
+			signals: []
+		};
+	}
+
+	if (id === 'm365') {
+		return {
+			id,
+			name: 'Microsoft 365',
+			confidence: value >= 5 ? 'High' : 'Medium',
+			reason: 'Likely Microsoft 365 based on MX/SPF/DKIM patterns.',
+			signals
+		};
+	}
+	if (id === 'googleWorkspace') {
+		return {
+			id,
+			name: 'Google Workspace',
+			confidence: value >= 5 ? 'High' : 'Medium',
+			reason: 'Likely Google Workspace based on MX/SPF/DKIM patterns.',
+			signals
+		};
+	}
+	return {
+		id: 'generic',
+		name: 'Generic / SaaS mail stack',
+		confidence: value >= 3 ? 'Medium' : 'Low',
+		reason: 'Third-party mail SaaS signals were detected, but not a single dominant provider.',
+		signals
+	};
+}
+
 export function extractNS(json) {
 	const answer = (json && Array.isArray(json.Answer)) ? json.Answer : [];
 	return answer

@@ -6,6 +6,7 @@ import {
 	checkBimiSvgRequirements,
 	computeOverallScore,
 	detectDnsHostingProviderFromNS,
+	detectMailProvider,
 	normalizeDohUrl,
 	normalizeDomain
 } from '../src/diagnostics.js';
@@ -56,6 +57,34 @@ test('detectDnsHostingProviderFromNS identifies common providers', () => {
 	assert.equal(result.confidence, 'High');
 	assert.match(result.reason, /NS matches: 2\/2/);
 	assert.equal(result.links.length, 1);
+});
+
+test('detectMailProvider recognizes Microsoft 365 patterns', () => {
+	const result = detectMailProvider({
+		mxRecords: ['0 example-com.mail.protection.outlook.com.'],
+		spfRecords: ['v=spf1 include:spf.protection.outlook.com -all'],
+		dkimSelectors: ['selector1', 'selector2'],
+		dkimUsesCname: true
+	});
+
+	assert.equal(result.id, 'm365');
+	assert.equal(result.name, 'Microsoft 365');
+	assert.equal(result.confidence, 'High');
+	assert.ok(result.signals.some((item) => item.includes('outlook')));
+});
+
+test('detectMailProvider recognizes Google Workspace patterns', () => {
+	const result = detectMailProvider({
+		mxRecords: ['1 aspmx.l.google.com.', '5 alt1.aspmx.l.google.com.'],
+		spfRecords: ['v=spf1 include:_spf.google.com ~all'],
+		dkimSelectors: ['google'],
+		dkimUsesCname: false
+	});
+
+	assert.equal(result.id, 'googleWorkspace');
+	assert.equal(result.name, 'Google Workspace');
+	assert.equal(result.confidence, 'High');
+	assert.ok(result.signals.some((item) => item.includes('Google')));
 });
 
 test('buildSpfExpansion follows includes and surfaces loops', async () => {

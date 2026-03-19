@@ -351,7 +351,9 @@ export function createRenderer(deps) {
 		const cardHtml = fixups.slice(0, 6).map((fixup) => {
 			const records = Array.isArray(fixup.records) ? fixup.records : [];
 			const recordHtml = records.map((record) => {
-				const zoneLine = record.copyText || `${record.host} ${record.type} ${record.value}`;
+				const currentValue = record.currentValue || tr('未設定', 'Not set');
+				const suggestedValue = record.suggestedValue || record.value || '';
+				const zoneLine = record.copyText || `${record.host} ${record.type} ${suggestedValue}`;
 				return `
 					<div class="action-record">
 						<div class="action-record-head">
@@ -361,10 +363,19 @@ export function createRenderer(deps) {
 							</div>
 							<span class="status">${esc(record.type || 'TXT')}</span>
 						</div>
-						<div class="mono">${esc(record.value || '')}</div>
+						<div class="diff-grid">
+							<div class="diff-block">
+								<div class="action-detail-label">${esc(tr('現在の値', 'Current'))}</div>
+								<div class="mono">${esc(currentValue)}</div>
+							</div>
+							<div class="diff-block">
+								<div class="action-detail-label">${esc(tr('推奨値', 'Suggested'))}</div>
+								<div class="mono">${esc(suggestedValue)}</div>
+							</div>
+						</div>
 						<div class="action-button-row">
 							<button type="button" class="btn-ghost copy-btn" value="${esc(zoneLine)}">${esc(tr('DNS行をコピー', 'Copy DNS line'))}</button>
-							<button type="button" class="btn-ghost copy-btn" value="${esc(record.value || '')}">${esc(tr('値をコピー', 'Copy value'))}</button>
+							<button type="button" class="btn-ghost copy-btn" value="${esc(suggestedValue)}">${esc(tr('値をコピー', 'Copy value'))}</button>
 						</div>
 					</div>
 				`;
@@ -413,6 +424,122 @@ export function createRenderer(deps) {
 				<div class="mini-title m-0">${esc(tr('修正ガイド', 'Action center'))}</div>
 				<div class="score-sub">${esc(tr('診断結果から、そのまま設定作業へ持っていける候補をまとめました。まずは上から順に確認してください。', 'These are ready-to-use next steps derived from the diagnosis. Start from the top and confirm each one before applying changes.'))}</div>
 				<div class="action-grid mt-12">${cardHtml}</div>
+			</section>
+		`;
+	}
+
+	function renderTrustPanel(results) {
+		const resolver = (results && results.meta && results.meta.resolver) ? results.meta.resolver : tr('不明', 'Unknown');
+		const evidenceCount = (results && results.meta && Array.isArray(results.meta.records)) ? results.meta.records.length : 0;
+		return `
+			<section class="trust-panel">
+				<div class="mini-title m-0">${esc(tr('判定の前提', 'How to read this result'))}</div>
+				<div class="trust-grid mt-12">
+					<div class="card p-16 trust-card">
+						<div class="action-kicker">${esc(tr('診断範囲', 'Scope'))}</div>
+						<div class="trust-copy">${esc(tr('公開DNSだけを参照し、メール送受信やサーバー内部の設定には触れていません。', 'Only public DNS was checked. Mail flow and private server-side settings were not accessed.'))}</div>
+					</div>
+					<div class="card p-16 trust-card">
+						<div class="action-kicker">${esc(tr('第三者通信', 'Third-party requests'))}</div>
+						<div class="trust-copy">${esc(trf('DNS照会は {resolver} を通じて行いました。必要なら独自 DoH へ切り替えられます。', 'DNS lookups were sent via {resolver}. You can switch to your own DoH endpoint if needed.', { resolver }))}</div>
+					</div>
+					<div class="card p-16 trust-card">
+						<div class="action-kicker">${esc(tr('判定根拠', 'Evidence'))}</div>
+						<div class="trust-copy">${esc(trf('{n} 件の生 DNS レコードと、各セクションの evidence を根拠に表示しています。', 'This report is grounded in {n} raw DNS records plus the evidence shown in each section.', { n: evidenceCount }))}</div>
+					</div>
+				</div>
+			</section>
+		`;
+	}
+
+	function renderProviderPlaybook(results) {
+		const provider = results && results.mailProvider ? results.mailProvider : null;
+		if (!provider) return '';
+		let steps = [];
+		if (provider.id === 'm365') {
+			steps = [
+				tr('Exchange Online の DKIM で selector1 / selector2 を確認', 'Confirm selector1 / selector2 in Exchange Online DKIM settings'),
+				tr('SPF に include:spf.protection.outlook.com が入っているか確認', 'Confirm SPF includes include:spf.protection.outlook.com'),
+				tr('DMARC は _dmarc.<domain> の TXT を 1 本に保つ', 'Keep DMARC as a single TXT record at _dmarc.<domain>')
+			];
+		} else if (provider.id === 'googleWorkspace') {
+			steps = [
+				tr('Google Admin で DKIM selector を確認し、google._domainkey などの TXT を公開', 'Confirm the DKIM selector in Google Admin and publish the TXT such as google._domainkey'),
+				tr('SPF に include:_spf.google.com が入っているか確認', 'Confirm SPF includes include:_spf.google.com'),
+				tr('MX が Google Workspace 向けになっているかも併せて確認', 'Also confirm MX records point to Google Workspace')
+			];
+		} else {
+			steps = [
+				tr('使っている送信サービスごとに SPF include と DKIM selector を棚卸し', 'Inventory SPF includes and DKIM selectors for each sender you actually use'),
+				tr('不要な旧サービスの SPF / DKIM を残さない', 'Remove SPF / DKIM entries for old services you no longer use'),
+				tr('DMARC は最後に強化し、レポートで誤判定を確認する', 'Tighten DMARC last, after checking reports for false positives')
+			];
+		}
+		const signals = Array.isArray(provider.signals) && provider.signals.length
+			? `<ul class="list mt-10">${provider.signals.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`
+			: '';
+		return `
+			<section class="card p-16 provider-card">
+				<div class="action-card-head">
+					<div>
+						<div class="action-kicker">${esc(tr('推定メール基盤', 'Estimated mail platform'))}</div>
+						<div class="mini-title m-0">${esc(provider.name)} <span class="status">${esc(provider.confidence)}</span></div>
+					</div>
+				</div>
+				<p class="action-summary">${esc(provider.reason || '')}</p>
+				<div class="action-detail">
+					<div class="action-detail-label">${esc(tr('まず見る場所', 'Where to start'))}</div>
+					<ul class="list mt-10">${steps.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
+				</div>
+				${signals}
+			</section>
+		`;
+	}
+
+	function renderGuides(results) {
+		const dmarcRecord = results && results.dmarc ? results.dmarc.record : '';
+		const dmarcP = dmarcRecord ? ((/;\s*p=([^;]+)/i.exec(`; ${dmarcRecord}`) || [])[1] || '').toLowerCase() : '';
+		const dmarcStage = !dmarcRecord ? 0 : dmarcP === 'none' ? 1 : dmarcP === 'quarantine' ? 2 : 3;
+		const spfRecords = results && results.spf ? results.spf.records : [];
+		const spfState = !spfRecords || !spfRecords.length
+			? 0
+			: spfRecords.length > 1
+				? 1
+				: /\+all\b/i.test(spfRecords[0])
+					? 2
+					: /~all\b/i.test(spfRecords[0])
+						? 3
+						: 4;
+		const dmarcSteps = [
+			tr('未設定', 'Missing'),
+			'p=none',
+			'p=quarantine',
+			'p=reject'
+		];
+		const spfSteps = [
+			tr('送信元棚卸し', 'Inventory senders'),
+			tr('1レコードへ整理', 'Single SPF record'),
+			tr('危険な +all を除去', 'Remove risky +all'),
+			tr('~all で監視', 'Monitor with ~all'),
+			tr('-all で厳格化', 'Tighten to -all')
+		];
+		const renderFlow = (steps, activeIndex) => `
+			<div class="flow-steps">
+				${steps.map((step, index) => `<div class="flow-step ${index <= activeIndex ? 'active' : ''} ${index === activeIndex ? 'current' : ''}">${esc(step)}</div>`).join('<div class="flow-arrow">→</div>')}
+			</div>
+		`;
+		return `
+			<section class="guide-grid">
+				<section class="card p-16 guide-card">
+					<div class="mini-title m-0">${esc(tr('DMARC 段階導入', 'DMARC rollout map'))}</div>
+					<div class="score-sub">${esc(tr('現在地を見ながら、none → quarantine → reject の順で強化します。', 'Strengthen step by step from none to quarantine to reject, based on the current stage.'))}</div>
+					<div class="mt-12">${renderFlow(dmarcSteps, dmarcStage)}</div>
+				</section>
+				<section class="card p-16 guide-card">
+					<div class="mini-title m-0">${esc(tr('SPF 修正の流れ', 'SPF fix path'))}</div>
+					<div class="score-sub">${esc(tr('まず送信元を整理し、その後にポリシーを厳格化するのが安全です。', 'A safe rollout is to inventory senders first, then tighten the policy.'))}</div>
+					<div class="mt-12">${renderFlow(spfSteps, spfState)}</div>
+				</section>
 			</section>
 		`;
 	}
@@ -513,6 +640,9 @@ export function createRenderer(deps) {
 			</section>`
 			: '';
 		const fixupHtml = renderFixups(results);
+		const trustHtml = renderTrustPanel(results);
+		const providerHtml = renderProviderPlaybook(results);
+		const guideHtml = renderGuides(results);
 
 		const meta = results.meta || {};
 		const metaTimestamp = meta.timestamp || '';
@@ -553,7 +683,10 @@ export function createRenderer(deps) {
 				<div class="score-number ${esc(scoreCls)}">${esc(overall)}</div>
 			</div>
 			<div class="score-breakdown">${chipHtml}</div>
+			${trustHtml}
+			${providerHtml}
 			${fixupHtml}
+			${guideHtml}
 			<div class="summary-stack">
 				${topHtml}
 				${err}
