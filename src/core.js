@@ -254,6 +254,11 @@ function applyI18n() {
 		if (!key) return;
 		el.setAttribute('placeholder', t(key));
 	});
+	document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+		const key = el.getAttribute('data-i18n-aria-label');
+		if (!key) return;
+		el.setAttribute('aria-label', t(key));
+	});
 	updateDiagnosisButtonState();
 	updateResolverUi();
 }

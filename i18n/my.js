@@ -23,6 +23,8 @@
   "hero.title": "လုပ်ငန်းအီးမေးလ် spoofing ကာကွယ်ရေးကို အများသိ DNS အပေါ် အခြေခံပြီး ကြိုတင်စစ်ဆေး",
   "hero.tagline": "Domain ထည့်ပါ → Public DNS (SPF/DKIM/DMARC စသည်) ကို ခန့်မှန်းအကဲဖြတ်။ ယုံကြည်ရမှုအဆင့်ကို ပြပြီး အတည်ပြုရန်အတွက် mail header ကို စစ်ဆေးရနိုင်သည်။",
   "hero.free": "အခမဲ့ ၁၀၀% (စာရင်းသွင်းရန်မလို)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "လျင်မြန်စစ်ဆေး",
   "form.domain": "ဒိုမိန်း",
   "form.consent": "အများပြည်သူ DNS ကိုသာ စစ်ဆေးရန် သဘောတူပါသည်",

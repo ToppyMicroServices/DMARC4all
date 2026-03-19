@@ -23,6 +23,8 @@
   "hero.title": "Äriposti võltsimise vastane eelkontroll avaliku DNS-i põhjal",
   "hero.tagline": "Sisesta domeen → avaliku DNS-i (SPF/DKIM/DMARC jm) hinnanguline kontroll. Kuvame kindluse taseme; lõplik kinnitamine võib vajada kirja päiste kontrolli.",
   "hero.free": "Täiesti tasuta (registreerimine pole vajalik)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Kiirkontroll",
   "form.domain": "Domeen",
   "form.consent": "Nõustun kontrollima avalikku DNS-i",

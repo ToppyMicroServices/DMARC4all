@@ -23,6 +23,8 @@
   "hero.title": "Comprobación rápida de la protección contra la suplantación en el correo corporativo a partir del DNS público",
   "hero.tagline": "Introduce un dominio para evaluar su DNS público (SPF, DKIM, DMARC, etc.). Mostramos un nivel de confianza, pero la confirmación final puede requerir revisar los encabezados del correo.",
   "hero.free": "Completamente gratis (sin registro)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Verificación rápida",
   "form.domain": "Dominio",
   "form.consent": "Acepto comprobar solo el DNS público (datos visibles públicamente)",

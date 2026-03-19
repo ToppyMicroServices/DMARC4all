@@ -23,6 +23,8 @@
   "hero.title": "Quick public DNS check for business email anti-spoofing",
   "hero.tagline": "Enter a domain to review its public DNS settings (SPF, DKIM, DMARC, etc.). Confidence levels are shown, but final confirmation may require checking email headers.",
   "hero.free": "Completely free (no signup)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Quick check",
   "form.domain": "Domain",
   "form.consent": "I agree to check public DNS (publicly visible data)",

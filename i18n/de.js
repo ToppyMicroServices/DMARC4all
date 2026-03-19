@@ -23,6 +23,8 @@
   "hero.title": "Schnellcheck für den Schutz von Business-E-Mails vor Spoofing auf Basis öffentlicher DNS-Daten",
   "hero.tagline": "Gib eine Domain ein, um ihre öffentlichen DNS-Einstellungen (SPF, DKIM, DMARC usw.) einzuschätzen. Wir zeigen einen Vertrauenswert; für die endgültige Bestätigung können Mail-Header erforderlich sein.",
   "hero.free": "Vollständig kostenlos (keine Anmeldung)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Schnellprüfung",
   "form.domain": "Domain",
   "form.consent": "Ich stimme der Prüfung öffentlicher DNS-Daten zu",

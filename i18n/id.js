@@ -23,6 +23,8 @@
   "hero.title": "Pemeriksaan awal anti-spoofing email bisnis berbasis DNS publik",
   "hero.tagline": "Masukkan domain → penilaian perkiraan DNS publik (SPF/DKIM/DMARC, dll.). Kami menampilkan tingkat kepastian; konfirmasi akhir bisa memerlukan pemeriksaan header email.",
   "hero.free": "Sepenuhnya gratis (tanpa pendaftaran)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Cek cepat",
   "form.domain": "Domain",
   "form.consent": "Setuju memeriksa DNS publik",

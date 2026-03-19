@@ -23,6 +23,8 @@
   "hero.title": "Kiểm tra nhanh khả năng chống giả mạo email doanh nghiệp dựa trên DNS công khai",
   "hero.tagline": "Nhập tên miền để đánh giá cấu hình DNS công khai (SPF, DKIM, DMARC, v.v.). Chúng tôi hiển thị mức độ tin cậy, nhưng xác nhận cuối cùng có thể cần kiểm tra tiêu đề email.",
   "hero.free": "Hoàn toàn miễn phí (không cần đăng ký)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "Kiểm tra nhanh",
   "form.domain": "Tên miền",
   "form.consent": "Đồng ý kiểm tra DNS công khai (dữ liệu hiển thị công khai)",

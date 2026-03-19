@@ -74,6 +74,42 @@ export function createDiagnosisRunner(deps) {
 	} = deps;
 
 	return async function runDiagnosis(domain, opts = {}) {
+		const buildTxtFixRecord = (name, value, ttl = 3600) => `${name}. ${ttl} IN TXT "${value.replace(/"/g, '\\"')}"`;
+		const dmarcTagsToRecord = (tags) => {
+			const preferred = ['v', 'p', 'sp', 'pct', 'adkim', 'aspf', 'fo', 'ri', 'rua', 'ruf'];
+			const entries = Object.entries(tags || {})
+				.filter(([, value]) => String(value || '').trim() !== '');
+			const ordered = [];
+			for (const key of preferred) {
+				const hit = entries.find(([entryKey]) => entryKey === key);
+				if (hit) ordered.push(hit);
+			}
+			for (const entry of entries) {
+				if (!preferred.includes(entry[0])) ordered.push(entry);
+			}
+			return ordered.map(([key, value]) => `${key}=${String(value).trim()}`).join('; ');
+		};
+		const spfDraftFromRecords = (records = []) => {
+			const tokens = [];
+			const seen = new Set();
+			for (const record of records) {
+				const rawTokens = String(record || '').trim().split(/\s+/);
+				for (const token of rawTokens) {
+					if (!token || /^v=spf1$/i.test(token)) continue;
+					if (/^[~?+\-]all$/i.test(token)) continue;
+					const normalized = token.toLowerCase();
+					if (seen.has(normalized)) continue;
+					seen.add(normalized);
+					tokens.push(token);
+				}
+			}
+			return `v=spf1 ${tokens.join(' ')} ~all`.replace(/\s+/g, ' ').trim();
+		};
+		const remediation = [];
+		const pushFixup = (item) => {
+			if (!item) return;
+			remediation.push(item);
+		};
 		const results = {
 			domain,
 			meta: {
@@ -82,6 +118,7 @@ export function createDiagnosisRunner(deps) {
 				records: []
 			},
 			priority: [],
+			fixups: [],
 			registrar: { registrar: '', registrarUrl: '', registrarIana: '', nameservers: [], rdapUrl: '', findings: [] },
 			dnsHosting: { ns: [], provider: '', confidence: '', reason: '', links: [], findings: [] },
 			subdomains: { enabled: false, found: [], findings: [] },
@@ -1139,20 +1176,71 @@ export function createDiagnosisRunner(deps) {
 					title: tr('DMARC が未設定', 'DMARC missing'),
 					action: tr('まず p=none で開始し,rua を受け取れる状態にしてから段階的に強化', 'Start with p=none, set up rua reporting, then tighten in stages')
 				});
+				const dmarcValue = `v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1`;
+				pushFixup({
+					level: 'high',
+					title: tr('安全な初手: DMARC を公開', 'Safe first step: publish DMARC'),
+					summary: tr('まずは監視用の p=none で導入し、集計レポートを受け取れる状態を作る', 'Start with monitoring-only p=none and make sure aggregate reports can be received.'),
+					records: [{
+						label: 'DMARC',
+						host: `_dmarc.${domain}`,
+						type: 'TXT',
+						value: dmarcValue,
+						copyText: buildTxtFixRecord(`_dmarc.${domain}`, dmarcValue)
+					}],
+					verify: `dig +short TXT _dmarc.${domain}`,
+					rollback: tr('追加した TXT を削除するか、直前の値に戻す', 'Remove the TXT you added, or restore the previous value.')
+				});
 			} else {
 				const p = (parseTagValue(results.dmarc.record, 'p') || '').toLowerCase();
+				const ruaValue = parseTagValue(results.dmarc.record, 'rua');
+				const dmarcTags = parseDmarcTags(results.dmarc.record);
 				if (p === 'none') {
 					results.priority.push({
 						level: 'med',
 						title: tr('DMARC が p=none', 'DMARC is p=none'),
 						action: tr('監視結果を見ながら quarantine/reject へ段階移行を検討', 'Review reports and consider staged move to quarantine/reject')
 					});
+					const stagedTags = { ...dmarcTags, p: 'quarantine', pct: dmarcTags.pct || '25' };
+					if (!stagedTags.rua) stagedTags.rua = `mailto:postmaster@${domain}`;
+					if (!stagedTags.v) stagedTags.v = 'DMARC1';
+					const stagedValue = dmarcTagsToRecord(stagedTags);
+					pushFixup({
+						level: 'med',
+						title: tr('次の候補: DMARC を quarantine へ段階強化', 'Next candidate: move DMARC toward quarantine'),
+						summary: tr('rua を見ながら誤判定が少ないことを確認できたら、まずは pct を小さくして quarantine を試す', 'Once rua reports look clean, try quarantine first with a smaller pct before going broader.'),
+						records: [{
+							label: 'DMARC',
+							host: `_dmarc.${domain}`,
+							type: 'TXT',
+							value: stagedValue,
+							copyText: buildTxtFixRecord(`_dmarc.${domain}`, stagedValue)
+						}],
+						verify: `dig +short TXT _dmarc.${domain}`,
+						rollback: tr('値を直前の p=none レコードへ戻す', 'Restore the previous p=none record if you see false positives.')
+					});
 				}
-				if (!parseTagValue(results.dmarc.record, 'rua')) {
+				if (!ruaValue) {
 					results.priority.push({
 						level: 'med',
 						title: tr('DMARC rua が未設定', 'DMARC rua missing'),
 						action: tr('集計レポートを受け取れるメールボックスを用意して rua を設定', 'Set up a mailbox for aggregate reports and configure rua')
+					});
+					const ruaTags = { ...dmarcTags, v: dmarcTags.v || 'DMARC1', rua: `mailto:postmaster@${domain}` };
+					const ruaRecord = dmarcTagsToRecord(ruaTags);
+					pushFixup({
+						level: 'med',
+						title: tr('DMARC に rua を追加', 'Add rua to DMARC'),
+						summary: tr('既存ポリシーは維持したまま、集計レポートの送信先だけを追加する', 'Keep the current policy and add only an aggregate report destination.'),
+						records: [{
+							label: 'DMARC',
+							host: `_dmarc.${domain}`,
+							type: 'TXT',
+							value: ruaRecord,
+							copyText: buildTxtFixRecord(`_dmarc.${domain}`, ruaRecord)
+						}],
+						verify: `dig +short TXT _dmarc.${domain}`,
+						rollback: tr('rua を追加する前の DMARC 値へ戻す', 'Restore the previous DMARC value without rua.')
 					});
 				}
 			}
@@ -1164,17 +1252,61 @@ export function createDiagnosisRunner(deps) {
 					title: tr('SPF が未設定', 'SPF missing'),
 					action: tr('送信元を棚卸しして SPF を設計（いきなり -all は避ける）', 'Inventory senders and design SPF (avoid jumping straight to -all)')
 				});
+				pushFixup({
+					level: 'med',
+					title: tr('SPF のたたき台を作る', 'Create an SPF starting draft'),
+					summary: tr('利用中の送信元を洗い出して include / ip4 を埋める。最初は ~all にして、確認後に厳格化する', 'List your real senders, fill in include / ip4, and start with ~all before tightening later.'),
+					records: [{
+						label: 'SPF draft',
+						host: domain,
+						type: 'TXT',
+						value: 'v=spf1 include:MAIL-SERVICE-1 include:MAIL-SERVICE-2 ~all',
+						copyText: buildTxtFixRecord(domain, 'v=spf1 include:MAIL-SERVICE-1 include:MAIL-SERVICE-2 ~all')
+					}],
+					verify: `dig +short TXT ${domain}`,
+					rollback: tr('追加した TXT を削除するか、以前の値に戻す', 'Remove the TXT you added, or restore the previous value.')
+				});
 			} else if (results.spf.records.length > 1) {
 				results.priority.push({
 					level: 'high',
 					title: tr('SPF が複数', 'Multiple SPF records'),
 					action: tr('SPF は 1 レコードに統合する（評価が不定になりやすい）', 'Consolidate SPF into a single record (avoid ambiguous evaluation)')
 				});
+				const draft = spfDraftFromRecords(results.spf.records);
+				pushFixup({
+					level: 'high',
+					title: tr('SPF を 1 レコードへ統合', 'Consolidate SPF into one record'),
+					summary: tr('複数の SPF をそのまま残さず、必要な include / ip4 を 1 本へまとめる', 'Do not keep multiple SPF records; combine the needed include / ip4 terms into one record.'),
+					records: [{
+						label: 'SPF draft',
+						host: domain,
+						type: 'TXT',
+						value: draft,
+						copyText: buildTxtFixRecord(domain, draft)
+					}],
+					verify: `dig +short TXT ${domain}`,
+					rollback: tr('変更前の SPF 値を控えてから差し替える', 'Keep the current SPF values so you can restore them if needed.')
+				});
 			} else if (spf && spfHasAllQualifier(spf, '+')) {
 				results.priority.push({
 					level: 'high',
 					title: tr('SPF が +all', 'SPF is +all'),
 					action: tr('+all をやめて送信元を限定（早急）', 'Remove +all and restrict senders (urgent)')
+				});
+				const saferSpf = spf.replace(/\+all\b/i, '~all');
+				pushFixup({
+					level: 'high',
+					title: tr('SPF の +all を外す', 'Remove +all from SPF'),
+					summary: tr('まずは誰でも送れてしまう状態をやめて、監視寄りの ~all へ下げる', 'First remove the allow-anyone behavior and step down to ~all for a safer rollout.'),
+					records: [{
+						label: 'SPF',
+						host: domain,
+						type: 'TXT',
+						value: saferSpf,
+						copyText: buildTxtFixRecord(domain, saferSpf)
+					}],
+					verify: `dig +short TXT ${domain}`,
+					rollback: tr('直前の SPF 値へ戻す', 'Restore the previous SPF value if needed.')
 				});
 			} else if (spf && spfEstimateLookupRisk(spf) >= 10) {
 				results.priority.push({
@@ -1192,11 +1324,56 @@ export function createDiagnosisRunner(deps) {
 					title: tr('DKIM が未確認/未設定', 'DKIM unverified/missing'),
 					action: tr('利用している送信基盤（Microsoft 365/Google/SaaS）で DKIM 署名を有効化し公開キーを設定', 'Enable DKIM signing in your sender (Microsoft 365/Google/SaaS) and publish the public key')
 				});
+				pushFixup({
+					level: 'med',
+					title: tr('DKIM は送信サービス側で有効化する', 'Enable DKIM in your sender'),
+					summary: tr('DKIM は provider ごとに selector と公開方法が異なるため、送信基盤の管理画面で selector を確認してから DNS を追加する', 'DKIM selectors and publishing methods vary by provider, so confirm the selector in your sender console before adding DNS records.'),
+					verify: dkimLookupHints(domain),
+					rollback: tr('送信基盤で DKIM を無効化し、追加した selector レコードを削除する', 'Disable DKIM in the sender console and remove the selector records you added.')
+				});
+			}
+
+			if (!results.mta_sts.record) {
+				const idStamp = results.meta.timestamp.slice(0, 10).replace(/-/g, '') + '01';
+				const mtaStsValue = `v=STSv1; id=${idStamp}`;
+				pushFixup({
+					level: 'low',
+					title: tr('MTA-STS の TXT を追加', 'Add the MTA-STS TXT'),
+					summary: tr('受信側 TLS を強制したい場合の入口。TXT に加えて policy file の公開も必要', 'This is the DNS entry point if you want inbound TLS enforcement. You also need to host the policy file.'),
+					records: [{
+						label: 'MTA-STS',
+						host: `_mta-sts.${domain}`,
+						type: 'TXT',
+						value: mtaStsValue,
+						copyText: buildTxtFixRecord(`_mta-sts.${domain}`, mtaStsValue)
+					}],
+					verify: `dig +short TXT _mta-sts.${domain}\n\nhttps://mta-sts.${domain}/.well-known/mta-sts.txt`,
+					rollback: tr('TXT を削除し、公開した policy file も取り下げる', 'Remove the TXT record and withdraw the hosted policy file.')
+				});
+			}
+
+			if (!results.mta_sts.tlsrpt) {
+				const tlsRptValue = `v=TLSRPTv1; rua=mailto:tlsrpt@${domain}`;
+				pushFixup({
+					level: 'low',
+					title: tr('TLS-RPT を追加', 'Add TLS-RPT'),
+					summary: tr('MTA-STS と合わせて使うと、TLS 配送の失敗をレポートで追える', 'When paired with MTA-STS, TLS-RPT helps you track delivery failures related to TLS.'),
+					records: [{
+						label: 'TLS-RPT',
+						host: `_smtp._tls.${domain}`,
+						type: 'TXT',
+						value: tlsRptValue,
+						copyText: buildTxtFixRecord(`_smtp._tls.${domain}`, tlsRptValue)
+					}],
+					verify: `dig +short TXT _smtp._tls.${domain}`,
+					rollback: tr('追加した TXT を削除するか、以前の値へ戻す', 'Remove the TXT you added, or restore the previous value.')
+				});
 			}
 		} catch {
 			// ignore recommendation synthesis failures
 		}
 
+		results.fixups = remediation;
 		return results;
 	};
 }

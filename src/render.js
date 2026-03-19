@@ -218,15 +218,50 @@ export function createRenderer(deps) {
 		}
 	}
 
+	function wireCopyButtons() {
+		if (!report) return;
+		report.querySelectorAll('.copy-btn').forEach((button) => {
+			button.addEventListener('click', async () => {
+				const text = button.value || button.getAttribute('value') || '';
+				if (!text) return;
+				const original = button.textContent || tr('コピー', 'Copy');
+				try {
+					if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+						await navigator.clipboard.writeText(text);
+					} else {
+						const input = document.createElement('textarea');
+						input.value = text;
+						input.setAttribute('readonly', '');
+						input.style.position = 'absolute';
+						input.style.left = '-9999px';
+						document.body.appendChild(input);
+						input.select();
+						document.execCommand('copy');
+						input.remove();
+					}
+					button.textContent = tr('コピー済み', 'Copied');
+					setTimeout(() => {
+						button.textContent = original;
+					}, 1400);
+				} catch {
+					button.textContent = tr('失敗', 'Failed');
+					setTimeout(() => {
+						button.textContent = original;
+					}, 1400);
+				}
+			});
+		});
+	}
+
 	function mkSection(title, sectionStatus, bodyHtml) {
 		return `
-			<div class="card p-16">
-				<div class="flex-space-between">
+			<section class="card p-16 report-section">
+				<div class="flex-space-between report-section-head">
 					<div class="mini-title m-0">${esc(title)}</div>
 					<span class="status">${esc(sectionStatus)}</span>
 				</div>
 				<div class="report mt-10">${bodyHtml}</div>
-			</div>
+			</section>
 		`;
 	}
 
@@ -301,6 +336,85 @@ export function createRenderer(deps) {
 			<div class="muted">${esc(t('dnsbl.about'))}</div>
 			${rows}
 		`);
+	}
+
+	function renderFixups(results) {
+		const fixups = Array.isArray(results && results.fixups) ? results.fixups : [];
+		if (!fixups.length) return '';
+
+		const levelLabel = (level) => {
+			if (level === 'high') return tr('優先', 'Priority');
+			if (level === 'med') return tr('次に対応', 'Next up');
+			return tr('改善候補', 'Improvement');
+		};
+
+		const cardHtml = fixups.slice(0, 6).map((fixup) => {
+			const records = Array.isArray(fixup.records) ? fixup.records : [];
+			const recordHtml = records.map((record) => {
+				const zoneLine = record.copyText || `${record.host} ${record.type} ${record.value}`;
+				return `
+					<div class="action-record">
+						<div class="action-record-head">
+							<div>
+								<div class="action-record-label">${esc(record.label || tr('推奨レコード', 'Suggested record'))}</div>
+								<div class="action-record-host">${esc(record.host || '')}</div>
+							</div>
+							<span class="status">${esc(record.type || 'TXT')}</span>
+						</div>
+						<div class="mono">${esc(record.value || '')}</div>
+						<div class="action-button-row">
+							<button type="button" class="btn-ghost copy-btn" value="${esc(zoneLine)}">${esc(tr('DNS行をコピー', 'Copy DNS line'))}</button>
+							<button type="button" class="btn-ghost copy-btn" value="${esc(record.value || '')}">${esc(tr('値をコピー', 'Copy value'))}</button>
+						</div>
+					</div>
+				`;
+			}).join('');
+
+			const verifyBlock = fixup.verify
+				? `
+					<div class="action-detail">
+						<div class="action-detail-label">${esc(tr('検証', 'Verify'))}</div>
+						<div class="mono">${esc(fixup.verify)}</div>
+						<div class="action-button-row">
+							<button type="button" class="btn-ghost copy-btn" value="${esc(fixup.verify)}">${esc(tr('検証コマンドをコピー', 'Copy verify command'))}</button>
+						</div>
+					</div>
+				`
+				: '';
+
+			const rollbackBlock = fixup.rollback
+				? `
+					<div class="action-detail">
+						<div class="action-detail-label">${esc(tr('戻し方', 'Rollback'))}</div>
+						<div class="muted">${esc(fixup.rollback)}</div>
+					</div>
+				`
+				: '';
+
+			return `
+				<section class="card p-16 action-card ${esc(fixup.level || 'low')}">
+					<div class="action-card-head">
+						<div>
+							<div class="action-kicker">${esc(levelLabel(fixup.level))}</div>
+							<div class="mini-title m-0">${esc(fixup.title || '')}</div>
+						</div>
+						<span class="status">${esc(levelLabel(fixup.level))}</span>
+					</div>
+					<p class="action-summary">${esc(fixup.summary || '')}</p>
+					${recordHtml}
+					${verifyBlock}
+					${rollbackBlock}
+				</section>
+			`;
+		}).join('');
+
+		return `
+			<section class="action-center">
+				<div class="mini-title m-0">${esc(tr('修正ガイド', 'Action center'))}</div>
+				<div class="score-sub">${esc(tr('診断結果から、そのまま設定作業へ持っていける候補をまとめました。まずは上から順に確認してください。', 'These are ready-to-use next steps derived from the diagnosis. Start from the top and confirm each one before applying changes.'))}</div>
+				<div class="action-grid mt-12">${cardHtml}</div>
+			</section>
+		`;
 	}
 
 	function renderResults(results) {
@@ -391,13 +505,14 @@ export function createRenderer(deps) {
 			})
 			.slice(0, 3);
 		const topHtml = topSorted.length
-			? `<div class="card p-16">
+			? `<section class="card p-16 summary-card">
 				<div class="mini-title m-0">${esc(t('report.top3Title'))}</div>
 				<ul class="list mt-10">
 					${topSorted.map((item) => `<li><strong>${esc(item.title)}</strong><div class="muted">${esc(item.action)}</div></li>`).join('')}
 				</ul>
-			</div>`
+			</section>`
 			: '';
+		const fixupHtml = renderFixups(results);
 
 		const meta = results.meta || {};
 		const metaTimestamp = meta.timestamp || '';
@@ -412,7 +527,7 @@ export function createRenderer(deps) {
 			? `<div class="mono tiny">${esc(recordLines.join('\n\n'))}</div>`
 			: `<div class="muted">${esc(t('report.repro.none'))}</div>`;
 		const reproHtml = `
-			<div class="card p-16">
+			<section class="card p-16 summary-card">
 				<div class="mini-title m-0">${esc(t('report.repro.title'))}</div>
 				<div class="muted">${esc(t('report.repro.time'))}: <span class="mono mono-inline">${esc(metaTimestamp || t('label.noneParen'))}</span></div>
 				<div class="muted">${esc(t('report.repro.resolver'))}: <span class="mono mono-inline">${esc(metaResolver || t('label.noneParen'))}</span></div>
@@ -423,11 +538,13 @@ export function createRenderer(deps) {
 					<button type="button" class="btn-ghost export-md">${esc(t('report.export.md'))}</button>
 				</div>
 				<div class="tiny muted">${esc(t('report.export.note'))}</div>
-			</div>
+			</section>
 		`;
 
 		setSafeInnerHTML(report, `
-			<div class="mini-title m-0-0-8">${esc(t('report.resultsTitle'))} <span class="status">${esc(results.domain)}</span></div>
+			<div class="results-header">
+				<div class="mini-title m-0-0-8">${esc(t('report.resultsTitle'))} <span class="status">${esc(results.domain)}</span></div>
+			</div>
 			<div class="score-banner">
 				<div class="score-left">
 					<div class="score-title">${esc(t('report.overallPostureTitle'))}</div>
@@ -436,10 +553,13 @@ export function createRenderer(deps) {
 				<div class="score-number ${esc(scoreCls)}">${esc(overall)}</div>
 			</div>
 			<div class="score-breakdown">${chipHtml}</div>
-			${topHtml}
-			${err}
-			${reproHtml}
-			<div class="grid two mt-12">
+			${fixupHtml}
+			<div class="summary-stack">
+				${topHtml}
+				${err}
+				${reproHtml}
+			</div>
+			<div class="grid two mt-12 report-grid">
 				${mkSection('DMARC', results.dmarc && results.dmarc.record ? statusText('configured') : statusText('missing'), dmarcBody)}
 				${mkSection('SPF', (results.spf && results.spf.records && results.spf.records.length) ? `TXT ${results.spf.records.length}` : statusText('missing'), spfBody)}
 				${mkSection(
@@ -463,6 +583,7 @@ export function createRenderer(deps) {
 		`);
 
 		wireExportButtons(results);
+		wireCopyButtons();
 	}
 
 	return {

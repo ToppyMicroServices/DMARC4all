@@ -23,6 +23,8 @@
   "hero.title": "ตรวจสถานะการป้องกันการปลอมแปลงอีเมลองค์กรเบื้องต้นจาก DNS สาธารณะ",
   "hero.tagline": "กรอกโดเมนเพื่อประเมินการตั้งค่า DNS สาธารณะ (SPF, DKIM, DMARC ฯลฯ) แบบคร่าว ๆ พร้อมระดับความเชื่อมั่น โดยการยืนยันขั้นสุดท้ายอาจต้องตรวจสอบส่วนหัวอีเมล",
   "hero.free": "ฟรีทั้งหมด (ไม่ต้องสมัคร)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "ตรวจแบบเร็ว",
   "form.domain": "โดเมน",
   "form.consent": "ยินยอมตรวจสอบ DNS สาธารณะ",

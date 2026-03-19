@@ -23,6 +23,8 @@
   "hero.title": "業務用メールのなりすまし対策を公開DNSから簡易診断",
   "hero.tagline": "ドメインを入力すると、公開DNS上のSPF・DKIM・DMARCなどをもとになりすまし対策の状態を簡易評価します。最終確認にはメールヘッダなどの一次情報が必要な場合があります。",
   "hero.free": "完全無料（登録不要）",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "クイック診断",
   "form.domain": "ドメイン",
   "form.consent": "公開DNSのみを確認することに同意する",

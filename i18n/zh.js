@@ -23,6 +23,8 @@
   "hero.title": "基于公共 DNS 的企业邮件防冒充预检",
   "hero.tagline": "输入域名，即可评估其公共 DNS 配置（SPF、DKIM、DMARC 等）。我们会显示置信度，但最终确认可能仍需查看邮件头。",
   "hero.free": "完全免费（无需注册）",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "快速检查",
   "form.domain": "域名",
   "form.consent": "同意仅查询公共 DNS（公开可见的数据）",

@@ -34,6 +34,8 @@
   "hero.title": "공개 DNS 기반으로 업무용 이메일 스푸핑 방지 상태를 사전 점검",
   "hero.tagline": "도메인을 입력하면 공개 DNS(SPF, DKIM, DMARC 등) 설정을 바탕으로 상태를 간단히 평가합니다. 결과에는 신뢰도를 표시하며, 최종 확인에는 메일 헤더 점검이 필요할 수 있습니다.",
   "hero.free": "완전 무료(가입 불필요)",
+  "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
+  "hero.badge.transport": "DNSSEC / MTA-STS / TLS-RPT",
   "form.title": "빠른 검사",
   "form.domain": "도메인",
   "form.consent": "공개 DNS만 확인하는 데 동의합니다 (공개 데이터)",
