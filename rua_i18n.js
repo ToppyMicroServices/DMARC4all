@@ -29,6 +29,22 @@
 		return 'ja';
 	}
 
+	function langFromQuery() {
+		try {
+			const params = new URLSearchParams(window.location.search || '');
+			const lang = String(params.get('lang') || '').trim().toLowerCase();
+			return SUPPORTED_LANGS.includes(lang) ? lang : '';
+		} catch {
+			return '';
+		}
+	}
+
+	function langFromDocument() {
+		const lang = String(document.documentElement.lang || '').trim().toLowerCase();
+		const prefix = lang.slice(0, 2);
+		return SUPPORTED_LANGS.includes(prefix) ? prefix : '';
+	}
+
 	function getI18n() {
 		return window.I18N || {};
 	}
@@ -151,7 +167,7 @@
 
 	function applyI18n() {
 		document.documentElement.lang = currentLang;
-		document.title = t('rua.pageTitle');
+		updateSeo();
 
 		const btns = Array.from(document.querySelectorAll('[data-lang-choice]'));
 		btns.forEach(btn => {
@@ -172,6 +188,106 @@
 		});
 	}
 
+	function getCanonicalBaseUrl() {
+		const existing = document.querySelector('link[rel="canonical"]');
+		if (existing) {
+			try {
+				return new URL(existing.getAttribute('href') || '', window.location.href);
+			} catch {
+				// ignore
+			}
+		}
+		return new URL(window.location.pathname || '/rua_service.html', window.location.origin);
+	}
+
+	function buildLocalizedUrl(lang) {
+		const url = getCanonicalBaseUrl();
+		url.search = '';
+		url.hash = '';
+		if (lang && lang !== 'ja') url.searchParams.set('lang', lang);
+		return url.toString();
+	}
+
+	function updateUrl(lang) {
+		try {
+			window.history.replaceState({}, '', buildLocalizedUrl(lang));
+		} catch {
+			// ignore
+		}
+	}
+
+	function upsertMeta(selector, attributes) {
+		let el = document.head.querySelector(selector);
+		if (!el) {
+			el = document.createElement('meta');
+			document.head.appendChild(el);
+		}
+		Object.entries(attributes).forEach(([key, value]) => el.setAttribute(key, value));
+		return el;
+	}
+
+	function ensureAlternateLinks() {
+		document.head.querySelectorAll('link[data-generated-hreflang="true"]').forEach(el => el.remove());
+		SUPPORTED_LANGS.forEach(lang => {
+			const link = document.createElement('link');
+			link.setAttribute('rel', 'alternate');
+			link.setAttribute('hreflang', lang);
+			link.setAttribute('href', buildLocalizedUrl(lang));
+			link.setAttribute('data-generated-hreflang', 'true');
+			document.head.appendChild(link);
+		});
+		const xDefault = document.createElement('link');
+		xDefault.setAttribute('rel', 'alternate');
+		xDefault.setAttribute('hreflang', 'x-default');
+		xDefault.setAttribute('href', buildLocalizedUrl('ja'));
+		xDefault.setAttribute('data-generated-hreflang', 'true');
+		document.head.appendChild(xDefault);
+	}
+
+	function updateSeo() {
+		const title = `${fmt(t('rua.h1'))} | DMARC4all`;
+		const description = fmt(t('rua.tagline'));
+		const pageUrl = buildLocalizedUrl(currentLang);
+		document.title = title;
+		const canonical = document.querySelector('link[rel="canonical"]');
+		if (canonical) canonical.setAttribute('href', pageUrl);
+		upsertMeta('meta[name="description"]', { name: 'description', content: description });
+		upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title });
+		upsertMeta('meta[property="og:description"]', { property: 'og:description', content: description });
+		upsertMeta('meta[property="og:url"]', { property: 'og:url', content: pageUrl });
+		upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
+		upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
+		upsertMeta('meta[property="og:locale"]', { property: 'og:locale', content: currentLang });
+
+		let schema = document.getElementById('seo-schema');
+		if (!schema) {
+			schema = document.createElement('script');
+			schema.type = 'application/ld+json';
+			schema.id = 'seo-schema';
+			document.head.appendChild(schema);
+		}
+		schema.textContent = JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'TechArticle',
+			headline: fmt(t('rua.h1')),
+			name: 'DMARC4all RUA service overview',
+			url: pageUrl,
+			inLanguage: currentLang,
+			description,
+			author: {
+				'@type': 'Organization',
+				name: 'ToppyMicroServices'
+			},
+			publisher: {
+				'@type': 'Organization',
+				name: 'ToppyMicroServices',
+				url: 'https://dmarc4all.toppymicros.com/'
+			},
+			about: ['DMARC', 'RUA', 'email authentication', 'DNS authorization']
+		}, null, 2);
+		ensureAlternateLinks();
+	}
+
 	function setLang(lang) {
 		currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'ja';
 		try {
@@ -179,16 +295,18 @@
 		} catch {
 			// ignore
 		}
+		updateUrl(currentLang);
 		applyI18n();
 	}
 
 	function init() {
+		let saved = '';
 		try {
-			const saved = localStorage.getItem(LANG_KEY);
-			currentLang = (saved && SUPPORTED_LANGS.includes(saved)) ? saved : detectLang();
+			saved = localStorage.getItem(LANG_KEY) || '';
 		} catch {
-			currentLang = detectLang();
+			saved = '';
 		}
+		currentLang = langFromQuery() || langFromDocument() || ((saved && SUPPORTED_LANGS.includes(saved)) ? saved : detectLang());
 
 		Array.from(document.querySelectorAll('[data-lang-choice]')).forEach(btn => {
 			btn.addEventListener('click', () => {

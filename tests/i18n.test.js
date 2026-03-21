@@ -49,3 +49,25 @@ test('translation helpers fall back through current language and english', () =>
 	assert.equal(i18n.tr('BIMIレコードを検出しました.', 'BIMI record detected.'), 'BIMI-Eintrag erkannt.');
 	assert.equal(i18n.trf('項目: {name}', 'Item: {name}', { name: 'DNS' }), 'Item: DNS');
 });
+
+test('initialLang prefers the lang query parameter over storage and browser settings', () => {
+	const fakeWindow = {
+		location: { search: '?lang=es' },
+		document: { documentElement: { lang: 'ja' } }
+	};
+	withNavigator({ languages: ['de-DE'], language: 'de-DE' }, () => {
+		const i18n = createI18n({ I18N: { ja: {}, en: {}, es: {} }, window: fakeWindow });
+		assert.equal(i18n.initialLang('en'), 'es');
+	});
+});
+
+test('initialLang falls back to the document language when no query is present', () => {
+	const fakeWindow = {
+		location: { search: '' },
+		document: { documentElement: { lang: 'zh-CN' } }
+	};
+	withNavigator({ languages: ['de-DE'], language: 'de-DE' }, () => {
+		const i18n = createI18n({ I18N: { ja: {}, en: {}, zh: {} }, window: fakeWindow });
+		assert.equal(i18n.initialLang(''), 'zh');
+	});
+});

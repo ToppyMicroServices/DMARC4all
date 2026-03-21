@@ -18,7 +18,7 @@ export const LANG_STORAGE_KEY = 'toppy-lang';
 export const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko'];
 
 export function createI18n(options = {}) {
-	const browserWindow = typeof window !== 'undefined' ? window : globalThis.window;
+	const browserWindow = options.window || (typeof window !== 'undefined' ? window : globalThis.window);
 	const I18N = options.I18N || browserWindow?.I18N || {};
 	const EXTRA_TR = options.EXTRA_TR || browserWindow?.EXTRA_TR || {};
 	let currentLang = options.defaultLang || 'ja';
@@ -101,6 +101,29 @@ export function createI18n(options = {}) {
 		return 'ja';
 	}
 
+	function langFromQuery() {
+		try {
+			const params = new URLSearchParams(browserWindow?.location?.search || '');
+			const lang = String(params.get('lang') || '').trim().toLowerCase();
+			return SUPPORTED_LANGS.includes(lang) ? lang : '';
+		} catch {
+			return '';
+		}
+	}
+
+	function langFromDocument() {
+		const lang = String(browserWindow?.document?.documentElement?.lang || '').trim().toLowerCase();
+		const prefix = lang.slice(0, 2);
+		return SUPPORTED_LANGS.includes(prefix) ? prefix : '';
+	}
+
+	function initialLang(savedLang = '') {
+		return langFromQuery()
+			|| langFromDocument()
+			|| (SUPPORTED_LANGS.includes(savedLang) ? savedLang : '')
+			|| detectLang();
+	}
+
 	function setLang(lang) {
 		currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'ja';
 		return currentLang;
@@ -123,6 +146,7 @@ export function createI18n(options = {}) {
 	return {
 		detectLang,
 		getLang,
+		initialLang,
 		isJa,
 		setLang,
 		statusText,

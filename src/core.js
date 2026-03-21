@@ -73,6 +73,7 @@ const i18n = createI18n();
 const {
 	detectLang,
 	getLang,
+	initialLang,
 	isJa,
 	setLang: setLangValue,
 	statusText,
@@ -260,6 +261,7 @@ function applyI18n() {
 		if (!key) return;
 		el.setAttribute('aria-label', t(key));
 	});
+	updateSeo(lang);
 	updateDiagnosisButtonState();
 	updateResolverUi();
 }
@@ -278,6 +280,7 @@ function setLang(lang) {
 	} catch {
 		// ignore storage failures
 	}
+	updateLangUrl(getLang());
 	applyI18n();
 	if (lastDiagnosisRun && !languageRerunInProgress) {
 		void rerunLastDiagnosisForLanguage();
@@ -304,12 +307,13 @@ async function rerunLastDiagnosisForLanguage() {
 }
 
 function initI18n() {
+	let saved = '';
 	try {
-		const saved = localStorage.getItem(LANG_STORAGE_KEY);
-		setLangValue(saved || detectLang());
+		saved = localStorage.getItem(LANG_STORAGE_KEY) || '';
 	} catch {
-		setLangValue(detectLang());
+		saved = '';
 	}
+	setLangValue(initialLang(saved) || detectLang());
 	if (langSelect) {
 		langSelect.value = getLang();
 		langSelect.addEventListener('change', (event) => setLang(event.target.value));
@@ -322,6 +326,118 @@ function initI18n() {
 	validateI18n();
 	applyI18n();
 	initResolverSelection();
+}
+
+function getCanonicalBaseUrl() {
+	const existing = document.querySelector('link[rel="canonical"]');
+	if (existing) {
+		try {
+			return new URL(existing.getAttribute('href') || '', window.location.href);
+		} catch {
+			// ignore
+		}
+	}
+	return new URL(window.location.pathname || '/', window.location.origin);
+}
+
+function buildLocalizedUrl(lang) {
+	const url = getCanonicalBaseUrl();
+	url.search = '';
+	url.hash = '';
+	if (lang && lang !== 'ja') url.searchParams.set('lang', lang);
+	return url.toString();
+}
+
+function updateLangUrl(lang) {
+	if (!window.history || typeof window.history.replaceState !== 'function') return;
+	try {
+		window.history.replaceState({}, '', buildLocalizedUrl(lang));
+	} catch {
+		// ignore URL update failures
+	}
+}
+
+function upsertMeta(selector, attributes) {
+	let el = document.head.querySelector(selector);
+	if (!el) {
+		el = document.createElement('meta');
+		document.head.appendChild(el);
+	}
+	Object.entries(attributes).forEach(([key, value]) => el.setAttribute(key, value));
+	return el;
+}
+
+function ensureAlternateLinks() {
+	document.head.querySelectorAll('link[data-generated-hreflang="true"]').forEach((el) => el.remove());
+	const langs = i18n.supportedLangs || [];
+	for (const lang of langs) {
+		const link = document.createElement('link');
+		link.setAttribute('rel', 'alternate');
+		link.setAttribute('hreflang', lang);
+		link.setAttribute('href', buildLocalizedUrl(lang));
+		link.setAttribute('data-generated-hreflang', 'true');
+		document.head.appendChild(link);
+	}
+	const xDefault = document.createElement('link');
+	xDefault.setAttribute('rel', 'alternate');
+	xDefault.setAttribute('hreflang', 'x-default');
+	xDefault.setAttribute('href', buildLocalizedUrl('ja'));
+	xDefault.setAttribute('data-generated-hreflang', 'true');
+	document.head.appendChild(xDefault);
+}
+
+function updateSeo(lang) {
+	const pageUrl = buildLocalizedUrl(lang);
+	const title = `${t('hero.title')} | DMARC4all`;
+	const description = t('hero.tagline');
+	document.title = title;
+
+	const canonical = document.querySelector('link[rel="canonical"]');
+	if (canonical) canonical.setAttribute('href', pageUrl);
+
+	upsertMeta('meta[name="description"]', { name: 'description', content: description });
+	upsertMeta('meta[property="og:title"]', { property: 'og:title', content: title });
+	upsertMeta('meta[property="og:description"]', { property: 'og:description', content: description });
+	upsertMeta('meta[property="og:url"]', { property: 'og:url', content: pageUrl });
+	upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
+	upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
+	upsertMeta('meta[property="og:locale"]', { property: 'og:locale', content: lang });
+
+	let schema = document.getElementById('seo-schema');
+	if (!schema) {
+		schema = document.createElement('script');
+		schema.type = 'application/ld+json';
+		schema.id = 'seo-schema';
+		document.head.appendChild(schema);
+	}
+	schema.textContent = JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'WebApplication',
+		name: 'DMARC4all',
+		url: pageUrl,
+		applicationCategory: 'SecurityApplication',
+		operatingSystem: 'Any',
+		isAccessibleForFree: true,
+		inLanguage: lang,
+		description,
+		publisher: {
+			'@type': 'Organization',
+			name: 'ToppyMicroServices',
+			url: 'https://dmarc4all.toppymicros.com/'
+		},
+		offers: {
+			'@type': 'Offer',
+			price: '0',
+			priceCurrency: 'USD'
+		},
+		featureList: [
+			'DMARC, SPF, DKIM, BIMI, DNSSEC, MTA-STS, and TLS-RPT checks',
+			'Browser-only public DNS diagnostics',
+			'Copy-ready DNS remediation guidance'
+		]
+	}, null, 2);
+
+	ensureAlternateLinks();
 }
 
 initI18n();
