@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /index_enterprise.html
+Disallow: /rua_service_enterprise.html
+Disallow: /offline.html
+
+Sitemap: https://dmarc4all.toppymicros.com/sitemap.xml

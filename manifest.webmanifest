@@ -3,7 +3,7 @@
   "name": "Toppy DMARC4all",
   "short_name": "DMARC4all",
   "description": "Browser-only DMARC, SPF, DKIM, BIMI, and DNS email-auth quick checks using public DNS.",
-  "start_url": "./index.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#eef5ff",
@@ -26,12 +26,12 @@
     {
       "name": "Quick Check",
       "short_name": "Check",
-      "url": "./index.html"
+      "url": "/"
     },
     {
       "name": "RUA Service",
       "short_name": "RUA",
-      "url": "./rua_service.html"
+      "url": "/rua_service.html"
     }
   ]
 }
