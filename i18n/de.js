@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: Signierung/Alignment in echten Mails nicht verifiziert",
   "dkim.messageUnverified.detail": "DNS zeigt nur Schlüssel; prüfe Signierung/Alignment in Mail-Headern (DKIM-Signature).",
   "dmarc.staged.title": "DMARC-Rollout: stufenweise Richtlinie",
-  "dmarc.staged.detailHtml": "Empfohlene Schritte: <ul><li>1) Mit p=none starten und rua-Reports sammeln</li><li>2) Auf quarantine wechseln, sobald Fehlalarme sinken</li><li>3) Schließlich auf reject umstellen</li><li>pct= für schrittweisen Rollout nutzen (z. B. <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Empfohlener Ablauf: <ul><li>1) Mit p=none starten und RUA-Berichte sammeln</li><li>2) Legitime E-Mails anhand der RUA-Daten und echter Nachrichten-Header prüfen</li><li>3) Auf quarantine umstellen, wenn das Risiko von Fehlalarmen niedrig ist</li><li>4) Nach einer Folgenabschätzung reject in Betracht ziehen</li></ul>",
   "report.repro.title": "Reproduzierbarkeit",
   "report.repro.time": "Prüfzeitpunkt",
   "report.repro.resolver": "Resolver",

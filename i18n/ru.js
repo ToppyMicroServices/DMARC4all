@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: подпись/выравнивание в реальных письмах не подтверждены",
   "dkim.messageUnverified.detail": "DNS показывает только ключи; проверьте по заголовкам (DKIM-Signature).",
   "dmarc.staged.title": "Пошаговое внедрение DMARC",
-  "dmarc.staged.detailHtml": "Рекомендуемые шаги: <ul><li>1) Начать с p=none и собирать отчёты rua</li><li>2) Перейти на quarantine, когда ложные срабатывания уменьшатся</li><li>3) В итоге перейти на reject</li><li>Использовать pct= для постепенного внедрения (напр. <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Рекомендуемый порядок: <ul><li>1) Начните с p=none и собирайте отчёты RUA</li><li>2) Проверьте легитимную почту по данным RUA и реальным заголовкам сообщений</li><li>3) Переходите на quarantine, когда риск ложных срабатываний низкий</li><li>4) Рассмотрите reject после оценки влияния</li></ul>",
   "report.repro.title": "Воспроизводимость",
   "report.repro.time": "Время проверки",
   "report.repro.resolver": "Резолвер",

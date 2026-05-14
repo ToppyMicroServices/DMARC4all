@@ -706,10 +706,23 @@ html[data-resolver-mode="auto"] #resolver-error {
 
 .trust-card,
 .provider-card,
+.readiness-card,
 .guide-card {
   background:
     linear-gradient(180deg, rgba(15, 118, 110, 0.04), rgba(255, 255, 255, 0.95)),
     rgba(255, 255, 255, 0.95);
+}
+
+.readiness-card.good {
+  border-color: rgba(69, 152, 102, 0.34);
+}
+
+.readiness-card.warn {
+  border-color: rgba(189, 143, 54, 0.38);
+}
+
+.readiness-card.bad {
+  border-color: rgba(190, 88, 82, 0.38);
 }
 
 .trust-copy {

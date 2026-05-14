@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM：实际邮件签名/对齐未验证",
   "dkim.messageUnverified.detail": "DNS 只显示公钥；请通过邮件头(DKIM-Signature)确认。",
   "dmarc.staged.title": "DMARC 分阶段部署",
-  "dmarc.staged.detailHtml": "推荐步骤: <ul><li>1) 先用 p=none 并收集 rua 报告</li><li>2) 误报减少后转为 quarantine</li><li>3) 最终转为 reject</li><li>使用 pct= 分阶段应用（例: <span class='mono'>pct=25→50→100</span>）</li></ul>",
+  "dmarc.staged.detailHtml": "建议路径: <ul><li>1) 先使用 p=none，并收集 RUA 报告</li><li>2) 结合 RUA 数据和真实邮件头确认合法邮件</li><li>3) 误报风险较低后再切换到 quarantine</li><li>4) 评估影响后再考虑 reject</li></ul>",
   "report.repro.title": "可复现性",
   "report.repro.time": "诊断时间",
   "report.repro.resolver": "Resolver",

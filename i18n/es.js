@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: firma/alineación en mensajes reales no verificada",
   "dkim.messageUnverified.detail": "DNS solo muestra claves; confirma firma/alineación con los encabezados (DKIM-Signature).",
   "dmarc.staged.title": "Despliegue DMARC: política por etapas",
-  "dmarc.staged.detailHtml": "Pasos recomendados: <ul><li>1) Empezar con p=none y recopilar informes rua</li><li>2) Pasar a quarantine cuando bajen los falsos positivos</li><li>3) Finalmente pasar a reject</li><li>Usa pct= para un despliegue gradual (ej.: <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Ruta recomendada: <ul><li>1) Empieza con p=none y recopila informes RUA</li><li>2) Confirma el correo legítimo con los datos de RUA y cabeceras reales</li><li>3) Pasa a quarantine cuando el riesgo de falsos positivos sea bajo</li><li>4) Valora pasar a reject después de revisar el impacto</li></ul>",
   "report.repro.title": "Reproducibilidad",
   "report.repro.time": "Hora de diagnóstico",
   "report.repro.resolver": "Resolver",

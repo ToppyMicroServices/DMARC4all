@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: real-message signing/alignment unverified",
   "dkim.messageUnverified.detail": "DNS only shows keys; confirm signing/alignment via message headers (DKIM-Signature).",
   "dmarc.staged.title": "DMARC rollout: staged policy",
-  "dmarc.staged.detailHtml": "Recommended steps: <ul><li>1) Start with p=none and collect rua reports</li><li>2) Move to quarantine once false positives are reduced</li><li>3) Finally move to reject</li><li>Use pct= for gradual rollout (e.g. <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Recommended path: <ul><li>1) Start with p=none and collect RUA reports</li><li>2) Confirm legitimate mail using RUA data and real message headers</li><li>3) Move to quarantine once false-positive risk is low</li><li>4) Consider reject after reviewing the impact</li></ul>",
   "report.repro.title": "Reproducibility",
   "report.repro.time": "Checked at",
   "report.repro.resolver": "Resolver",

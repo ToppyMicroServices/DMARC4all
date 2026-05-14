@@ -1,0 +1,117 @@
+<!doctype html>
+<!--
+  Copyright 2026 ToppyMicroServices OÜ
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1b2a">
+  <title>Standards & Privacy | DMARC4all</title>
+  <meta name="description" content="DMARC4all's standards and privacy position: DMARCbis, aggregate reporting, failure reporting, RUA, RUF, and privacy-first handling.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://dmarc4all.toppymicros.com/standards_privacy.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="DMARC4all">
+  <meta property="og:title" content="Standards & Privacy | DMARC4all">
+  <meta property="og:description" content="How DMARC4all follows DMARCbis, aggregate reporting, and privacy-first RUA guidance.">
+  <meta property="og:url" content="https://dmarc4all.toppymicros.com/standards_privacy.html">
+  <meta property="og:image" content="https://dmarc4all.toppymicros.com/apple-touch-icon.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Standards & Privacy | DMARC4all">
+  <meta name="twitter:description" content="DMARCbis, aggregate reporting, failure reporting, RUA/RUF, and DMARC4all's privacy-first policy.">
+  <meta name="twitter:image" content="https://dmarc4all.toppymicros.com/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <div class="brandbar" aria-label="ToppyMicroServices">
+      <a href="index.html" style="display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none;">
+        <img src="apple-touch-icon.png" alt="ToppyMicroServices">
+        <span class="brand-name">ToppyMicroServices</span>
+      </a>
+      <div class="brand-actions">
+        <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      </div>
+    </div>
+
+    <main class="hero">
+      <p class="pill">Standards & Privacy</p>
+      <h1>標準に沿い、余計なデータを持たない DMARC 支援</h1>
+      <p class="tagline">DMARC4all は、公開 DNS の診断、RUA を使った段階導入、Failure Reporting の慎重な取り扱いを基本方針にしています。</p>
+
+      <section class="card p-16 mt-12">
+        <h2>DMARCbis / Aggregate Reporting / Failure Reporting</h2>
+        <p>DMARC の中心は、From ドメインに対する SPF / DKIM の alignment と、受信側へ伝える policy です。DMARCbis はこの基本仕様を更新し、Aggregate Reporting は集計レポートの扱いを整理します。</p>
+        <p>Failure Reporting は、個別メッセージに近い情報を含む場合があります。そのため、プライバシーと実運用の差を意識した慎重な扱いが必要です。DMARC4all では RUA を実務上の主軸とし、RUF は「必要性とリスクを理解した組織が慎重に扱うもの」として説明します。</p>
+      </section>
+
+      <section class="guide-grid mt-12">
+        <article class="card p-16 guide-card">
+          <h2>RUA</h2>
+          <p>RUA は DMARC aggregate reports の送信先です。日次などの集計 XML から、送信元 IP、件数、SPF / DKIM / DMARC の結果、alignment を把握できます。</p>
+          <p>DMARC4all では、RUA を p=none から quarantine / reject へ進むための観測材料として扱います。</p>
+        </article>
+        <article class="card p-16 guide-card">
+          <h2>RUF</h2>
+          <p>RUF は failure reports の送信先です。環境によっては個別メールに近い情報やヘッダ情報を含み得るため、プライバシー上のリスクが大きくなります。</p>
+          <p>DMARC4all は RUF を積極的には推奨しません。必要な場合でも、法務・プライバシー・保存期間・アクセス制御を先に決めるべきだと考えます。</p>
+        </article>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>DMARC4all の方針</h2>
+        <ul class="list">
+          <li>公開 DNS だけを診断し、メール送受信やサーバー内部設定には触れません。</li>
+          <li>RUA は段階導入のための可視化として扱い、RUF は慎重に説明します。</li>
+          <li>RUA XML の原本を保存しない、または必要最小限の非可逆な集計に寄せる設計を優先します。</li>
+          <li>p=none を完了扱いにせず、quarantine / reject へ進むための準備度を表示します。</li>
+          <li>英語圏以外の実務者にも分かるよう、用語と手順をできるだけ平易にします。</li>
+        </ul>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>IETF DMARC watch</h2>
+        <p>DMARC4all は、DMARCbis、Aggregate Reporting、Failure Reporting の IETF 文書を追跡し、説明文と診断ガイドを更新します。仕様と provider の実際の挙動が異なる場合は、両者を分けて説明します。</p>
+        <p>2026-05-14 時点では、DMARCbis、Aggregate Reporting、Failure Reporting は IETF Datatracker 上で RFC Editor queue に進んでいます。RFC 番号が確定した後、このページの説明も更新します。</p>
+        <ul class="list">
+          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-dmarcbis/" target="_blank" rel="noopener">DMARCbis</a></li>
+          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-aggregate-reporting/" target="_blank" rel="noopener">DMARC Aggregate Reporting</a></li>
+          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-failure-reporting/" target="_blank" rel="noopener">DMARC Failure Reporting</a></li>
+        </ul>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>IETF / WG で共有する場合の位置づけ</h2>
+        <p>DMARC4all は、標準文書そのものの代替ではありません。DMARCbis と関連 reporting 文書を、実務者が使いやすい運用手順に落とし込むための補助ツールです。特に、非英語圏の小規模組織が p=none から enforcement へ無理なく進めることを重視しています。</p>
+        <ul class="list">
+          <li>目的: 公開 DNS だけを使い、DMARC / SPF / DKIM / RUA の状態と次の安全な一歩を示す。</li>
+          <li>非目的: 受信側の最終判定、法的助言、Failure Reporting の一律推奨、メール本文や個人データの収集。</li>
+          <li>共有したい論点: 表現の正確性、RUA/RUF のリスク説明、enforcement readiness の判定基準、各言語の実務者に伝わる説明。</li>
+          <li>フィードバック歓迎: 標準と provider 実装の差、誤解を招く表現、追加すべき安全上の注意。</li>
+        </ul>
+      </section>
+
+      <p class="mt-12"><a href="index.html">Back to Quick Check</a> / <a href="dns_provider_guides.html">DNS provider guides</a></p>
+    </main>
+  </div>
+</body>
+</html>

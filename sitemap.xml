@@ -24,6 +24,18 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://dmarc4all.toppymicros.com/standards_privacy.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dmarc4all.toppymicros.com/dns_provider_guides.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=en</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=es</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=de</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>

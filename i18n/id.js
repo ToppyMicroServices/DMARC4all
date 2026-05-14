@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: penandatanganan/alignment pada email nyata belum terverifikasi",
   "dkim.messageUnverified.detail": "DNS hanya menampilkan kunci; verifikasi melalui header (DKIM-Signature).",
   "dmarc.staged.title": "Penerapan DMARC bertahap",
-  "dmarc.staged.detailHtml": "Langkah rekomendasi: <ul><li>1) Mulai dengan p=none dan kumpulkan laporan rua</li><li>2) Pindah ke quarantine saat false positive berkurang</li><li>3) Terakhir pindah ke reject</li><li>Gunakan pct= untuk penerapan bertahap (contoh: <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Alur yang disarankan: <ul><li>1) Mulai dengan p=none dan kumpulkan laporan RUA</li><li>2) Pastikan email yang sah lewat data RUA dan header email asli</li><li>3) Pindah ke quarantine saat risiko false positive sudah rendah</li><li>4) Pertimbangkan reject setelah meninjau dampaknya</li></ul>",
   "report.repro.title": "Reproduksibilitas",
   "report.repro.time": "Waktu pemeriksaan",
   "report.repro.resolver": "Resolver",

@@ -497,6 +497,76 @@ export function createRenderer(deps) {
 		`;
 	}
 
+	function assessEnforcementReadiness(results) {
+		const dmarcRecord = results && results.dmarc ? String(results.dmarc.record || '') : '';
+		const spfRecords = results && results.spf && Array.isArray(results.spf.records) ? results.spf.records : [];
+		const dkimConfirmed = results && results.dkim && Array.isArray(results.dkim.confirmedSelectors) ? results.dkim.confirmedSelectors : [];
+		const p = dmarcRecord ? ((/;\s*p=([^;]+)/i.exec(`; ${dmarcRecord}`) || [])[1] || '').toLowerCase() : '';
+		const hasRua = /;\s*rua\s*=/i.test(`; ${dmarcRecord}`);
+		const spfUsable = spfRecords.length === 1 && !/\+all\b/i.test(spfRecords[0]);
+		const dkimUsable = dkimConfirmed.length > 0;
+		const validPolicy = ['none', 'quarantine', 'reject'].includes(p);
+		const blockers = [];
+
+		if (!dmarcRecord) blockers.push(tr('DMARC レコードが未設定', 'DMARC record is missing'));
+		if (dmarcRecord && !validPolicy) blockers.push(tr('DMARC policy（p=）を none / quarantine / reject のいずれかにしてください', 'DMARC policy (p=) should be none, quarantine, or reject'));
+		if (dmarcRecord && !hasRua) blockers.push(tr('RUA 集計レポートの宛先が未設定', 'RUA aggregate reporting is not configured'));
+		if (!spfUsable) blockers.push(tr('SPF を 1 レコードに整理し、+all を避ける必要があります', 'SPF should be a single usable record without +all'));
+		if (!dkimUsable) blockers.push(tr('DKIM 署名を実メールまたは selector で確認してください', 'DKIM signing should be confirmed by selector or real message headers'));
+
+		if (p === 'reject' && hasRua && spfUsable && dkimUsable) {
+			return {
+				level: 'good',
+				label: tr('reject 適用済み', 'Reject enforced'),
+				next: tr('転送・例外・サブドメイン方針を定期確認', 'Keep reviewing forwarding, exceptions, and subdomain policy'),
+				blockers: []
+			};
+		}
+		if (p === 'quarantine' && hasRua && spfUsable && dkimUsable) {
+			return {
+				level: 'good',
+				label: tr('reject へ進める候補', 'Ready for reject'),
+				next: tr('RUA で誤判定が少ないことを確認して reject へ段階移行', 'Use RUA reports to confirm low false positives, then move toward reject'),
+				blockers: []
+			};
+		}
+		if (p === 'none' && hasRua && spfUsable && dkimUsable) {
+			return {
+				level: 'warn',
+				label: tr('quarantine へ進める候補', 'Ready for quarantine'),
+				next: tr('RUA と実メールヘッダを確認し、影響範囲を把握してから quarantine へ進む', 'Review RUA reports and real message headers, then move to quarantine with impact understood'),
+				blockers: []
+			};
+		}
+		return {
+			level: !dmarcRecord || (dmarcRecord && !validPolicy) ? 'bad' : 'warn',
+			label: tr('監視・準備段階', 'Monitoring only'),
+			next: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics'),
+			blockers: blockers.slice(0, 4)
+		};
+	}
+
+	function renderEnforcementReadiness(results) {
+		const readiness = assessEnforcementReadiness(results);
+		const blockerHtml = readiness.blockers.length
+			? `<ul class="list mt-10">${readiness.blockers.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`
+			: `<div class="trust-copy mt-10">${esc(tr('主要な前提は満たしています。変更は小さく段階的に行ってください。', 'The main prerequisites are in place. Make enforcement changes gradually.'))}</div>`;
+		return `
+			<section class="card p-16 readiness-card ${esc(readiness.level)}">
+				<div class="action-card-head">
+					<div>
+						<div class="action-kicker">${esc(tr('適用準備度', 'Enforcement readiness'))}</div>
+						<div class="mini-title m-0">${esc(readiness.label)}</div>
+					</div>
+					<span class="status">${esc(readiness.label)}</span>
+				</div>
+				<p class="action-summary">${esc(readiness.next)}</p>
+				${blockerHtml}
+				<div class="tiny muted mt-10">${esc(tr('判定は公開 DNS のみを根拠にした目安です。最終判断では実メールヘッダと RUA 集計を確認してください。', 'This is an indicative public-DNS-only assessment. Confirm with real message headers and RUA aggregate reports before final enforcement.'))}</div>
+			</section>
+		`;
+	}
+
 	function renderGuides(results) {
 		const dmarcRecord = results && results.dmarc ? results.dmarc.record : '';
 		const dmarcP = dmarcRecord ? ((/;\s*p=([^;]+)/i.exec(`; ${dmarcRecord}`) || [])[1] || '').toLowerCase() : '';
@@ -643,6 +713,7 @@ export function createRenderer(deps) {
 		const fixupHtml = renderFixups(results);
 		const trustHtml = renderTrustPanel(results);
 		const providerHtml = renderProviderPlaybook(results);
+		const readinessHtml = renderEnforcementReadiness(results);
 		const guideHtml = renderGuides(results);
 
 		const meta = results.meta || {};
@@ -685,6 +756,7 @@ export function createRenderer(deps) {
 			</div>
 			<div class="score-breakdown">${chipHtml}</div>
 			${trustHtml}
+			${readinessHtml}
 			${providerHtml}
 			${fixupHtml}
 			${guideHtml}

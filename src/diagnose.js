@@ -274,8 +274,8 @@ export function createDiagnosisRunner(deps) {
 							tr('p=none で開始し,集計レポート(rua)を受け取れるメールボックスを用意してから quarantine/reject へ段階移行する', 'Start with p=none, set up a mailbox for aggregate reports (rua), then move to quarantine/reject in stages.')
 						),
 						isJa()
-							? `例:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1"\n\n検証:\ndig +short TXT _dmarc.${domain}\n\n戻す:\n追加したTXTを削除`
-							: `Example:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1"\n\nVerify:\ndig +short TXT _dmarc.${domain}\n\nRollback:\nRemove the TXT record you added`
+							? `例:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}"\n\n検証:\ndig +short TXT _dmarc.${domain}\n\n戻す:\n追加したTXTを削除`
+							: `Example:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}"\n\nVerify:\ndig +short TXT _dmarc.${domain}\n\nRollback:\nRemove the TXT record you added`
 					)
 				);
 			} else {
@@ -1178,7 +1178,7 @@ export function createDiagnosisRunner(deps) {
 					title: tr('DMARC が未設定', 'DMARC missing'),
 					action: tr('まず p=none で開始し,rua を受け取れる状態にしてから段階的に強化', 'Start with p=none, set up rua reporting, then tighten in stages')
 				});
-				const dmarcValue = `v=DMARC1; p=none; rua=mailto:postmaster@${domain}; fo=1`;
+				const dmarcValue = `v=DMARC1; p=none; rua=mailto:postmaster@${domain}`;
 				pushFixup({
 					level: 'high',
 					title: tr('安全な初手: DMARC を公開', 'Safe first step: publish DMARC'),
@@ -1204,14 +1204,15 @@ export function createDiagnosisRunner(deps) {
 						title: tr('DMARC が p=none', 'DMARC is p=none'),
 						action: tr('監視結果を見ながら quarantine/reject へ段階移行を検討', 'Review reports and consider staged move to quarantine/reject')
 					});
-					const stagedTags = { ...dmarcTags, p: 'quarantine', pct: dmarcTags.pct || '25' };
+					const stagedTags = { ...dmarcTags, p: 'quarantine' };
+					delete stagedTags.pct;
 					if (!stagedTags.rua) stagedTags.rua = `mailto:postmaster@${domain}`;
 					if (!stagedTags.v) stagedTags.v = 'DMARC1';
 					const stagedValue = dmarcTagsToRecord(stagedTags);
 					pushFixup({
 						level: 'med',
 						title: tr('次の候補: DMARC を quarantine へ段階強化', 'Next candidate: move DMARC toward quarantine'),
-						summary: tr('rua を見ながら誤判定が少ないことを確認できたら、まずは pct を小さくして quarantine を試す', 'Once rua reports look clean, try quarantine first with a smaller pct before going broader.'),
+						summary: tr('RUA と実メールヘッダで誤判定が少ないことを確認してから quarantine へ進める', 'Move to quarantine only after RUA reports and real message headers show low false positives.'),
 						records: [{
 							label: 'DMARC',
 							host: `_dmarc.${domain}`,

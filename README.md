@@ -33,6 +33,13 @@ It also includes a DMARC RUA service description page and an operational workflo
   - The checked domain itself for lightweight HTTPS reachability probes
   - (Optional) BIMI logo URL (only if it is `https://`)
 
+## Standards & operational guidance
+
+- Standards and privacy position: https://dmarc4all.toppymicros.com/standards_privacy.html
+- DNS provider setup notes: https://dmarc4all.toppymicros.com/dns_provider_guides.html
+- IETF DMARC watch: track DMARCbis, DMARC Aggregate Reporting, and DMARC Failure Reporting; separate standards guidance from provider-specific behavior when they differ.
+- IETF/WG sharing position: this is a public-DNS-only implementation aid, not a replacement for the specifications or a receiver-side conformance test. Feedback is especially useful on wording accuracy, RUA/RUF privacy guidance, and enforcement-readiness criteria.
+
 ## Usage
 
 ### Local

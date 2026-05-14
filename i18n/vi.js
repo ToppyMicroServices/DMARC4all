@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: chữ ký/align trên email thật chưa xác minh",
   "dkim.messageUnverified.detail": "DNS chỉ cho thấy khóa; xác nhận bằng header (DKIM-Signature).",
   "dmarc.staged.title": "Triển khai DMARC theo giai đoạn",
-  "dmarc.staged.detailHtml": "Các bước khuyến nghị: <ul><li>1) Bắt đầu với p=none và thu thập báo cáo rua</li><li>2) Chuyển sang quarantine khi giảm false positive</li><li>3) Cuối cùng chuyển sang reject</li><li>Dùng pct= để triển khai dần (vd: <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Lộ trình khuyến nghị: <ul><li>1) Bắt đầu với p=none và thu thập báo cáo RUA</li><li>2) Xác nhận email hợp lệ bằng dữ liệu RUA và header email thực tế</li><li>3) Chuyển sang quarantine khi rủi ro false positive đã thấp</li><li>4) Cân nhắc reject sau khi đánh giá tác động</li></ul>",
   "report.repro.title": "Tái lập kết quả",
   "report.repro.time": "Thời điểm kiểm tra",
   "report.repro.resolver": "Resolver",

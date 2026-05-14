@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: ยังไม่ยืนยันการลงนาม/การจัดแนวในอีเมลจริง",
   "dkim.messageUnverified.detail": "DNS แสดงแค่คีย์; ตรวจด้วย header (DKIM-Signature).",
   "dmarc.staged.title": "การปรับใช้ DMARC แบบเป็นขั้น",
-  "dmarc.staged.detailHtml": "ขั้นตอนที่แนะนำ: <ul><li>1) เริ่มด้วย p=none และเก็บรายงาน rua</li><li>2) เมื่อ false positive ลดลงให้ไปที่ quarantine</li><li>3) สุดท้ายไปที่ reject</li><li>ใช้ pct= เพื่อค่อย ๆ ปรับใช้ (เช่น <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "แนวทางที่แนะนำ: <ul><li>1) เริ่มจาก p=none แล้วเก็บรายงาน RUA</li><li>2) ตรวจยืนยันอีเมลที่ถูกต้องด้วยข้อมูล RUA และ header ของอีเมลจริง</li><li>3) เปลี่ยนเป็น quarantine เมื่อความเสี่ยง false positive ต่ำ</li><li>4) พิจารณา reject หลังประเมินผลกระทบแล้ว</li></ul>",
   "report.repro.title": "ความสามารถในการทำซ้ำ",
   "report.repro.time": "เวลาในการตรวจ",
   "report.repro.resolver": "Resolver",

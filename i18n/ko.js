@@ -138,7 +138,7 @@
   "dkim.messageUnverified.title": "DKIM: 실제 메일 서명/정합 미검증",
   "dkim.messageUnverified.detail": "DNS는 키만 보여줍니다. 메일 헤더(DKIM-Signature)로 확인하세요.",
   "dmarc.staged.title": "DMARC 단계적 도입",
-  "dmarc.staged.detailHtml": "권장 단계: <ul><li>1) p=none으로 시작해 rua 보고 수집</li><li>2) 오탐이 줄면 quarantine</li><li>3) 최종적으로 reject</li><li>pct=로 단계 적용(예: <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "권장 흐름: <ul><li>1) p=none으로 시작해 RUA 보고서를 수집합니다</li><li>2) RUA 데이터와 실제 메일 헤더로 정상 메일을 확인합니다</li><li>3) 오탐 위험이 낮아지면 quarantine으로 전환합니다</li><li>4) 영향을 확인한 뒤 reject 적용을 검토합니다</li></ul>",
   "report.repro.title": "재현성",
   "report.repro.time": "진단 시각",
   "report.repro.resolver": "Resolver",

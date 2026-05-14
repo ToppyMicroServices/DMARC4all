@@ -150,7 +150,7 @@ test('createDiagnosisRunner builds staged remediation with current and suggested
 	const quarantineFix = results.fixups.find((fixup) => fixup.title === 'Next candidate: move DMARC toward quarantine');
 	assert.equal(quarantineFix.records[0].currentValue, 'v=DMARC1; p=none');
 	assert.match(quarantineFix.records[0].suggestedValue, /p=quarantine/);
-	assert.match(quarantineFix.records[0].suggestedValue, /pct=25/);
+	assert.doesNotMatch(quarantineFix.records[0].suggestedValue, /pct=/);
 	assert.match(quarantineFix.records[0].suggestedValue, /rua=mailto:postmaster@example\.com/);
 	assert.match(quarantineFix.records[0].copyText, /^_dmarc\.example\.com\. 3600 IN TXT "/);
 
@@ -259,7 +259,7 @@ test('createRenderer outputs provider, trust, diff, and guide sections', () => {
 		},
 		dnsHosting: { provider: 'Cloudflare', links: [], findings: ['<div class="finding low"><strong>DNS host</strong></div>'] },
 		registrar: { registrar: 'Namecheap', nameservers: [], findings: ['<div class="finding low"><strong>Registrar</strong></div>'] },
-		dmarc: { record: 'v=DMARC1; p=none', findings: ['<div class="finding low"><strong>DMARC</strong></div>'] },
+		dmarc: { record: 'v=DMARC1; p=none; rua=mailto:postmaster@example.com', findings: ['<div class="finding low"><strong>DMARC</strong></div>'] },
 		spf: { records: ['v=spf1 include:spf.protection.outlook.com ~all'], findings: ['<div class="finding low"><strong>SPF</strong></div>'] },
 		dkim: { selectors: ['selector1'], confirmedSelectors: ['selector1'], usesCname: true, findings: ['<div class="finding low"><strong>DKIM</strong></div>'] },
 		bimi: { record: '', findings: ['<div class="finding low"><strong>BIMI</strong></div>'] },
@@ -273,6 +273,8 @@ test('createRenderer outputs provider, trust, diff, and guide sections', () => {
 
 	assert.match(report.innerHTML, /Action center/);
 	assert.match(report.innerHTML, /How to read this result/);
+	assert.match(report.innerHTML, /Enforcement readiness/);
+	assert.match(report.innerHTML, /Ready for quarantine/);
 	assert.match(report.innerHTML, /Microsoft 365/);
 	assert.match(report.innerHTML, /Current/);
 	assert.match(report.innerHTML, /Suggested/);

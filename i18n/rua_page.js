@@ -62,7 +62,7 @@
     'rua.p1.li3': 'レート制限/洪水検知/自動抑制（DMARC 報告の悪用対策は RFC 9091 の意図に沿う）.',
     'rua.p1.li4': 'UI で「受信者が報告した観測値」であることを明示し、SPF/DKIM/alignment を分けて表示.',
     'rua.p2.title.html': '<strong>P2 - 体験と差別化</strong>',
-    'rua.p2.li1': 'コピー用 DMARC 断片（例: p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100）と段階移行ガイド.',
+    'rua.p2.li1': 'コピーして使える DMARC 断片（例: p=none; rua=mailto:...）と段階移行ガイド.',
     'rua.p2.li2': 'JSON/CSV エクスポートとメタ情報（受信組織/期間/解析時刻/バージョン）.',
     'rua.p2.li3': '任意の真正性ヒント（受信レポートの DKIM/SPF や既知レポーターのラベル付け）.',
 
@@ -215,7 +215,7 @@
     'rua.p1.li3': 'Abuse resistance & rate limiting; detect floods; align with RFC 9091 threat model.',
     'rua.p1.li4': 'UI clarity: label data as receiver-reported telemetry; separate SPF/DKIM/alignment outcomes.',
     'rua.p2.title.html': '<strong>P2 - Product quality & differentiation</strong>',
-    'rua.p2.li1': 'Copy-paste DMARC snippets (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) with staged rollout guidance.',
+    'rua.p2.li1': 'Copy-ready DMARC snippets (for example, p=none; rua=mailto:...) with staged rollout guidance.',
     'rua.p2.li2': 'Exports (JSON/CSV) with metadata: reporting org, period, parse timestamp, tool version.',
     'rua.p2.li3': 'Optional authenticity hints: DKIM/SPF on report emails, allowlist known reporters, label unknowns.',
 
@@ -481,7 +481,7 @@
     'rua.p1.li3': 'Chong lam dung va rate limiting; phat hien flood; phu hop voi mo hinh de doa RFC 9091.',
     'rua.p1.li4': 'Ranh mach UI: dan nhan du lieu la telemetry do ben nhan bao cao; tach ket qua SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - Chat luong san pham va khac biet</strong>',
-    'rua.p2.li1': 'Doan DMARC copy-paste (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) kem huong dan rollout theo giai doan.',
+    'rua.p2.li1': 'Đoạn DMARC có thể sao chép (ví dụ: p=none; rua=mailto:...) kèm hướng dẫn triển khai theo từng giai đoạn.',
     'rua.p2.li2': 'Xuat (JSON/CSV) kem metadata: to chuc bao cao, ky bao cao, thoi diem parse, phien ban cong cu.',
     'rua.p2.li3': 'Goi y xac thuc tuy chon: DKIM/SPF tren email bao cao, allowlist nguoi bao cao da biet, gan nhan unknown.',
 
@@ -631,7 +631,7 @@
     'rua.p1.li3': 'ต้านการใช้งานผิดและ rate limiting; ตรวจ flood; สอดคล้องกับ RFC 9091 threat model.',
     'rua.p1.li4': 'ความชัดเจนใน UI: ระบุว่าเป็น telemetry จากผู้รับรายงาน; แยกผล SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - คุณภาพผลิตภัณฑ์และความแตกต่าง</strong>',
-    'rua.p2.li1': 'สคริปต์ DMARC คัดลอกได้ (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) พร้อมคำแนะนำ rollout เป็นขั้น.',
+    'rua.p2.li1': 'ส่วน DMARC ที่คัดลอกไปใช้ได้ (เช่น p=none; rua=mailto:...) พร้อมคำแนะนำการปรับใช้เป็นขั้นตอน.',
     'rua.p2.li2': 'ส่งออก (JSON/CSV) พร้อมเมตาดาตา: องค์กรที่รายงาน, ช่วงเวลา, เวลา parse, เวอร์ชันเครื่องมือ.',
     'rua.p2.li3': 'ตัวชี้วัดความแท้เพิ่มเติม: DKIM/SPF บนอีเมลรายงาน, allowlist ผู้รายงานที่รู้จัก, ป้ายกำกับที่ไม่รู้จัก.',
 
@@ -781,7 +781,7 @@
     'rua.p1.li3': 'Ketahanan abuse & rate limiting; deteksi flood; selaras dengan model ancaman RFC 9091.',
     'rua.p1.li4': 'Kejelasan UI: labeli sebagai telemetry yang dilaporkan penerima; pisahkan hasil SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - Kualitas produk & diferensiasi</strong>',
-    'rua.p2.li1': 'Potongan DMARC copy-paste (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) dengan panduan rollout bertahap.',
+    'rua.p2.li1': 'Potongan DMARC siap salin (misalnya p=none; rua=mailto:...) dengan panduan penerapan bertahap.',
     'rua.p2.li2': 'Ekspor (JSON/CSV) dengan metadata: organisasi pelapor, periode, waktu parsing, versi alat.',
     'rua.p2.li3': 'Petunjuk keaslian opsional: DKIM/SPF pada email laporan, allowlist pelapor yang dikenal, labeli yang tidak dikenal.',
 
@@ -931,7 +931,7 @@
     'rua.p1.li3': 'Väärkasutuse vastane kaitse & rate limiting; floodide tuvastus; kooskõlas RFC 9091 ohumudeliga.',
     'rua.p1.li4': 'UI selgus: märgista andmed kui vastuvõtja raporteeritud telemeetria; eralda SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - Toote kvaliteet ja eristumine</strong>',
-    'rua.p2.li1': 'Kopeeri-kleebi DMARC lõigud (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) koos etapilise juurutuse juhisega.',
+    'rua.p2.li1': 'Kopeerimiseks valmis DMARC näited (nt p=none; rua=mailto:...) koos etapilise kasutuselevõtu juhisega.',
     'rua.p2.li2': 'Ekspordid (JSON/CSV) metaga: raporteeriv organisatsioon, periood, parsimise aeg, tööriista versioon.',
     'rua.p2.li3': 'Valikulised autentsuse vihjed: DKIM/SPF aruandemeilidel, tuntud raporteerijate allowlist, märgista tundmatud.',
 
@@ -1081,7 +1081,7 @@
     'rua.p1.li3': '악용 방어 및 레이트 리밋; 폭주 감지; RFC 9091 위협 모델에 정렬.',
     'rua.p1.li4': 'UI 명확성: 수신자 보고 텔레메트리로 표시하고 SPF/DKIM/alignment 결과를 분리.',
     'rua.p2.title.html': '<strong>P2 - 품질과 차별화</strong>',
-    'rua.p2.li1': '복사-붙여넣기 DMARC 스니펫(p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100)과 단계적 적용 가이드.',
+    'rua.p2.li1': '그대로 복사해 쓸 수 있는 DMARC 예시(p=none; rua=mailto:...)와 단계적 적용 가이드.',
     'rua.p2.li2': '내보내기(JSON/CSV)와 메타데이터: 보고 조직, 기간, 파싱 시각, 도구 버전.',
     'rua.p2.li3': '선택적 진위 힌트: 보고서 메일의 DKIM/SPF, 알려진 보고자 allowlist, 미확인 표기.',
 
@@ -1231,7 +1231,7 @@
     'rua.p1.li3': 'Resistencia al abuso y rate limiting; detectar floods; alinearse con el modelo de amenaza RFC 9091.',
     'rua.p1.li4': 'Claridad UI: etiquetar como telemetria reportada por receptores; separar resultados SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - Calidad y diferenciacion</strong>',
-    'rua.p2.li1': 'Fragmentos DMARC listos para copiar (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) con guia de despliegue gradual.',
+    'rua.p2.li1': 'Fragmentos DMARC listos para copiar (por ejemplo, p=none; rua=mailto:...) con guía de despliegue gradual.',
     'rua.p2.li2': 'Exportaciones (JSON/CSV) con metadatos: organizacion reportante, periodo, hora de parseo, version de la herramienta.',
     'rua.p2.li3': 'Sugerencias opcionales de autenticidad: DKIM/SPF en correos de reporte, allowlist de reportantes conocidos, marcar desconocidos.',
 
@@ -1381,7 +1381,7 @@
     'rua.p1.li3': 'Missbrauchsresistenz & Rate Limiting; Floods erkennen; am RFC-9091-Bedrohungsmodell ausrichten.',
     'rua.p1.li4': 'UI-Klarheit: als vom Empfanger gemeldete Telemetrie kennzeichnen; SPF/DKIM/Alignment getrennt anzeigen.',
     'rua.p2.title.html': '<strong>P2 - Produktqualitat & Differenzierung</strong>',
-    'rua.p2.li1': 'Copy-paste-DMARC-Snippets (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) mit Staging-Guidance.',
+    'rua.p2.li1': 'Kopierfertige DMARC-Beispiele (z. B. p=none; rua=mailto:...) mit Anleitung für die schrittweise Einführung.',
     'rua.p2.li2': 'Exporte (JSON/CSV) mit Metadaten: berichtende Organisation, Zeitraum, Parse-Zeitstempel, Tool-Version.',
     'rua.p2.li3': 'Optionale Echtheits-Hinweise: DKIM/SPF der Report-Mails, Allowlist bekannter Reporter, Unbekannte markieren.',
 
@@ -1531,7 +1531,7 @@
     'rua.p1.li3': 'Устойчивость к злоупотреблениям и rate limiting; детекция флудов; соответствие модели угроз RFC 9091.',
     'rua.p1.li4': 'Ясность UI: пометка как телеметрии, сообщённой получателем; разделять SPF/DKIM/alignment.',
     'rua.p2.title.html': '<strong>P2 - Качество продукта и дифференциация</strong>',
-    'rua.p2.li1': 'Готовые DMARC-фрагменты для копирования (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) с поэтапным внедрением.',
+    'rua.p2.li1': 'Готовые к копированию примеры DMARC (например, p=none; rua=mailto:...) и рекомендации по поэтапному внедрению.',
     'rua.p2.li2': 'Экспорт (JSON/CSV) с метаданными: организация-репортёр, период, время парсинга, версия инструмента.',
     'rua.p2.li3': 'Опциональные подсказки подлинности: DKIM/SPF на письмах отчётов, allowlist известных репортёров, метки неизвестных.',
 
@@ -1681,7 +1681,7 @@
     'rua.p1.li3': '抗滥用与限速；检测洪泛；对齐 RFC 9091 威胁模型。',
     'rua.p1.li4': 'UI 清晰度：标注为接收方上报的遥测数据；分开显示 SPF/DKIM/alignment 结果。',
     'rua.p2.title.html': '<strong>P2 - 产品质量与差异化</strong>',
-    'rua.p2.li1': '可复制的 DMARC 片段（p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100）及分阶段部署指南。',
+    'rua.p2.li1': '可直接复制使用的 DMARC 示例（如 p=none; rua=mailto:...），并附分阶段部署指南。',
     'rua.p2.li2': '导出（JSON/CSV）并包含元数据：报告组织、周期、解析时间、工具版本。',
     'rua.p2.li3': '可选的真实性提示：报告邮件 DKIM/SPF、已知报告方白名单、标记未知。',
 
@@ -1831,7 +1831,7 @@
     'rua.p1.li3': 'ការទប់ស្កាត់ការប្រើប្រាស់ខុស និង rate limiting; រកឃើញ flood; សម្របទៅនឹង threat model របស់ RFC 9091។',
     'rua.p1.li4': 'ភាពច្បាស់លាស់ក្នុង UI: សម្គាល់ថាជា telemetry ពីអ្នកទទួល; បំបែក SPF/DKIM/alignment។',
     'rua.p2.title.html': '<strong>P2 - គុណភាពផលិតផល និងភាពខុសប្លែក</strong>',
-    'rua.p2.li1': 'Snippet DMARC សម្រាប់ copy-paste (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) ជាមួយមគ្គុទេសក៍ rollout ជាដំណាក់កាល។',
+    'rua.p2.li1': 'ឧទាហរណ៍ DMARC ដែលអាចចម្លងទៅប្រើបាន (ឧ. p=none; rua=mailto:...) និងការណែនាំអនុវត្តជាដំណាក់កាល។',
     'rua.p2.li2': 'ការនាំចេញ (JSON/CSV) និង metadata៖ អង្គការរាយការណ៍, រយៈពេល, ពេលវេលា parse, កំណែឧបករណ៍។',
     'rua.p2.li3': 'សញ្ញាផ្ទៀងផ្ទាត់ជម្រើស៖ DKIM/SPF លើអ៊ីមែលរបាយការណ៍, allowlist អ្នករាយការណ៍ដែលស្គាល់, ស្លាក unknown។',
 
@@ -1981,7 +1981,7 @@
     'rua.p1.li3': 'အလွဲသုံးစားမှုကာကွယ်မှုနှင့် rate limiting; flood ကို တွေ့ရှိရန်; RFC 9091 threat model နှင့် ကိုက်ညီစေရန်။',
     'rua.p1.li4': 'UI ရှင်းလင်းမှု: လက်ခံသူကတင်ပို့သော telemetry အဖြစ် အမှတ်အသားပြုခြင်း; SPF/DKIM/alignment ကို ခွဲပြရန်။',
     'rua.p2.title.html': '<strong>P2 - ထုတ်ကုန်အရည်အသွေးနှင့် ကွဲပြားမှု</strong>',
-    'rua.p2.li1': 'ကူးယူအသုံးပြုနိုင်သော DMARC snippets (p=none; rua=mailto:...; fo=1; adkim=s; aspf=s; pct=100) နှင့် အဆင့်လိုက် rollout လမ်းညွှန်။',
+    'rua.p2.li1': 'ကူးယူသုံးနိုင်သော DMARC ဥပမာများ (ဥပမာ p=none; rua=mailto:...) နှင့် အဆင့်လိုက် အသုံးချရန် လမ်းညွှန်။',
     'rua.p2.li2': 'JSON/CSV ထုတ်ယူမှုနှင့် metadata: အစီရင်ခံအဖွဲ့, ကာလ, parse အချိန်, ကိရိယာဗားရှင်း။',
     'rua.p2.li3': 'ရွေးချယ်နိုင်သော အမှန်တကယ်မှုအချက်များ: အစီရင်ခံအီးမေးလ်တွင် DKIM/SPF, သိKnown reporter allowlist, မသိသူများကို လက်မှတ်တင်။',
 

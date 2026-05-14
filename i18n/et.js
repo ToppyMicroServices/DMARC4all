@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: päris kirja allkirjastus/joondus kinnitamata",
   "dkim.messageUnverified.detail": "DNS näitab ainult võtit; kontrolli kirja päiseid (DKIM-Signature).",
   "dmarc.staged.title": "DMARC-i astmeline juurutus",
-  "dmarc.staged.detailHtml": "Soovituslikud sammud: <ul><li>1) Alusta p=none ja kogu rua aruandeid</li><li>2) Liigu quarantine’ile, kui valepositiivsed vähenevad</li><li>3) Lõpuks liigu reject’ile</li><li>Kasuta pct= järk-järgulise juurutuse jaoks (nt <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "Soovitatav käik: <ul><li>1) Alusta p=none poliitikaga ja kogu RUA aruandeid</li><li>2) Kontrolli lubatud kirju RUA andmete ja tegelike kirjade päiste järgi</li><li>3) Liigu quarantine poliitikale, kui valepositiivsete risk on väike</li><li>4) Kaalu reject poliitikat pärast mõju hindamist</li></ul>",
   "report.repro.title": "Reprodutseeritavus",
   "report.repro.time": "Kontrolli aeg",
   "report.repro.resolver": "Resolver",

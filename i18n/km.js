@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: ការចុះហត្ថលេខា/ការតម្រឹមក្នុងអ៊ីមែលពិតមិនទាន់ផ្ទៀងផ្ទាត់",
   "dkim.messageUnverified.detail": "DNS បង្ហាញតែគ្រាប់ចុច; សូមពិនិត្យ header (DKIM-Signature).",
   "dmarc.staged.title": "ការដាក់ប្រើ DMARC ជាដំណាក់កាល",
-  "dmarc.staged.detailHtml": "ជំហានណែនាំ: <ul><li>1) ចាប់ផ្តើមជាមួយ p=none និងប្រមូលរបាយការណ៍ rua</li><li>2) ផ្លាស់ទៅ quarantine ពេល false positive កាន់តែតិច</li><li>3) ចុងក្រោយផ្លាស់ទៅ reject</li><li>ប្រើ pct= សម្រាប់ដំណាក់កាល (ឧ. <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "ដំណើរការដែលណែនាំ: <ul><li>1) ចាប់ផ្តើមដោយ p=none ហើយប្រមូលរបាយការណ៍ RUA</li><li>2) ផ្ទៀងផ្ទាត់អ៊ីមែលស្របច្បាប់ដោយប្រើទិន្នន័យ RUA និង header អ៊ីមែលពិត</li><li>3) ផ្លាស់ទៅ quarantine នៅពេលហានិភ័យ false positive ទាប</li><li>4) ពិចារណា reject បន្ទាប់ពីវាយតម្លៃផលប៉ះពាល់</li></ul>",
   "report.repro.title": "ភាពអាចធ្វើឡើងវិញ",
   "report.repro.time": "ពេលវេលាវាយតម្លៃ",
   "report.repro.resolver": "Resolver",

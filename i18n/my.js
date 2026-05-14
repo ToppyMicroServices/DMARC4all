@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: အမှန်တကယ်မေးလ်တွင် စာချုပ်ချင်း/align မအတည်ပြုသေး",
   "dkim.messageUnverified.detail": "DNS သည် key သာပြသသည်။ header (DKIM-Signature) ဖြင့် အတည်ပြုပါ။",
   "dmarc.staged.title": "DMARC ကို အဆင့်လိုက် ပြောင်းရွှေ့ခြင်း",
-  "dmarc.staged.detailHtml": "အကြံပြုအဆင့်များ: <ul><li>1) p=none ဖြင့် စတင်၍ rua အစီရင်ခံစာများ စုဆောင်း</li><li>2) false positive လျော့သွားသည့်အခါ quarantine သို့</li><li>3) နောက်ဆုံးတွင် reject သို့</li><li>pct= ဖြင့် အဆင့်လိုက် အသုံးချ (ဥပမာ <span class='mono'>pct=25→50→100</span>)</li></ul>",
+  "dmarc.staged.detailHtml": "အကြံပြုထားသော လမ်းကြောင်း: <ul><li>1) p=none ဖြင့် စတင်ပြီး RUA အစီရင်ခံစာများကို စုဆောင်းပါ</li><li>2) RUA ဒေတာနှင့် တကယ့်အီးမေးလ် header များဖြင့် တရားဝင်အီးမေးလ်များကို စစ်ဆေးပါ</li><li>3) false positive အန္တရာယ် နည်းလာပါက quarantine သို့ ပြောင်းပါ</li><li>4) သက်ရောက်မှုကို စစ်ဆေးပြီးနောက် reject ကို စဉ်းစားပါ</li></ul>",
   "report.repro.title": "ပြန်လည်ထုတ်ဖော်နိုင်မှု",
   "report.repro.time": "စစ်ဆေးသည့်အချိန်",
   "report.repro.resolver": "Resolver",

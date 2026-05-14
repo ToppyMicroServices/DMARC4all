@@ -127,7 +127,7 @@
   "dkim.messageUnverified.title": "DKIM: 実メールでの署名/整合は未検証",
   "dkim.messageUnverified.detail": "DNSだけでは署名実施/整合は確定できない.送信メールのヘッダ（DKIM-Signature）で確認する.",
   "dmarc.staged.title": "DMARCの段階導入（推奨ステップ）",
-  "dmarc.staged.detailHtml": "推奨ステップ: <ul><li>1) p=none で rua を収集</li><li>2) 誤判定が減ったら quarantine</li><li>3) 最終的に reject</li><li>pct= を併用して段階適用（例: <span class='mono'>pct=25→50→100</span>）</li></ul>",
+  "dmarc.staged.detailHtml": "推奨ステップ: <ul><li>1) p=none で RUA レポートを集める</li><li>2) RUA と実際のメールヘッダで正規メールを確認する</li><li>3) 誤判定のリスクが低ければ quarantine へ進む</li><li>4) 影響を確認したうえで reject を検討する</li></ul>",
   "report.repro.title": "再現性",
   "report.repro.time": "診断時刻",
   "report.repro.resolver": "Resolver",
