@@ -95,12 +95,17 @@ function watchForWaitingWorker(registration) {
 	});
 }
 
+export function shouldReloadOnControllerChange(hadControllerAtStart, alreadyTriggered) {
+	return Boolean(hadControllerAtStart) && !alreadyTriggered;
+}
+
 export function registerPwa() {
 	if (pwaRegistered) return;
 	pwaRegistered = true;
 
 	if (!('serviceWorker' in navigator)) return;
 	if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+	const hadControllerAtStart = Boolean(navigator.serviceWorker.controller);
 
 	window.addEventListener('load', () => {
 		navigator.serviceWorker.register('./sw.js').then((registration) => {
@@ -111,7 +116,7 @@ export function registerPwa() {
 	}, { once: true });
 
 	navigator.serviceWorker.addEventListener('controllerchange', () => {
-		if (refreshTriggered) return;
+		if (!shouldReloadOnControllerChange(hadControllerAtStart, refreshTriggered)) return;
 		refreshTriggered = true;
 		window.location.reload();
 	});

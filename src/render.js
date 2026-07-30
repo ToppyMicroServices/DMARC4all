@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js';
+
 export function createRenderer(deps) {
 	const {
 		esc,
+		getLang = () => 'und',
 		getDmarcRuaExampleHtml,
 		isJa,
 		report,
@@ -142,7 +145,7 @@ export function createRenderer(deps) {
 	}
 
 	function buildJsonExport(results) {
-		return JSON.stringify(results, null, 2);
+		return JSON.stringify(buildPortableReport(results, { locale: getLang() }), null, 2);
 	}
 
 	function buildMarkdownReport(results) {
@@ -497,57 +500,37 @@ export function createRenderer(deps) {
 		`;
 	}
 
-	function assessEnforcementReadiness(results) {
-		const dmarcRecord = results && results.dmarc ? String(results.dmarc.record || '') : '';
-		const spfRecords = results && results.spf && Array.isArray(results.spf.records) ? results.spf.records : [];
-		const dkimConfirmed = results && results.dkim && Array.isArray(results.dkim.confirmedSelectors) ? results.dkim.confirmedSelectors : [];
-		const p = dmarcRecord ? ((/;\s*p=([^;]+)/i.exec(`; ${dmarcRecord}`) || [])[1] || '').toLowerCase() : '';
-		const hasRua = /;\s*rua\s*=/i.test(`; ${dmarcRecord}`);
-		const spfUsable = spfRecords.length === 1 && !/\+all\b/i.test(spfRecords[0]);
-		const dkimUsable = dkimConfirmed.length > 0;
-		const validPolicy = ['none', 'quarantine', 'reject'].includes(p);
-		const blockers = [];
-
-		if (!dmarcRecord) blockers.push(tr('DMARC レコードが未設定', 'DMARC record is missing'));
-		if (dmarcRecord && !validPolicy) blockers.push(tr('DMARC policy（p=）を none / quarantine / reject のいずれかにしてください', 'DMARC policy (p=) should be none, quarantine, or reject'));
-		if (dmarcRecord && !hasRua) blockers.push(tr('RUA 集計レポートの宛先が未設定', 'RUA aggregate reporting is not configured'));
-		if (!spfUsable) blockers.push(tr('SPF を 1 レコードに整理し、+all を避ける必要があります', 'SPF should be a single usable record without +all'));
-		if (!dkimUsable) blockers.push(tr('DKIM 署名を実メールまたは selector で確認してください', 'DKIM signing should be confirmed by selector or real message headers'));
-
-		if (p === 'reject' && hasRua && spfUsable && dkimUsable) {
-			return {
-				level: 'good',
-				label: tr('reject 適用済み', 'Reject enforced'),
-				next: tr('転送・例外・サブドメイン方針を定期確認', 'Keep reviewing forwarding, exceptions, and subdomain policy'),
-				blockers: []
-			};
-		}
-		if (p === 'quarantine' && hasRua && spfUsable && dkimUsable) {
-			return {
-				level: 'good',
-				label: tr('reject へ進める候補', 'Ready for reject'),
-				next: tr('RUA で誤判定が少ないことを確認して reject へ段階移行', 'Use RUA reports to confirm low false positives, then move toward reject'),
-				blockers: []
-			};
-		}
-		if (p === 'none' && hasRua && spfUsable && dkimUsable) {
-			return {
-				level: 'warn',
-				label: tr('quarantine へ進める候補', 'Ready for quarantine'),
-				next: tr('RUA と実メールヘッダを確認し、影響範囲を把握してから quarantine へ進む', 'Review RUA reports and real message headers, then move to quarantine with impact understood'),
-				blockers: []
-			};
-		}
+	function localizeEnforcementReadiness(results) {
+		const assessment = assessEnforcementReadiness(results);
+		const labels = {
+			reject_enforced: tr('reject 適用済み', 'Reject enforced'),
+			ready_for_reject: tr('reject へ進める候補', 'Ready for reject'),
+			ready_for_quarantine: tr('quarantine へ進める候補', 'Ready for quarantine'),
+			monitoring_only: tr('監視・準備段階', 'Monitoring only')
+		};
+		const nextActions = {
+			reject_enforced: tr('転送・例外・サブドメイン方針を定期確認', 'Keep reviewing forwarding, exceptions, and subdomain policy'),
+			ready_for_reject: tr('RUA で誤判定が少ないことを確認して reject へ段階移行', 'Use RUA reports to confirm low false positives, then move toward reject'),
+			ready_for_quarantine: tr('RUA と実メールヘッダを確認し、影響範囲を把握してから quarantine へ進む', 'Review RUA reports and real message headers, then move to quarantine with impact understood'),
+			monitoring_only: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics')
+		};
+		const blockerText = {
+			dmarc_record_missing: tr('DMARC レコードが未設定', 'DMARC record is missing'),
+			dmarc_policy_invalid: tr('DMARC policy（p=）を none / quarantine / reject のいずれかにしてください', 'DMARC policy (p=) should be none, quarantine, or reject'),
+			aggregate_reporting_missing: tr('RUA 集計レポートの宛先が未設定', 'RUA aggregate reporting is not configured'),
+			spf_not_usable: tr('SPF を 1 レコードに整理し、+all を避ける必要があります', 'SPF should be a single usable record without +all'),
+			dkim_not_confirmed: tr('DKIM 署名を実メールまたは selector で確認してください', 'DKIM signing should be confirmed by selector or real message headers')
+		};
 		return {
-			level: !dmarcRecord || (dmarcRecord && !validPolicy) ? 'bad' : 'warn',
-			label: tr('監視・準備段階', 'Monitoring only'),
-			next: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics'),
-			blockers: blockers.slice(0, 4)
+			level: assessment.level,
+			label: labels[assessment.status],
+			next: nextActions[assessment.status],
+			blockers: assessment.blockers.slice(0, 4).map((code) => blockerText[code] || code)
 		};
 	}
 
 	function renderEnforcementReadiness(results) {
-		const readiness = assessEnforcementReadiness(results);
+		const readiness = localizeEnforcementReadiness(results);
 		const blockerHtml = readiness.blockers.length
 			? `<ul class="list mt-10">${readiness.blockers.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`
 			: `<div class="trust-copy mt-10">${esc(tr('主要な前提は満たしています。変更は小さく段階的に行ってください。', 'The main prerequisites are in place. Make enforcement changes gradually.'))}</div>`;

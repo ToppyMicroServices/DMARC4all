@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  Copyright 2026 ToppyMicroServices OÜ
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1b2a">
+  <title>AI & Machine Access | DMARC4all</title>
+  <meta name="description" content="Machine-readable access to DMARC4all: llms.txt, a versioned diagnosis JSON format, JSON Schema, safety boundaries, and citation guidance.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://dmarc4all.toppymicros.com/ai_usage.html">
+  <link rel="alternate" type="text/plain" href="https://dmarc4all.toppymicros.com/llms.txt" title="DMARC4all LLM index">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="DMARC4all">
+  <meta property="og:title" content="AI & Machine Access | DMARC4all">
+  <meta property="og:description" content="Versioned, machine-readable DMARC4all reports with explicit safety and interpretation boundaries.">
+  <meta property="og:url" content="https://dmarc4all.toppymicros.com/ai_usage.html">
+  <meta property="og:image" content="https://dmarc4all.toppymicros.com/apple-touch-icon.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AI & Machine Access | DMARC4all">
+  <meta name="twitter:description" content="Versioned, machine-readable DMARC4all reports with explicit safety and interpretation boundaries.">
+  <meta name="twitter:image" content="https://dmarc4all.toppymicros.com/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css?v=4">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "AI & Machine Access for DMARC4all",
+      "url": "https://dmarc4all.toppymicros.com/ai_usage.html",
+      "description": "Machine-readable access, report schema, and safe-use guidance for DMARC4all.",
+      "author": {
+        "@type": "Organization",
+        "name": "ToppyMicroServices"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <div class="brandbar" aria-label="ToppyMicroServices">
+      <a href="index.html" style="display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none;">
+        <img src="apple-touch-icon.png" alt="ToppyMicroServices">
+        <span class="brand-name">ToppyMicroServices</span>
+      </a>
+      <div class="brand-actions">
+        <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+
+    <main class="hero document-page">
+      <p class="pill">AI & Machine Access</p>
+      <h1>Stable evidence for humans and AI agents</h1>
+      <p class="tagline">DMARC4all publishes a curated LLM index and a versioned JSON report contract so tools can interpret a diagnosis without scraping presentation HTML.</p>
+
+      <section class="guide-grid mt-12">
+        <article class="card p-16 guide-card">
+          <div class="action-kicker">Discover</div>
+          <h2>LLM-readable context</h2>
+          <p><a href="llms.txt"><span class="mono mono-inline">/llms.txt</span></a> is the concise map. <a href="llms-full.txt"><span class="mono mono-inline">/llms-full.txt</span></a> adds field semantics, readiness states, limitations, and safe agent behavior.</p>
+        </article>
+        <article class="card p-16 guide-card">
+          <div class="action-kicker">Interpret</div>
+          <h2>Versioned JSON contract</h2>
+          <p>The diagnosis page exports <span class="mono mono-inline">dmarc4all-diagnosis</span> JSON. Version <span class="mono mono-inline">1.0.0</span> excludes rendering HTML and separates summary, observations, remediation, evidence, limitations, and errors.</p>
+        </article>
+        <article class="card p-16 guide-card">
+          <div class="action-kicker">Validate</div>
+          <h2>Schema and example</h2>
+          <p>Use the <a href="schemas/diagnosis-result.schema.json">JSON Schema 2020-12 document</a> to validate exports and the <a href="examples/diagnosis-result.example.json">example report</a> to test consumers.</p>
+        </article>
+        <article class="card p-16 guide-card">
+          <div class="action-kicker">Current boundary</div>
+          <h2>Browser export, not a public API</h2>
+          <p>Diagnostics currently run in the browser. DMARC4all does not yet expose a public server API or MCP endpoint. Agents can read the documentation and consume a JSON report exported by the operator.</p>
+        </article>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>Safe automation contract</h2>
+        <ol class="list">
+          <li>Confirm that the operator manages the domain or has explicit permission to test it.</li>
+          <li>Read <span class="mono mono-inline">scope.limitations</span> and <span class="mono mono-inline">errors</span> before interpreting the score.</li>
+          <li>Treat <span class="mono mono-inline">enforcementReadiness</span> as triage, not approval to change DNS.</li>
+          <li>Compare current and suggested values, then confirm the authorized sender inventory and provider requirements.</li>
+          <li>Verify representative message headers and recent DMARC aggregate reports before moving to quarantine or reject.</li>
+          <li>Require human approval and a rollback plan before applying any DNS change.</li>
+        </ol>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>日本語での利用方針</h2>
+        <p>AI は、診断結果のスコアだけで変更可否を判断してはいけません。JSON 出力には、公開 DNS で確認できた事実、判定上の制約、優先事項、修正案、根拠となる DNS レコード、取得時のエラーを分けて収録しています。</p>
+        <p>DMARC の <span class="mono mono-inline">p=quarantine</span> や <span class="mono mono-inline">p=reject</span> へ進む前に、正規の送信元一覧、実メールの認証結果、RUA 集計レポート、現在の DNS 値、切り戻し手順を人が確認してください。修正案は、そのまま自動適用するための命令ではなく、レビューのたたき台です。</p>
+      </section>
+
+      <section class="card p-16 mt-12">
+        <h2>How to cite a diagnosis</h2>
+        <p>For the product, cite: “DMARC4all, ToppyMicroServices, DMARC4all public-DNS email authentication diagnostic, <a href="https://dmarc4all.toppymicros.com/">https://dmarc4all.toppymicros.com/</a> (accessed YYYY-MM-DD).”</p>
+        <p>For a specific result, retain <span class="mono mono-inline">generatedAt</span>, <span class="mono mono-inline">resolver</span>, <span class="mono mono-inline">schemaVersion</span>, and the relevant evidence. Do not describe the output as a certification or a receiver-side conformance result.</p>
+      </section>
+
+      <p class="mt-12"><a href="index.html">Back to Quick Check</a> / <a href="standards_privacy.html">Standards & Privacy</a> / <a href="dns_provider_guides.html">DNS provider guides</a></p>
+    </main>
+  </div>
+</body>
+</html>

@@ -40,6 +40,18 @@ It also includes a DMARC RUA service description page and an operational workflo
 - IETF DMARC watch: track DMARCbis, DMARC Aggregate Reporting, and DMARC Failure Reporting; separate standards guidance from provider-specific behavior when they differ.
 - IETF/WG sharing position: this is a public-DNS-only implementation aid, not a replacement for the specifications or a receiver-side conformance test. Feedback is especially useful on wording accuracy, RUA/RUF privacy guidance, and enforcement-readiness criteria.
 
+## AI and machine access
+
+- Curated LLM index: https://dmarc4all.toppymicros.com/llms.txt
+- Detailed machine context: https://dmarc4all.toppymicros.com/llms-full.txt
+- AI usage and safety guidance: https://dmarc4all.toppymicros.com/ai_usage.html
+- Portable diagnosis schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
+- Example diagnosis report: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
+
+The browser's JSON export uses the versioned `dmarc4all-diagnosis` format and omits presentation HTML. It separates observations, readiness, remediation, evidence, limitations, and errors so automated consumers do not need to scrape the results page.
+
+DMARC4all does not currently expose a public diagnosis API or MCP endpoint. Suggested records are review drafts and must not be applied automatically.
+
 ## Usage
 
 ### Local
@@ -173,6 +185,7 @@ This tool sends DNS queries for the entered domain to the selected DNS-over-HTTP
 - `src/diagnose.js`: main diagnosis runner/orchestration
 - `src/diagnostics.js`: DNS/network/protocol helper functions
 - `src/render.js`: findings, report sections, exports, and DNSBL rendering
+- `src/portable-report.js`: stable machine-readable diagnosis export
 - `src/i18n.js`: translation state and helpers
 
 ## Docs

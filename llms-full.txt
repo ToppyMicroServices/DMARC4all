@@ -1,0 +1,90 @@
+# DMARC4all full context
+
+DMARC4all is an open-source, browser-based diagnostic maintained by ToppyMicroServices. Its purpose is to help operators, especially those working outside English-only environments, understand public email-authentication DNS and move from DMARC monitoring toward enforcement without treating DNS evidence as complete operational proof.
+
+Canonical site: https://dmarc4all.toppymicros.com/
+Source: https://github.com/ToppyMicroServices/DMARC4all
+License: Apache-2.0
+Portable report format: dmarc4all-diagnosis
+Portable report schema version: 1.0.0
+Schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
+Example: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
+
+## What the diagnosis checks
+
+- DMARC TXT at _dmarc.<domain>, including policy and aggregate-report destination signals.
+- SPF TXT records, risky +all use, multiple-record conditions, and a bounded expansion view.
+- Common DKIM selector candidates and CNAME delegation signals. This is not exhaustive selector discovery.
+- BIMI, MX, MTA-STS, TLS-RPT, CAA, and DNSSEC public records.
+- Optional lightweight HTTPS and small-scale subdomain checks.
+- Best-effort DNS hosting and mail-platform signals.
+
+## What the diagnosis does not establish
+
+- It does not send or receive email.
+- It does not access mailboxes, mail servers, DNS control panels, or provider consoles.
+- It does not prove that live messages pass SPF, DKIM, or DMARC alignment.
+- It does not prove receiver-side conformance.
+- It does not replace message-header review, sender inventory, DMARC aggregate reports, provider documentation, or change-control review.
+- A score is a navigation aid, not a certification or security guarantee.
+
+## Privacy and network behavior
+
+The domain entered by the user is sent to the selected DNS-over-HTTPS resolver. The public build defaults to Cloudflare and can also use another listed resolver or a custom HTTPS DoH endpoint. The public build may query rdap.org, the checked domain for lightweight HTTPS reachability, and an HTTPS BIMI logo URL. DMARC4all has no application backend for browser diagnostics and does not collect submitted domains itself, but third-party endpoints may process or log requests under their own policies.
+
+## Enforcement readiness
+
+The machine-readable status is one of:
+
+- monitoring_only: prerequisites visible in public DNS are incomplete or the DMARC policy is not ready to advance.
+- ready_for_quarantine: p=none is present, aggregate reporting is configured, SPF is represented by one usable record without +all, and at least one DKIM selector was confirmed.
+- ready_for_reject: p=quarantine is present and the same public-DNS prerequisites are met.
+- reject_enforced: p=reject is present and the same public-DNS prerequisites are met.
+
+These states are deliberately conservative summaries of public DNS. Even ready_for_quarantine and ready_for_reject require confirmation from DMARC aggregate reports and representative real-message headers before a policy change.
+
+Blocker codes:
+
+- dmarc_record_missing
+- dmarc_policy_invalid
+- aggregate_reporting_missing
+- spf_not_usable
+- dkim_not_confirmed
+
+## Portable JSON report
+
+The browser's Export JSON action produces a versioned object that excludes HTML rendering fragments. Stable top-level fields are:
+
+- $schema, format, schemaVersion, generatedAt, domain, locale
+- scope: public-DNS basis, resolver, and limitation codes
+- summary: scores, enforcementReadiness, and estimated mail provider
+- observations: DMARC, SPF, DKIM, BIMI, MX, MTA-STS/TLS-RPT, CAA, DNSSEC, and optional subdomain results
+- priorities: human-readable prioritized actions in the selected UI language
+- remediation: suggested record changes, verification steps, and rollback text in the selected UI language
+- evidence: observed DNS records and TTL values captured during the run
+- errors: lookup or diagnostic errors that should reduce confidence
+
+Consumers should validate the declared schema version, reject unknown versions, preserve evidence, and never auto-apply remediation records.
+
+## Safe agent behavior
+
+1. Ask the operator to confirm that they manage the domain or have permission to test it.
+2. Run the browser diagnosis or ask the operator for an exported JSON report.
+3. Read scope.limitations and errors before interpreting scores.
+4. Use summary.enforcementReadiness as a triage signal, not a deployment authorization.
+5. Compare remediation currentValue and suggestedValue.
+6. Confirm all legitimate senders, current DNS values, provider-specific requirements, real-message alignment, and recent aggregate reports.
+7. Present a staged change with verification and rollback.
+8. Require human approval before any DNS change.
+
+## Citation
+
+Suggested factual citation:
+
+DMARC4all, ToppyMicroServices, "DMARC4all public-DNS email authentication diagnostic," https://dmarc4all.toppymicros.com/ (accessed YYYY-MM-DD).
+
+When citing a diagnosis, include the checked domain only if disclosure is appropriate, plus generatedAt, resolver, schemaVersion, and the relevant evidence. Do not describe DMARC4all output as a certification.
+
+## Standards position
+
+DMARC4all is an implementation aid, not a substitute for DMARC specifications. The project tracks DMARCbis and the related aggregate- and failure-reporting documents, favors aggregate reporting as the practical basis for staged enforcement, and treats failure reporting as privacy-sensitive. If project guidance and a finalized standard differ, the standard is authoritative and the project should be updated.

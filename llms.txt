@@ -1,0 +1,33 @@
+# DMARC4all
+
+> DMARC4all is a free, browser-based email authentication diagnostic from ToppyMicroServices. It inspects public DNS for DMARC, SPF, DKIM, BIMI, MX, MTA-STS, TLS-RPT, CAA, and DNSSEC, then provides evidence, enforcement-readiness guidance, and copy-ready remediation drafts.
+
+Important interpretation notes:
+- Diagnostics run in the browser. DMARC4all does not provide a public server API or MCP endpoint at this time.
+- The selected DNS-over-HTTPS resolver receives the domain being checked. The default resolver is Cloudflare.
+- Results are indicative and based primarily on public DNS. Confirm enforcement decisions with real message headers and DMARC aggregate reports.
+- DKIM selectors cannot be discovered exhaustively from DNS.
+- Do not apply generated DNS values automatically. Confirm authorized senders, provider requirements, current records, and rollback steps first.
+- Use subdomain scanning only for domains you manage or have explicit permission to test.
+
+## Primary resources
+
+- [DMARC4all diagnosis](https://dmarc4all.toppymicros.com/): Run the browser-based public DNS check and export a versioned JSON report.
+- [AI and machine access](https://dmarc4all.toppymicros.com/ai_usage.html): Current access methods, safety boundaries, report contract, and citation guidance.
+- [Portable diagnosis JSON Schema](https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json): JSON Schema 2020-12 contract for exported reports.
+- [Portable diagnosis example](https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json): Example report using reserved documentation data.
+- [Full LLM context](https://dmarc4all.toppymicros.com/llms-full.txt): Compact product, interpretation, and field-level context.
+
+## Operational guidance
+
+- [Standards and privacy](https://dmarc4all.toppymicros.com/standards_privacy.html): DMARCbis, aggregate reporting, failure reporting, RUA/RUF, privacy, and project scope.
+- [DNS provider guides](https://dmarc4all.toppymicros.com/dns_provider_guides.html): Practical notes for Cloudflare, Route 53, onamae.com, Xserver, Google Workspace, and Microsoft 365.
+- [RUA service overview](https://dmarc4all.toppymicros.com/rua_service.html): Aggregate-report service design and operational position.
+
+## Project
+
+- [Source repository](https://github.com/ToppyMicroServices/DMARC4all): Source code, tests, issues, and releases under Apache-2.0.
+
+## Optional
+
+- [Sitemap](https://dmarc4all.toppymicros.com/sitemap.xml): Index of human-facing pages and localized entry points.

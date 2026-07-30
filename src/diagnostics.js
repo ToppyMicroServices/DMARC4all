@@ -689,7 +689,7 @@ export function computeOverallScore(results) {
 		// ignore lightweight score enrichment failures
 	}
 
-	if (!results.dkim || !results.dkim.selectors || results.dkim.selectors.length === 0) {
+	if (!results.dkim || !Array.isArray(results.dkim.confirmedSelectors) || results.dkim.confirmedSelectors.length === 0) {
 		score -= 18;
 		chips.push('DKIM: missing');
 	} else {

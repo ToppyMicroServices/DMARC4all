@@ -190,6 +190,26 @@ test('createDiagnosisRunner consolidates multiple SPF records into one draft', a
 	assert.match(consolidateFix.records[0].copyText, /^example\.com\. 3600 IN TXT "/);
 });
 
+test('createDiagnosisRunner does not confirm a revoked DKIM key', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=none; rua=mailto:dmarc@example.com')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['example.com|MX', mxAnswer('10 mail.example.net.')],
+		['selector1._domainkey.example.com|TXT', txtAnswer('v=DKIM1; p=')]
+	]);
+	const dohQuery = async (name, type) => answers.get(`${name}|${type}`) || {};
+	const runner = createRunner({ dohQuery });
+
+	const results = await withMockFetch(() => runner('example.com'));
+
+	assert.deepEqual(results.dkim.selectors, ['selector1']);
+	assert.deepEqual(results.dkim.confirmedSelectors, []);
+	assert.ok(results.priority.some((item) => item.title === 'DKIM unverified/missing'));
+	assert.ok(results.fixups.some((item) => item.title === 'Enable DKIM in your sender'));
+	assert.match(results.dkim.findings.join(''), /Unusable DKIM key record detected/);
+});
+
 test('createRenderer outputs provider, trust, diff, and guide sections', () => {
 	const { t, tr, trf } = createTranslator();
 	const report = createFakeReport();

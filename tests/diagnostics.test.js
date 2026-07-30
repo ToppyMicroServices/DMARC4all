@@ -159,3 +159,23 @@ test('computeOverallScore penalizes missing email auth controls', () => {
 	assert.ok(result.chips.includes('DMARC: missing'));
 	assert.ok(result.chips.includes('DKIM: missing'));
 });
+
+test('computeOverallScore requires a usable confirmed DKIM key', () => {
+	const base = {
+		dmarc: { record: 'v=DMARC1; p=reject; rua=mailto:dmarc@example.com; sp=reject' },
+		spf: { records: ['v=spf1 -all'] },
+		mta_sts: { record: 'v=STSv1; id=20260730', tlsrpt: 'v=TLSRPTv1; rua=mailto:tlsrpt@example.com' }
+	};
+	const revoked = computeOverallScore({
+		...base,
+		dkim: { selectors: ['selector1'], confirmedSelectors: [] }
+	});
+	const usable = computeOverallScore({
+		...base,
+		dkim: { selectors: ['selector1'], confirmedSelectors: ['selector1'] }
+	});
+
+	assert.ok(revoked.chips.includes('DKIM: missing'));
+	assert.ok(usable.chips.includes('DKIM: ok'));
+	assert.equal(usable.score - revoked.score, 18);
+});

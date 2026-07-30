@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
 const OFFLINE_FALLBACK = '/offline.html';
 
@@ -23,12 +23,19 @@ const PRECACHE_PATHS = [
 	'/index.html',
 	'/index_enterprise.html',
 	'/offline.html',
+	'/ai_usage.html',
 	'/rua_service.html',
 	'/rua_service_enterprise.html',
+	'/standards_privacy.html',
+	'/dns_provider_guides.html',
+	'/llms.txt',
+	'/llms-full.txt',
+	'/schemas/diagnosis-result.schema.json',
+	'/examples/diagnosis-result.example.json',
 	'/app.js',
 	'/site.js',
 	'/manifest.webmanifest',
-	'/styles.css',
+	'/styles.css?v=4',
 	'/favicon.ico',
 	'/apple-touch-icon.png',
 	'/assets/favicon.ico',
@@ -41,6 +48,7 @@ const PRECACHE_PATHS = [
 	'/src/dom.js',
 	'/src/i18n.js',
 	'/src/pwa.js',
+	'/src/portable-report.js',
 	'/src/render.js',
 	'/src/safe-html.js',
 	'/i18n/de.js',

@@ -86,6 +86,7 @@ const {
 
 const renderer = createRenderer({
 	esc,
+	getLang,
 	getDmarcRuaExampleHtml: () => buildDmarcRuaExampleHtml(),
 	isJa,
 	report,

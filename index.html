@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<html lang="ja" data-resolver-mode="auto">
+<html lang="ja" data-resolver-mode="manual">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
@@ -24,6 +24,7 @@
   <meta name="description" content="Free browser-based DMARC checker and SPF/DKIM/BIMI audit. Check public DNS, review email authentication posture, and copy ready-to-use DNS fixes.">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="https://dmarc4all.toppymicros.com/">
+  <link rel="alternate" type="text/plain" href="https://dmarc4all.toppymicros.com/llms.txt" title="DMARC4all LLM index">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="DMARC4all">
   <meta property="og:title" content="DMARC Checker / SPF・DKIM・BIMI 診断 | DMARC4all">
@@ -39,7 +40,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=4">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -215,6 +216,8 @@
                   <a href="standards_privacy.html">Standards & Privacy</a>
                   <span aria-hidden="true"> / </span>
                   <a href="dns_provider_guides.html">DNS provider guides</a>
+                  <span aria-hidden="true"> / </span>
+                  <a href="ai_usage.html">AI & Machine Access</a>
                 </p>
                 <details class="tiny muted">
                   <summary data-i18n-html="rua.example.summary.html">DMARCに <code>rua=</code> を追加する例（DMARC4all）</summary>

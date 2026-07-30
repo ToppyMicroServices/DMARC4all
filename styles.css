@@ -219,6 +219,35 @@ body {
   margin: 0;
 }
 
+.document-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.document-page h1 {
+  max-width: 18ch;
+}
+
+.document-page .card {
+  min-width: 0;
+  color: var(--ink-soft);
+}
+
+.document-page .card p,
+.document-page .card li {
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.document-page .card p + p {
+  margin-top: 10px;
+}
+
+.document-page .card a {
+  color: #0b5f59;
+  text-underline-offset: 3px;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json",
+  "format": "dmarc4all-diagnosis",
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-30T00:00:00.000Z",
+  "domain": "example.com",
+  "locale": "en",
+  "scope": {
+    "basis": "public_dns",
+    "resolver": "Cloudflare",
+    "limitations": [
+      "no_email_sent_or_received",
+      "no_mailbox_or_server_access",
+      "dkim_selectors_not_exhaustively_discoverable",
+      "results_require_header_and_rua_confirmation"
+    ]
+  },
+  "summary": {
+    "scores": {
+      "overall": 78,
+      "spf": 85
+    },
+    "enforcementReadiness": {
+      "status": "ready_for_quarantine",
+      "level": "warn",
+      "policy": "none",
+      "checks": {
+        "dmarcRecordPresent": true,
+        "dmarcPolicyValid": true,
+        "aggregateReportingConfigured": true,
+        "spfUsable": true,
+        "dkimConfirmed": true
+      },
+      "blockers": []
+    },
+    "mailProvider": {
+      "id": "m365",
+      "name": "Microsoft 365",
+      "confidence": "High",
+      "signals": [
+        "MX: protection.outlook.com"
+      ]
+    }
+  },
+  "observations": {
+    "dmarc": {
+      "record": "v=DMARC1; p=none; rua=mailto:dmarc@example.com",
+      "policy": "none",
+      "aggregateReportingConfigured": true
+    },
+    "spf": {
+      "records": [
+        "v=spf1 include:spf.protection.outlook.com ~all"
+      ],
+      "recordCount": 1,
+      "dangerousAll": false
+    },
+    "dkim": {
+      "selectors": [
+        "selector1"
+      ],
+      "confirmedSelectors": [
+        "selector1"
+      ],
+      "usesCname": true
+    },
+    "bimi": {
+      "name": "",
+      "record": "",
+      "logoUrl": "",
+      "evidenceDocumentUrl": ""
+    },
+    "mx": {
+      "records": [
+        "0 example-com.mail.protection.outlook.com."
+      ]
+    },
+    "mtaSts": {
+      "record": "",
+      "tlsReportingRecord": ""
+    },
+    "caa": {
+      "records": []
+    },
+    "dnssec": {
+      "ds": [],
+      "dnskey": []
+    },
+    "subdomains": {
+      "scanEnabled": false,
+      "found": []
+    }
+  },
+  "priorities": [
+    {
+      "severity": "med",
+      "title": "DMARC is p=none",
+      "action": "Review reports and consider a staged move to quarantine or reject."
+    }
+  ],
+  "remediation": [
+    {
+      "severity": "med",
+      "title": "Next candidate: move DMARC toward quarantine",
+      "summary": "Move only after aggregate reports and real message headers show low false positives.",
+      "records": [
+        {
+          "label": "DMARC",
+          "host": "_dmarc.example.com",
+          "type": "TXT",
+          "currentValue": "v=DMARC1; p=none; rua=mailto:dmarc@example.com",
+          "suggestedValue": "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com",
+          "copyText": "_dmarc.example.com. 3600 IN TXT \"v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com\""
+        }
+      ],
+      "verify": "dig +short TXT _dmarc.example.com",
+      "rollback": "Restore the previous p=none record if you see false positives."
+    }
+  ],
+  "evidence": {
+    "dnsRecords": [
+      {
+        "name": "_dmarc.example.com",
+        "type": "TXT",
+        "ttl": 300,
+        "value": "v=DMARC1; p=none; rua=mailto:dmarc@example.com"
+      }
+    ]
+  },
+  "errors": []
+}

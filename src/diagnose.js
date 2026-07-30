@@ -650,6 +650,7 @@ export function createDiagnosisRunner(deps) {
 		try {
 			const found = [];
 			const cnameOnly = [];
+			const unusable = [];
 			for (const sel of DKIM_SELECTOR_CANDIDATES) {
 				const name = `${sel}._domainkey.${domain}`;
 				let txtRecords = [];
@@ -690,26 +691,31 @@ export function createDiagnosisRunner(deps) {
 
 				const delegatedTxt = delegatedTxtRecord ? delegatedTxtRecord.data : '';
 				const cnameTarget = cnameInfo.target || '';
-				if (dkimTxt || delegatedTxt) {
-					found.push({
+				const effectiveTxt = dkimTxt || delegatedTxt;
+				if (effectiveTxt) {
+					const item = {
 						selector: sel,
 						name,
 						txt: dkimTxt || '',
 						cn: cnameTarget,
 						delegatedTxt,
 						cnameChain: cnameInfo.chain || []
-					});
+					};
+					const publicKeyMatch = /(?:^|;)\s*p\s*=\s*([^;]*)/i.exec(effectiveTxt);
+					const publicKey = publicKeyMatch ? publicKeyMatch[1].replace(/\s+/g, '') : '';
+					if (publicKey) found.push(item);
+					else unusable.push({ ...item, issue: publicKeyMatch ? 'revoked' : 'missing_public_key' });
 				} else if (cnameTarget) {
 					cnameOnly.push({ selector: sel, name, cn: cnameTarget, cnameChain: cnameInfo.chain || [] });
 				}
 			}
 
-			results.dkim.selectors = found.map((item) => item.selector);
+			results.dkim.selectors = [...found, ...unusable].map((item) => item.selector);
 			results.dkim.confirmedSelectors = found.map((item) => item.selector);
-			results.dkim.usesCname = found.some((item) => !!item.cn) || cnameOnly.length > 0;
+			results.dkim.usesCname = [...found, ...unusable].some((item) => !!item.cn) || cnameOnly.length > 0;
 			if (!found.length) {
 				if (cnameOnly.length) {
-					results.dkim.selectors = cnameOnly.map((item) => item.selector);
+					results.dkim.selectors = [...unusable, ...cnameOnly].map((item) => item.selector);
 					results.dkim.findings.push(
 						mkFinding(
 							'med',
@@ -722,7 +728,7 @@ export function createDiagnosisRunner(deps) {
 						)
 					);
 				}
-				if (!cnameOnly.length) {
+				if (!cnameOnly.length && !unusable.length) {
 					results.dkim.findings.push(
 						mkFinding(
 							'high',
@@ -783,6 +789,31 @@ export function createDiagnosisRunner(deps) {
 						)
 					);
 				}
+			}
+			if (unusable.length) {
+				const evidence = unusable.map((item) => {
+					const chainText = formatCnameChain(item.cnameChain || []);
+					if (item.txt) return `TXT ${item.name}\n${item.txt}`;
+					return `${chainText}\n\nTXT ${item.cn}\n${item.delegatedTxt}`.trim();
+				}).join('\n\n');
+				results.dkim.findings.push(
+					mkFinding(
+						found.length ? 'low' : 'high',
+						tr('利用できない DKIM 公開鍵レコードを検出', 'Unusable DKIM key record detected'),
+						detailJaOr(
+							mkDetail(
+								'DKIM 公開鍵を利用できない状態',
+								'p= が空なら鍵は失効済みで、p= が無ければ公開鍵レコードとして不正',
+								'送信側がこの selector を使っていないことを確認し、必要なら新しい鍵を公開'
+							),
+							tr(
+								'p= が空の鍵は失効済みで、p= が無いレコードは不正です。どちらも DKIM 署名の検証には使えません。送信側がこの selector を使っていないことを確認し、必要なら新しい鍵を公開してください。',
+								'An empty p= marks the key as revoked, while a missing p= makes the key record invalid. Neither can validate DKIM signatures. Confirm the sender no longer uses this selector, and publish a new key if needed.'
+							)
+						),
+						evidence
+					)
+				);
 			}
 			results.dkim.findings.push(
 				mkFinding(
@@ -1326,8 +1357,7 @@ export function createDiagnosisRunner(deps) {
 			}
 
 			const dkimConfirmed = (results.dkim && Array.isArray(results.dkim.confirmedSelectors)) ? results.dkim.confirmedSelectors : [];
-			const dkimCandidates = (results.dkim && Array.isArray(results.dkim.selectors)) ? results.dkim.selectors : [];
-			if (!dkimConfirmed.length && !dkimCandidates.length) {
+			if (!dkimConfirmed.length) {
 				results.priority.push({
 					level: 'high',
 					title: tr('DKIM が未確認/未設定', 'DKIM unverified/missing'),
