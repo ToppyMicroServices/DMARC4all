@@ -174,6 +174,11 @@
 			const v = btn.getAttribute('data-lang-choice');
 			btn.classList.toggle('active', v === currentLang);
 		});
+		const activeButton = btns.find(btn => btn.classList.contains('active'));
+		const switcher = activeButton?.closest('.lang-switch');
+		if (switcher && switcher.scrollWidth > switcher.clientWidth) {
+			switcher.scrollLeft = Math.max(0, activeButton.offsetLeft - ((switcher.clientWidth - activeButton.offsetWidth) / 2));
+		}
 
 		document.querySelectorAll('[data-i18n]').forEach(el => {
 			const key = el.getAttribute('data-i18n');

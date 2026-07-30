@@ -62,7 +62,7 @@
   "SPF: IP-only (operational risk)": "SPF: IP သာသတ်မှတ်ထားခြင်း (လုပ်ငန်းလည်ပတ်မှု အန္တရာယ်)",
   "IP-only SPF is brittle: if sender IPs change and SPF is not updated, legitimate mail may fail. If you use multiple SaaS senders, prefer include-based design and a sender inventory. If you truly have fixed IPs, pair it with change-management and staged rollout (~all → -all).": "IP သာပါတဲ့ SPF သည် မမြဲမြံပါ။ ပို့သူ IP များ ပြောင်းလဲ/တိုးချဲ့သော်လည်း SPF မပြင်ဆင်ပါက legitimate mail မအောင်မြင်နိုင်သည်။ SaaS ပို့သူများစွာ သုံးပါက include-based ဒီဇိုင်းနှင့် ပို့သူစာရင်းကို အကြံပြုသည်။ Fixed IP များသာရှိပါက change-management နှင့် staged rollout (~all → -all) ကို အတူတကွ လုပ်ဆောင်ပါ။",
   "SPF: uses ptr": "SPF: ptr ကို သုံးထားသည်",
-  "ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.": "ptr ကို မကြာခဏ မထောက်ခံကြပါ (မတည်ငြိမ်/ကုန်ကျ/မှားယွင်း判定 ဖြစ်နိုင်)။ ဖယ်ရှားခြင်း သို့မဟုတ် အစားထိုးခြင်းကို စဉ်းစားပါ။",
+  "ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.": "ptr ကို မကြာခဏ မထောက်ခံကြပါ (မတည်ငြိမ်ခြင်း၊ ကုန်ကျစရိတ်များခြင်းနှင့် မှားယွင်းဆုံးဖြတ်မှု ဖြစ်နိုင်ခြင်းကြောင့်)။ ဖယ်ရှားခြင်း သို့မဟုတ် အစားထိုးခြင်းကို စဉ်းစားပါ။",
   "SPF: uses exists": "SPF: exists ကို သုံးထားသည်",
   "exists can add complexity. Make intent explicit and watch the lookup limit.": "exists သည် ပိုရှုပ်ထွေးစေနိုင်သည်။ ရည်ရွယ်ချက်ကို ရှင်းလင်းစွာရေးပြီး lookup limit ကို သတိပြုပါ။",
   "SPF: uses redirect": "SPF: redirect ကို သုံးထားသည်",

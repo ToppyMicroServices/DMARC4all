@@ -165,7 +165,7 @@
   "a= may not be a certificate (PEM)": "a= ប្រហែលមិនមែន certificate (PEM)",
   "exists can add complexity. Make intent explicit and watch the lookup limit.": "exists អាចបន្ថែមភាពស្មុគស្មាញ។ ធ្វើឱ្យគោលបំណងច្បាស់ ហើយប្រយ័ត្ន lookup limit។",
   "l= is not https://": "l= មិនមែន https://",
-  "l= typically points to an SVG (.svg)": "l= 通ម្មតាសំដៅទៅ SVG (.svg)",
+  "l= typically points to an SVG (.svg)": "ជាទូទៅ l= ចង្អុលទៅឯកសារ SVG (.svg)",
   "ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.": "ជាទូទៅ មិនណែនាំ ptr (មិនស្ថិរភាព/ថ្លៃ/លទ្ធផលខុស)។ ពិចារណាលុប ឬជំនួសវា។",
   "unknown": "មិនដឹង",
   "yes": "បាទ/ចាស",

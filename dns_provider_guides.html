@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<html lang="ja">
+<html lang="ja" data-i18n-page="guides" data-default-lang="ja">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
@@ -39,7 +39,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=6">
+  <script defer src="vendor/dompurify.min.js"></script>
+  <script defer src="i18n/document_pages.js?v=2"></script>
+  <script defer src="document_i18n.js?v=2"></script>
 </head>
 <body>
   <div class="shell">
@@ -48,75 +51,92 @@
         <img src="apple-touch-icon.png" alt="ToppyMicroServices">
         <span class="brand-name">ToppyMicroServices</span>
       </a>
+      <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский">RU</button>
+        </nav>
+      </div>
     </div>
 
     <main class="hero document-page">
-      <p class="pill">DNS Provider Guides</p>
-      <h1>DNS 管理画面で迷わないための DMARC 設定メモ</h1>
-      <p class="tagline">DMARC / SPF / DKIM は、同じ TXT レコードでも provider ごとに入力欄の名前が違います。ここでは、実務でつまずきやすい点だけを短くまとめます。</p>
+      <p class="pill" data-doc-i18n="pill">DNS 事業者別ガイド</p>
+      <h1 data-doc-i18n="title">DNS 管理画面で迷わないための DMARC 設定メモ</h1>
+      <p class="tagline" data-doc-i18n="tagline">DMARC / SPF / DKIM は、同じ TXT レコードでも事業者ごとに入力欄の名前が異なります。ここでは、実務でつまずきやすい点だけを短くまとめます。</p>
 
       <section class="guide-grid mt-12">
         <article class="card p-16 guide-card">
           <h2>Cloudflare</h2>
           <ul class="list">
-            <li>Type は TXT。Name は apex なら <span class="mono mono-inline">@</span>、DMARC は <span class="mono mono-inline">_dmarc</span>。</li>
-            <li>Content には引用符なしで <span class="mono mono-inline">v=DMARC1; p=none; rua=mailto:...</span> を入れます。</li>
-            <li>DKIM の CNAME は proxy せず DNS only にします。</li>
+            <li data-doc-i18n-html="cloudflare.li1">Type は TXT。Name は apex なら <span class="mono mono-inline">@</span>、DMARC は <span class="mono mono-inline">_dmarc</span>。</li>
+            <li data-doc-i18n-html="cloudflare.li2">Content には引用符なしで <span class="mono mono-inline">v=DMARC1; p=none; rua=mailto:...</span> を入れます。</li>
+            <li data-doc-i18n="cloudflare.li3">DKIM の CNAME はプロキシを無効にし、DNS only にします。</li>
           </ul>
         </article>
         <article class="card p-16 guide-card">
           <h2>Amazon Route 53</h2>
           <ul class="list">
-            <li>Record name は <span class="mono mono-inline">_dmarc.example.com</span> または hosted zone 基準の <span class="mono mono-inline">_dmarc</span>。</li>
-            <li>TXT value は、Route 53 の UI 上で引用符付きとして表示・処理される場合があります。</li>
-            <li>複数 SPF を作らず、apex の TXT は SPF 1 本に統合します。</li>
+            <li data-doc-i18n-html="route53.li1">レコード名は <span class="mono mono-inline">_dmarc.example.com</span>、またはホストゾーンを基準にした <span class="mono mono-inline">_dmarc</span> です。</li>
+            <li data-doc-i18n="route53.li2">TXT 値は、Route 53 の画面上で引用符付きとして表示・処理される場合があります。</li>
+            <li data-doc-i18n="route53.li3">SPF レコードを複数作らず、apex の TXT 1 本に統合します。</li>
           </ul>
         </article>
         <article class="card p-16 guide-card">
           <h2>お名前.com</h2>
           <ul class="list">
-            <li>ホスト名に <span class="mono mono-inline">_dmarc</span>、TYPE に TXT、VALUE に DMARC 値を入れます。</li>
-            <li>ホスト名へドメイン全体を重複入力しないよう確認します。</li>
-            <li>反映待ちの間は古い値と新しい値が混在することがあります。</li>
+            <li data-doc-i18n-html="onamae.li1">ホスト名に <span class="mono mono-inline">_dmarc</span>、TYPE に TXT、VALUE に DMARC 値を入れます。</li>
+            <li data-doc-i18n="onamae.li2">ホスト名にドメイン全体を重ねて入力していないか確認します。</li>
+            <li data-doc-i18n="onamae.li3">DNS の反映待ちの間は、古い値と新しい値が混在することがあります。</li>
           </ul>
         </article>
         <article class="card p-16 guide-card">
           <h2>Xserver</h2>
           <ul class="list">
-            <li>DNS レコード設定で、ホスト名 <span class="mono mono-inline">_dmarc</span>、種別 TXT を選びます。</li>
-            <li>SPF は既存の <span class="mono mono-inline">v=spf1</span> を探し、必要な include を 1 本にまとめます。</li>
-            <li>メール機能と外部送信サービスを併用する場合は、送信元を先に棚卸しします。</li>
+            <li data-doc-i18n-html="xserver.li1">DNS レコード設定で、ホスト名 <span class="mono mono-inline">_dmarc</span>、種別 TXT を選びます。</li>
+            <li data-doc-i18n-html="xserver.li2">既存の <span class="mono mono-inline">v=spf1</span> を探し、必要な include を 1 本の SPF レコードにまとめます。</li>
+            <li data-doc-i18n="xserver.li3">メール機能と外部送信サービスを併用する場合は、正規の送信元を先に洗い出します。</li>
           </ul>
         </article>
         <article class="card p-16 guide-card">
           <h2>Google Workspace</h2>
           <ul class="list">
-            <li>SPF は通常 <span class="mono mono-inline">include:_spf.google.com</span> を含めます。</li>
-            <li>DKIM は Google Admin で selector を発行し、指定された TXT を DNS に追加します。</li>
-            <li>DMARC は RUA を受け取りながら p=none から段階的に進めます。</li>
+            <li data-doc-i18n-html="google.li1">SPF には通常 <span class="mono mono-inline">include:_spf.google.com</span> を含めます。</li>
+            <li data-doc-i18n="google.li2">Google 管理コンソールで DKIM セレクタを発行し、指定された TXT レコードを DNS に追加します。</li>
+            <li data-doc-i18n="google.li3">RUA を受け取りながら、DMARC を p=none から段階的に進めます。</li>
           </ul>
         </article>
         <article class="card p-16 guide-card">
           <h2>Microsoft 365</h2>
           <ul class="list">
-            <li>SPF は通常 <span class="mono mono-inline">include:spf.protection.outlook.com</span> を含めます。</li>
-            <li>DKIM は Exchange Admin Center で有効化し、selector1 / selector2 の CNAME を DNS に追加します。</li>
-            <li>複数の送信 SaaS がある場合は SPF lookup 数と DKIM selector を別々に確認します。</li>
+            <li data-doc-i18n-html="microsoft.li1">SPF には通常 <span class="mono mono-inline">include:spf.protection.outlook.com</span> を含めます。</li>
+            <li data-doc-i18n="microsoft.li2">Exchange 管理センターで DKIM を有効にし、selector1 / selector2 の CNAME を DNS に追加します。</li>
+            <li data-doc-i18n="microsoft.li3">複数の送信 SaaS がある場合は、SPF の DNS 参照回数と DKIM セレクタを別々に確認します。</li>
           </ul>
         </article>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>共通の注意</h2>
+        <h2 data-doc-i18n="common.title">共通の注意</h2>
         <ul class="list">
-          <li>SPF は 1 ドメイン 1 レコードが基本です。複数あると評価が不安定になります。</li>
-          <li>DMARC は <span class="mono mono-inline">_dmarc</span> の TXT です。apex の TXT ではありません。</li>
-          <li>DKIM selector は DNS から総当たりで完全列挙できません。送信サービスの管理画面で確認します。</li>
-          <li>p=reject へ進む前に、RUA 集計と実メールヘッダで正規メールの alignment を確認します。</li>
+          <li data-doc-i18n="common.li1">SPF は 1 ドメインにつき 1 レコードが基本です。複数あると正しく評価されません。</li>
+          <li data-doc-i18n-html="common.li2">DMARC は <span class="mono mono-inline">_dmarc</span> の TXT レコードです。apex の TXT ではありません。</li>
+          <li data-doc-i18n="common.li3">DKIM セレクタを DNS から総当たりで完全に列挙することはできません。送信サービスの管理画面で確認します。</li>
+          <li data-doc-i18n="common.li4">p=reject へ進む前に、RUA 集計と実メールのヘッダで正規メールのアライメントを確認します。</li>
         </ul>
       </section>
 
-      <p class="mt-12"><a href="index.html">Back to Quick Check</a> / <a href="standards_privacy.html">Standards & Privacy</a> / <a href="ai_usage.html">AI & Machine Access</a></p>
+      <p class="mt-12"><a href="index.html" data-doc-i18n="links.back">簡易診断へ戻る</a> / <a href="standards_privacy.html" data-doc-i18n="links.standards">標準とプライバシー</a> / <a href="ai_usage.html" data-doc-i18n="links.ai">AI・機械向けアクセス</a></p>
     </main>
   </div>
 </body>

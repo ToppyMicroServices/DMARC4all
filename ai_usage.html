@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<html lang="en">
+<html lang="en" data-i18n-page="ai" data-default-lang="en">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
@@ -40,8 +40,11 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=4">
-  <script type="application/ld+json">
+  <link rel="stylesheet" href="styles.css?v=6">
+  <script defer src="vendor/dompurify.min.js"></script>
+  <script defer src="i18n/document_pages.js?v=2"></script>
+  <script defer src="document_i18n.js?v=2"></script>
+  <script id="seo-schema" type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "TechArticle",
@@ -63,63 +66,78 @@
         <span class="brand-name">ToppyMicroServices</span>
       </a>
       <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский">RU</button>
+        </nav>
         <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
 
     <main class="hero document-page">
-      <p class="pill">AI & Machine Access</p>
-      <h1>Stable evidence for humans and AI agents</h1>
-      <p class="tagline">DMARC4all publishes a curated LLM index and a versioned JSON report contract so tools can interpret a diagnosis without scraping presentation HTML.</p>
+      <p class="pill" data-doc-i18n="pill">AI & Machine Access</p>
+      <h1 data-doc-i18n="title">Stable evidence for humans and AI agents</h1>
+      <p class="tagline" data-doc-i18n="tagline">DMARC4all publishes a curated LLM index and a versioned JSON report contract so tools can interpret a diagnosis without scraping presentation HTML.</p>
 
       <section class="guide-grid mt-12">
         <article class="card p-16 guide-card">
-          <div class="action-kicker">Discover</div>
-          <h2>LLM-readable context</h2>
-          <p><a href="llms.txt"><span class="mono mono-inline">/llms.txt</span></a> is the concise map. <a href="llms-full.txt"><span class="mono mono-inline">/llms-full.txt</span></a> adds field semantics, readiness states, limitations, and safe agent behavior.</p>
+          <div class="action-kicker" data-doc-i18n="discover.kicker">Discover</div>
+          <h2 data-doc-i18n="discover.title">LLM-readable context</h2>
+          <p data-doc-i18n-html="discover.body"><a href="llms.txt"><span class="mono mono-inline">/llms.txt</span></a> is the concise map. <a href="llms-full.txt"><span class="mono mono-inline">/llms-full.txt</span></a> adds field semantics, readiness states, limitations, and safe agent behavior.</p>
         </article>
         <article class="card p-16 guide-card">
-          <div class="action-kicker">Interpret</div>
-          <h2>Versioned JSON contract</h2>
-          <p>The diagnosis page exports <span class="mono mono-inline">dmarc4all-diagnosis</span> JSON. Version <span class="mono mono-inline">1.0.0</span> excludes rendering HTML and separates summary, observations, remediation, evidence, limitations, and errors.</p>
+          <div class="action-kicker" data-doc-i18n="interpret.kicker">Interpret</div>
+          <h2 data-doc-i18n="interpret.title">Versioned JSON contract</h2>
+          <p data-doc-i18n-html="interpret.body">The diagnosis page exports <span class="mono mono-inline">dmarc4all-diagnosis</span> JSON. Version <span class="mono mono-inline">1.0.0</span> excludes rendering HTML and separates summary, observations, remediation, evidence, limitations, and errors.</p>
         </article>
         <article class="card p-16 guide-card">
-          <div class="action-kicker">Validate</div>
-          <h2>Schema and example</h2>
-          <p>Use the <a href="schemas/diagnosis-result.schema.json">JSON Schema 2020-12 document</a> to validate exports and the <a href="examples/diagnosis-result.example.json">example report</a> to test consumers.</p>
+          <div class="action-kicker" data-doc-i18n="validate.kicker">Validate</div>
+          <h2 data-doc-i18n="validate.title">Schema and example</h2>
+          <p data-doc-i18n-html="validate.body">Use the <a href="schemas/diagnosis-result.schema.json">JSON Schema 2020-12 document</a> to validate exports and the <a href="examples/diagnosis-result.example.json">example report</a> to test consumers.</p>
         </article>
         <article class="card p-16 guide-card">
-          <div class="action-kicker">Current boundary</div>
-          <h2>Browser export, not a public API</h2>
-          <p>Diagnostics currently run in the browser. DMARC4all does not yet expose a public server API or MCP endpoint. Agents can read the documentation and consume a JSON report exported by the operator.</p>
+          <div class="action-kicker" data-doc-i18n="boundary.kicker">Current boundary</div>
+          <h2 data-doc-i18n="boundary.title">Browser export, not a public API</h2>
+          <p data-doc-i18n="boundary.body">Diagnostics currently run in the browser. DMARC4all does not yet expose a public server API or MCP endpoint. Agents can read the documentation and consume a JSON report exported by the operator.</p>
         </article>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>Safe automation contract</h2>
+        <h2 data-doc-i18n="safe.title">Safe automation contract</h2>
         <ol class="list">
-          <li>Confirm that the operator manages the domain or has explicit permission to test it.</li>
-          <li>Read <span class="mono mono-inline">scope.limitations</span> and <span class="mono mono-inline">errors</span> before interpreting the score.</li>
-          <li>Treat <span class="mono mono-inline">enforcementReadiness</span> as triage, not approval to change DNS.</li>
-          <li>Compare current and suggested values, then confirm the authorized sender inventory and provider requirements.</li>
-          <li>Verify representative message headers and recent DMARC aggregate reports before moving to quarantine or reject.</li>
-          <li>Require human approval and a rollback plan before applying any DNS change.</li>
+          <li data-doc-i18n="safe.li1">Confirm that the operator manages the domain or has explicit permission to test it.</li>
+          <li data-doc-i18n-html="safe.li2">Read <span class="mono mono-inline">scope.limitations</span> and <span class="mono mono-inline">errors</span> before interpreting the score.</li>
+          <li data-doc-i18n-html="safe.li3">Treat <span class="mono mono-inline">enforcementReadiness</span> as triage, not approval to change DNS.</li>
+          <li data-doc-i18n="safe.li4">Compare current and suggested values, then confirm the authorized sender inventory and provider requirements.</li>
+          <li data-doc-i18n="safe.li5">Verify representative message headers and recent DMARC aggregate reports before moving to quarantine or reject.</li>
+          <li data-doc-i18n="safe.li6">Require human approval and a rollback plan before applying any DNS change.</li>
         </ol>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>日本語での利用方針</h2>
-        <p>AI は、診断結果のスコアだけで変更可否を判断してはいけません。JSON 出力には、公開 DNS で確認できた事実、判定上の制約、優先事項、修正案、根拠となる DNS レコード、取得時のエラーを分けて収録しています。</p>
-        <p>DMARC の <span class="mono mono-inline">p=quarantine</span> や <span class="mono mono-inline">p=reject</span> へ進む前に、正規の送信元一覧、実メールの認証結果、RUA 集計レポート、現在の DNS 値、切り戻し手順を人が確認してください。修正案は、そのまま自動適用するための命令ではなく、レビューのたたき台です。</p>
+        <h2 data-doc-i18n="policy.title">Interpretation policy</h2>
+        <p data-doc-i18n="policy.p1">AI must not decide whether to change DNS from the score alone. The JSON export separates facts observed in public DNS, interpretation limits, priorities, suggested fixes, supporting DNS records, and lookup errors.</p>
+        <p data-doc-i18n-html="policy.p2">Before moving DMARC to <span class="mono mono-inline">p=quarantine</span> or <span class="mono mono-inline">p=reject</span>, a human should review the authorized sender inventory, real-message authentication results, RUA aggregate reports, current DNS values, and a rollback plan. Remediation is a review aid, not an instruction for automatic deployment.</p>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>How to cite a diagnosis</h2>
-        <p>For the product, cite: “DMARC4all, ToppyMicroServices, DMARC4all public-DNS email authentication diagnostic, <a href="https://dmarc4all.toppymicros.com/">https://dmarc4all.toppymicros.com/</a> (accessed YYYY-MM-DD).”</p>
-        <p>For a specific result, retain <span class="mono mono-inline">generatedAt</span>, <span class="mono mono-inline">resolver</span>, <span class="mono mono-inline">schemaVersion</span>, and the relevant evidence. Do not describe the output as a certification or a receiver-side conformance result.</p>
+        <h2 data-doc-i18n="cite.title">How to cite a diagnosis</h2>
+        <p data-doc-i18n-html="cite.p1">For the product, cite: “DMARC4all, ToppyMicroServices, DMARC4all public-DNS email authentication diagnostic, <a href="https://dmarc4all.toppymicros.com/">https://dmarc4all.toppymicros.com/</a> (accessed YYYY-MM-DD).”</p>
+        <p data-doc-i18n-html="cite.p2">For a specific result, retain <span class="mono mono-inline">generatedAt</span>, <span class="mono mono-inline">resolver</span>, <span class="mono mono-inline">schemaVersion</span>, and the relevant evidence. Do not describe the output as a certification or a receiver-side conformance result.</p>
       </section>
 
-      <p class="mt-12"><a href="index.html">Back to Quick Check</a> / <a href="standards_privacy.html">Standards & Privacy</a> / <a href="dns_provider_guides.html">DNS provider guides</a></p>
+      <p class="mt-12"><a href="index.html" data-doc-i18n="links.back">Back to Quick Check</a> / <a href="standards_privacy.html" data-doc-i18n="links.standards">Standards & Privacy</a> / <a href="dns_provider_guides.html" data-doc-i18n="links.guides">DNS provider guides</a></p>
     </main>
   </div>
 </body>

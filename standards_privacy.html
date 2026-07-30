@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<html lang="ja">
+<html lang="ja" data-i18n-page="standards" data-default-lang="ja">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
@@ -39,7 +39,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=6">
+  <script defer src="vendor/dompurify.min.js"></script>
+  <script defer src="i18n/document_pages.js?v=2"></script>
+  <script defer src="document_i18n.js?v=2"></script>
 </head>
 <body>
   <div class="shell">
@@ -49,68 +52,83 @@
         <span class="brand-name">ToppyMicroServices</span>
       </a>
       <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский">RU</button>
+        </nav>
         <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
       </div>
     </div>
 
     <main class="hero document-page">
-      <p class="pill">Standards & Privacy</p>
-      <h1>標準に沿い、余計なデータを持たない DMARC 支援</h1>
-      <p class="tagline">DMARC4all は、公開 DNS の診断、RUA を使った段階導入、Failure Reporting の慎重な取り扱いを基本方針にしています。</p>
+      <p class="pill" data-doc-i18n="pill">標準とプライバシー</p>
+      <h1 data-doc-i18n="title">標準に沿い、余計なデータを持たない DMARC 支援</h1>
+      <p class="tagline" data-doc-i18n="tagline">DMARC4all は、公開 DNS の診断、RUA を使った段階導入、Failure Reporting の慎重な取り扱いを基本方針にしています。</p>
 
       <section class="card p-16 mt-12">
-        <h2>DMARCbis / Aggregate Reporting / Failure Reporting</h2>
-        <p>DMARC の中心は、From ドメインに対する SPF / DKIM の alignment と、受信側へ伝える policy です。DMARCbis はこの基本仕様を更新し、Aggregate Reporting は集計レポートの扱いを整理します。</p>
-        <p>Failure Reporting は、個別メッセージに近い情報を含む場合があります。そのため、プライバシーと実運用の差を意識した慎重な扱いが必要です。DMARC4all では RUA を実務上の主軸とし、RUF は「必要性とリスクを理解した組織が慎重に扱うもの」として説明します。</p>
+        <h2 data-doc-i18n="overview.title">RFC 9989 / RFC 9990 / RFC 9991</h2>
+        <p data-doc-i18n="overview.p1">DMARC の中心は、From ドメインに対する SPF / DKIM のアライメントと、受信側へ伝えるポリシーです。RFC 9989 が現在の中核仕様、RFC 9990 が集約レポート、RFC 9991 が失敗レポートを定めています。</p>
+        <p data-doc-i18n="overview.p2">Failure Reporting は、個別メッセージに近い情報を含む場合があります。そのため、プライバシーと実運用の差を意識した慎重な扱いが必要です。DMARC4all では RUA を実務上の主軸とし、RUF は必要性とリスクを理解した組織が慎重に扱うものとして説明します。</p>
       </section>
 
       <section class="guide-grid mt-12">
         <article class="card p-16 guide-card">
           <h2>RUA</h2>
-          <p>RUA は DMARC aggregate reports の送信先です。日次などの集計 XML から、送信元 IP、件数、SPF / DKIM / DMARC の結果、alignment を把握できます。</p>
-          <p>DMARC4all では、RUA を p=none から quarantine / reject へ進むための観測材料として扱います。</p>
+          <p data-doc-i18n="rua.p1">RUA は DMARC 集計レポートの送信先です。日次などの集計 XML から、送信元 IP、件数、SPF / DKIM / DMARC の結果、アライメントを把握できます。</p>
+          <p data-doc-i18n="rua.p2">DMARC4all では、RUA を p=none から quarantine / reject へ進むための観測材料として扱います。</p>
         </article>
         <article class="card p-16 guide-card">
           <h2>RUF</h2>
-          <p>RUF は failure reports の送信先です。環境によっては個別メールに近い情報やヘッダ情報を含み得るため、プライバシー上のリスクが大きくなります。</p>
-          <p>DMARC4all は RUF を積極的には推奨しません。必要な場合でも、法務・プライバシー・保存期間・アクセス制御を先に決めるべきだと考えます。</p>
+          <p data-doc-i18n="ruf.p1">RUF は失敗レポートの送信先です。環境によっては個別メールに近い情報やヘッダ情報を含み得るため、プライバシー上のリスクが大きくなります。</p>
+          <p data-doc-i18n="ruf.p2">DMARC4all は RUF を積極的には推奨しません。必要な場合でも、法務・プライバシー・保存期間・アクセス制御を先に決めるべきだと考えます。</p>
         </article>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>DMARC4all の方針</h2>
+        <h2 data-doc-i18n="policy.title">DMARC4all の方針</h2>
         <ul class="list">
-          <li>公開 DNS だけを診断し、メール送受信やサーバー内部設定には触れません。</li>
-          <li>RUA は段階導入のための可視化として扱い、RUF は慎重に説明します。</li>
-          <li>RUA XML の原本を保存しない、または必要最小限の非可逆な集計に寄せる設計を優先します。</li>
-          <li>p=none を完了扱いにせず、quarantine / reject へ進むための準備度を表示します。</li>
-          <li>英語圏以外の実務者にも分かるよう、用語と手順をできるだけ平易にします。</li>
+          <li data-doc-i18n="policy.li1">公開 DNS だけを診断し、メール送受信やサーバー内部設定には触れません。</li>
+          <li data-doc-i18n="policy.li2">RUA は段階導入のための可視化として扱い、RUF は慎重に説明します。</li>
+          <li data-doc-i18n="policy.li3">RUA XML の原本を保存しない、または必要最小限の非可逆な集計に寄せる設計を優先します。</li>
+          <li data-doc-i18n="policy.li4">p=none を完了扱いにせず、quarantine / reject へ進むための準備度を表示します。</li>
+          <li data-doc-i18n="policy.li5">英語圏以外の実務者にも分かるよう、用語と手順をできるだけ平易にします。</li>
         </ul>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>IETF DMARC watch</h2>
-        <p>DMARC4all は、DMARCbis、Aggregate Reporting、Failure Reporting の IETF 文書を追跡し、説明文と診断ガイドを更新します。仕様と provider の実際の挙動が異なる場合は、両者を分けて説明します。</p>
-        <p>2026-05-14 時点では、DMARCbis、Aggregate Reporting、Failure Reporting は IETF Datatracker 上で RFC Editor queue に進んでいます。RFC 番号が確定した後、このページの説明も更新します。</p>
+        <h2 data-doc-i18n="watch.title">IETF DMARC ウォッチ</h2>
+        <p data-doc-i18n="watch.p1">DMARC4all は、DMARCbis、Aggregate Reporting、Failure Reporting の IETF 文書を追跡し、説明文と診断ガイドを更新します。仕様と各事業者の実際の挙動が異なる場合は、両者を分けて説明します。</p>
+        <p data-doc-i18n="watch.p2">2026年7月30日時点で、DMARCbis は RFC 9989、Aggregate Reporting は RFC 9990、Failure Reporting は RFC 9991 として公開済みです。いずれも2026年5月発行の標準化過程（Proposed Standard）の RFC です。</p>
         <ul class="list">
-          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-dmarcbis/" target="_blank" rel="noopener">DMARCbis</a></li>
-          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-aggregate-reporting/" target="_blank" rel="noopener">DMARC Aggregate Reporting</a></li>
-          <li><a href="https://datatracker.ietf.org/doc/draft-ietf-dmarc-failure-reporting/" target="_blank" rel="noopener">DMARC Failure Reporting</a></li>
+          <li><a href="https://datatracker.ietf.org/doc/rfc9989/" target="_blank" rel="noopener">RFC 9989: DMARC</a></li>
+          <li><a href="https://datatracker.ietf.org/doc/rfc9990/" target="_blank" rel="noopener">RFC 9990: DMARC Aggregate Reporting</a></li>
+          <li><a href="https://datatracker.ietf.org/doc/rfc9991/" target="_blank" rel="noopener">RFC 9991: DMARC Failure Reporting</a></li>
         </ul>
       </section>
 
       <section class="card p-16 mt-12">
-        <h2>IETF / WG で共有する場合の位置づけ</h2>
-        <p>DMARC4all は、標準文書そのものの代替ではありません。DMARCbis と関連 reporting 文書を、実務者が使いやすい運用手順に落とし込むための補助ツールです。特に、非英語圏の小規模組織が p=none から enforcement へ無理なく進めることを重視しています。</p>
+        <h2 data-doc-i18n="share.title">IETF / WG で共有する場合の位置づけ</h2>
+        <p data-doc-i18n="share.p1">DMARC4all は、標準文書そのものの代替ではありません。DMARCbis と関連するレポート仕様を、実務者が使いやすい運用手順に落とし込むための補助ツールです。特に、非英語圏の小規模組織が p=none から適用ポリシーへ無理なく進めることを重視しています。</p>
         <ul class="list">
-          <li>目的: 公開 DNS だけを使い、DMARC / SPF / DKIM / RUA の状態と次の安全な一歩を示す。</li>
-          <li>非目的: 受信側の最終判定、法的助言、Failure Reporting の一律推奨、メール本文や個人データの収集。</li>
-          <li>共有したい論点: 表現の正確性、RUA/RUF のリスク説明、enforcement readiness の判定基準、各言語の実務者に伝わる説明。</li>
-          <li>フィードバック歓迎: 標準と provider 実装の差、誤解を招く表現、追加すべき安全上の注意。</li>
+          <li data-doc-i18n="share.li1">目的: 公開 DNS だけを使い、DMARC / SPF / DKIM / RUA の状態と次の安全な一歩を示す。</li>
+          <li data-doc-i18n="share.li2">対象外: 受信側の最終判定、法的助言、Failure Reporting の一律推奨、メール本文や個人データの収集。</li>
+          <li data-doc-i18n="share.li3">共有したい論点: 表現の正確性、RUA / RUF のリスク説明、適用準備度の判定基準、各言語の実務者に伝わる説明。</li>
+          <li data-doc-i18n="share.li4">フィードバック歓迎: 標準と事業者実装の差、誤解を招く表現、追加すべき安全上の注意。</li>
         </ul>
       </section>
 
-      <p class="mt-12"><a href="index.html">Back to Quick Check</a> / <a href="dns_provider_guides.html">DNS provider guides</a> / <a href="ai_usage.html">AI & Machine Access</a></p>
+      <p class="mt-12"><a href="index.html" data-doc-i18n="links.back">簡易診断へ戻る</a> / <a href="dns_provider_guides.html" data-doc-i18n="links.guides">DNS 事業者別ガイド</a> / <a href="ai_usage.html" data-doc-i18n="links.ai">AI・機械向けアクセス</a></p>
     </main>
   </div>
 </body>

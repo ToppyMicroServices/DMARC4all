@@ -62,6 +62,8 @@ body {
 }
 
 .shell {
+  width: 100%;
+  min-width: 0;
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
@@ -71,6 +73,8 @@ body {
 .brandbar {
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
   gap: 14px;
   padding: 12px 14px;
   border-radius: 22px;
@@ -113,8 +117,10 @@ body {
 
 .lang-switch {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   max-width: 58vw;
   overflow-x: auto;
   padding: 2px;
@@ -563,6 +569,11 @@ html[data-resolver-mode="auto"] #resolver-error {
 .hero .tiny,
 .hero .muted {
   color: rgba(226, 232, 240, 0.72);
+}
+
+.hero .card .tiny,
+.hero .card .muted {
+  color: #475569;
 }
 
 .hero form .tiny,
@@ -1183,12 +1194,13 @@ html[data-resolver-mode="auto"] #resolver-error {
 
   .brand-actions {
     width: 100%;
+    max-width: 100%;
     margin-left: 0;
     justify-content: space-between;
   }
 
   .lang-switch {
-    max-width: 100%;
+    max-width: calc(100% - 80px);
   }
 
   .hero {

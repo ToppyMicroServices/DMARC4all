@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v11';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
 const OFFLINE_FALLBACK = '/offline.html';
 
@@ -33,15 +33,16 @@ const PRECACHE_PATHS = [
 	'/schemas/diagnosis-result.schema.json',
 	'/examples/diagnosis-result.example.json',
 	'/app.js',
+	'/document_i18n.js?v=2',
 	'/site.js',
 	'/manifest.webmanifest',
-	'/styles.css?v=4',
+	'/styles.css?v=6',
 	'/favicon.ico',
 	'/apple-touch-icon.png',
 	'/assets/favicon.ico',
 	'/vendor/dompurify.min.js',
 	'/rua_config.js',
-	'/rua_i18n.js',
+	'/rua_i18n.js?v=4',
 	'/src/core.js',
 	'/src/diagnose.js',
 	'/src/diagnostics.js',
@@ -53,6 +54,7 @@ const PRECACHE_PATHS = [
 	'/src/safe-html.js',
 	'/i18n/de.js',
 	'/i18n/de_extra.js',
+	'/i18n/document_pages.js?v=2',
 	'/i18n/en.js',
 	'/i18n/es.js',
 	'/i18n/es_extra.js',
@@ -69,9 +71,10 @@ const PRECACHE_PATHS = [
 	'/i18n/my.js',
 	'/i18n/ru.js',
 	'/i18n/ru_extra.js',
-	'/i18n/rua_page.js',
+	'/i18n/rua_page.js?v=4',
 	'/i18n/th.js',
 	'/i18n/th_extra.js',
+	'/i18n/ui_extra.js',
 	'/i18n/vi.js',
 	'/i18n/vi_extra.js',
 	'/i18n/zh.js',

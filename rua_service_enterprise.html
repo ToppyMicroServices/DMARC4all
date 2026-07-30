@@ -29,7 +29,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=6">
   <script defer src="vendor/dompurify.min.js"></script>
   <script defer src="i18n/ja.js"></script>
   <script defer src="i18n/en.js"></script>
@@ -45,8 +45,8 @@
   <script defer src="i18n/zh.js"></script>
   <script defer src="i18n/ru.js"></script>
   <script defer src="rua_config.js"></script>
-  <script defer src="i18n/rua_page.js"></script>
-  <script defer src="rua_i18n.js"></script>
+  <script defer src="i18n/rua_page.js?v=4"></script>
+  <script defer src="rua_i18n.js?v=4"></script>
   <script type="module" src="site.js"></script>
 </head>
 <body>
@@ -103,7 +103,7 @@
           <h3 style="margin: 14px 0 6px;" data-i18n="rua.definition.title">Definition-level clarity</h3>
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
             <li data-i18n-html="rua.definition.li1.html">DMARC の <span class="code">rua=</span> は aggregate data の送信先（URI のリスト）.未指定なら集計レポートは送られない</li>
-            <li data-i18n="rua.definition.li2">集計レポートは XML（RFC 7489 Appendix C）で、送信元IP・認証結果・alignment などを要約</li>
+            <li data-i18n="rua.definition.li2">RFC 9990 は、集約レポートを送信元 IP、認証結果、ドメインの整合状況などを要約する XML 文書として定義しています。</li>
             <li data-i18n-html="rua.definition.li3.html"><span class="code">ruf=</span> は失敗/フォレンジックで、個別メッセージ情報を含み得るためプライバシー面で慎重対応が必要</li>
           </ul>
 
@@ -122,7 +122,7 @@
           <ul class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
             <li data-i18n="rua.p1.li1">データ最小化モード: 標準/匿名化（IPv4 /24, IPv6 /48）/集計のみを選択可能にする</li>
             <li data-i18n="rua.p1.li2">マルチテナント隔離とアクセス制御（行レベル分離、暗号化、監査ログ）</li>
-            <li data-i18n="rua.p1.li3">レート制限/洪水検知/自動抑制（DMARC 報告の悪用対策は RFC 9091 の意図に沿う）</li>
+            <li data-i18n="rua.p1.li3">レート制限、洪水検知、自動抑制を実装し、RFC 9990 第 8 節のセキュリティ上の注意に沿って悪用を防ぐ。</li>
             <li data-i18n="rua.p1.li4">UI で「受信者が報告した観測値」であることを明示し、SPF/DKIM/alignment を分けて表示</li>
           </ul>
 
@@ -146,7 +146,7 @@
           <ol class="tiny" style="margin: 8px 0 0; padding-left: 18px;">
             <li data-i18n-html="rua.setup.step1.html"><strong>1)</strong> あなたのドメインの DMARC レコード（通常 <span class="code">_dmarc</span>）を編集します</li>
             <li style="margin-top: 8px;" data-i18n-html="rua.setup.step2.html"><strong>2)</strong> <span class="code">rua=mailto:{RUA_EMAIL}</span> を追加（または更新）します（すでに <span class="code">rua=</span> がある場合は mailto を追記できます）</li>
-            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step3.html"><strong>3)</strong> 一部の受信者は、外部宛て RUA を許可するための承認 DNS を要求します（RFC 7489 §7.1: Verifying External Destinations）.その場合でも、<strong>当サービスが当社ドメイン側で必要な TXT を自動発行</strong>します.あなたの DNS に追加作業は不要です</li>
+            <li style="margin-top: 8px;" data-i18n-html="rua.setup.step3.html"><strong>3.</strong> 一部の受信側は、外部宛て RUA を許可する承認 DNS を要求します（RFC 9990 第 4 節「外部送信先の検証」）。その場合も、<strong>当サービスが当社ドメイン側に必要な TXT レコードを自動で公開</strong>するため、利用者側の DNS へ追加する作業はありません。</li>
           </ol>
 
           <p class="tiny" style="margin-top: 10px;" data-i18n-html="rua.setup.step4.html"><strong>4)</strong> DNS 反映後、通常 24〜48 時間以内にレポートが届き始めます（受信者側のスケジュールにより前後します）</p>
