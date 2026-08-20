@@ -147,7 +147,7 @@ Exit codes are `0` for a completed command without a configured failure, `1` for
 
 ### GitHub Action
 
-The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`, `fail-on`, and optional comma-separated `selectors`. In this repository it can be used as follows:
+The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`, `fail-on`, optional comma-separated `selectors`, and an optional DNS-over-HTTPS `resolver`. In this repository it can be used as follows:
 
 ```yaml
 - uses: ./.github/actions/dmarc4all
@@ -157,7 +157,7 @@ The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`,
     selectors: selector1,selector2
 ```
 
-The action emits annotations for DMARC, SPF lookup-limit, and requested DKIM-selector findings. It returns the generated JSON path as the `report` output even when a configured finding threshold exits with code 2. It requires no secrets for checks against public DNS.
+The action emits annotations for DMARC, SPF lookup-limit, and requested DKIM-selector findings. It returns the generated JSON path as the `report` output even when a configured finding threshold exits with code 2. The default resolver is Cloudflare's public DNS-over-HTTPS JSON endpoint; no secrets are required.
 
 ### Readiness decisions
 

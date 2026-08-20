@@ -41,3 +41,52 @@ jobs:
 
       - name: Run regression tests
         run: npm test
+
+  action-smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Start deterministic DNS fixture
+        shell: bash
+        run: |
+          node tests/fixtures/doh-server.js > "$RUNNER_TEMP/doh-port" 2> "$RUNNER_TEMP/doh-server.log" &
+          echo "$!" > "$RUNNER_TEMP/doh-server.pid"
+          for _ in {1..50}; do
+            if [ -s "$RUNNER_TEMP/doh-port" ]; then break; fi
+            sleep 0.1
+          done
+          test -s "$RUNNER_TEMP/doh-port"
+          port="$(tr -d '\r\n' < "$RUNNER_TEMP/doh-port")"
+          echo "DMARC4ALL_FIXTURE_RESOLVER=http://127.0.0.1:${port}/dns-query" >> "$GITHUB_ENV"
+
+      - name: Run the composite Action against deterministic evidence
+        id: dmarc4all
+        continue-on-error: true
+        uses: ./.github/actions/dmarc4all
+        with:
+          domain: example.com
+          resolver: ${{ env.DMARC4ALL_FIXTURE_RESOLVER }}
+          selectors: missing
+          fail-on: high
+
+      - name: Verify failure status and retained report output
+        shell: bash
+        env:
+          ACTION_OUTCOME: ${{ steps.dmarc4all.outcome }}
+          REPORT_PATH: ${{ steps.dmarc4all.outputs.report }}
+        run: |
+          test "$ACTION_OUTCOME" = "failure"
+          test -n "$REPORT_PATH"
+          test -f "$REPORT_PATH"
+          node tests/verify-action-report.js "$REPORT_PATH"
+
+      - name: Stop deterministic DNS fixture
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/doh-server.pid" ]; then
+            kill "$(tr -d '\r\n' < "$RUNNER_TEMP/doh-server.pid")" || true
+          fi

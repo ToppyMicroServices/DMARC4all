@@ -12,6 +12,10 @@ inputs:
     description: Optional comma-separated DKIM selectors to observe
     required: false
     default: ''
+  resolver:
+    description: DNS-over-HTTPS JSON endpoint
+    required: false
+    default: https://cloudflare-dns.com/dns-query
 outputs:
   report:
     description: Path to the generated JSON report
@@ -33,6 +37,7 @@ runs:
         INPUT_DOMAIN: ${{ inputs.domain }}
         INPUT_FAIL_ON: ${{ inputs.fail-on }}
         INPUT_SELECTORS: ${{ inputs.selectors }}
+        INPUT_RESOLVER: ${{ inputs.resolver }}
       run: |
         report_path="${RUNNER_TEMP}/dmarc4all-report.json"
         selector_args=()
@@ -43,7 +48,8 @@ runs:
         done
         set +e
         node "$GITHUB_ACTION_PATH/../../../bin/dmarc4all.js" check "$INPUT_DOMAIN" \
-          "${selector_args[@]}" --fail-on "$INPUT_FAIL_ON" --output "$report_path"
+          "${selector_args[@]}" --resolver "$INPUT_RESOLVER" \
+          --fail-on "$INPUT_FAIL_ON" --output "$report_path"
         status=$?
         set -e
         if [ -f "$report_path" ]; then
