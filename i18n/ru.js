@@ -148,5 +148,8 @@
   "links.standards": "Стандарты и конфиденциальность",
   "links.guides": "Инструкции для DNS-провайдеров",
   "links.ai": "Доступ для ИИ и систем",
+  "tools.header": "Анализ заголовков",
+  "tools.ruaAnalyzer": "Анализ RUA",
+  "tools.authGraph": "Граф аутентификации",
 };
 })();

@@ -148,5 +148,8 @@
   "links.standards": "标准与隐私",
   "links.guides": "DNS 服务商指南",
   "links.ai": "AI 与机器访问",
+  "tools.header": "邮件头分析器",
+  "tools.ruaAnalyzer": "RUA 报告分析器",
+  "tools.authGraph": "身份验证图",
 };
 })();

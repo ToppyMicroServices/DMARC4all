@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.0.0.schema.json",
+  "title": "DMARC4all portable diagnosis report 1.0.0",
+  "description": "Historical immutable contract for portable diagnosis reports published with schemaVersion 1.0.0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "format", "schemaVersion", "generatedAt", "domain", "locale", "scope", "summary", "observations", "priorities", "remediation", "evidence", "errors"],
+  "properties": {
+    "$schema": { "const": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json" },
+    "format": { "const": "dmarc4all-diagnosis" },
+    "schemaVersion": { "const": "1.0.0" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "domain": { "type": "string", "minLength": 1 },
+    "locale": { "type": "string", "minLength": 2 },
+    "scope": { "$ref": "#/$defs/scope" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "observations": { "type": "object" },
+    "priorities": { "type": "array", "items": { "$ref": "#/$defs/priority" } },
+    "remediation": { "type": "array", "items": { "$ref": "#/$defs/remediation" } },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dnsRecords"],
+      "properties": { "dnsRecords": { "type": "array", "items": { "$ref": "#/$defs/dnsRecord" } } }
+    },
+    "errors": { "$ref": "#/$defs/stringArray" }
+  },
+  "$defs": {
+    "stringArray": { "type": "array", "items": { "type": "string" } },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "resolver", "limitations"],
+      "properties": {
+        "basis": { "const": "public_dns" },
+        "resolver": { "type": "string" },
+        "limitations": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scores", "enforcementReadiness", "mailProvider"],
+      "properties": {
+        "scores": { "type": "object" },
+        "enforcementReadiness": {
+          "type": "object",
+          "required": ["status", "level", "policy", "checks", "blockers"],
+          "properties": {
+            "status": { "enum": ["monitoring_only", "ready_for_quarantine", "ready_for_reject", "reject_enforced"] },
+            "level": { "enum": ["good", "warn", "bad"] },
+            "policy": { "type": ["string", "null"], "enum": ["none", "quarantine", "reject", null] },
+            "checks": { "type": "object" },
+            "blockers": { "type": "array" }
+          }
+        },
+        "mailProvider": { "type": "object" }
+      }
+    },
+    "priority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "title", "action"],
+      "properties": {
+        "severity": { "enum": ["low", "med", "high"] },
+        "title": { "type": "string" },
+        "action": { "type": "string" }
+      }
+    },
+    "remediation": {
+      "type": "object",
+      "required": ["severity", "title", "summary", "records", "verify", "rollback"],
+      "properties": {
+        "severity": { "enum": ["low", "med", "high"] },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "records": { "type": "array" },
+        "verify": { "type": "string" },
+        "rollback": { "type": "string" }
+      }
+    },
+    "dnsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "ttl", "value"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "ttl": { "type": ["integer", "null"], "minimum": 0 },
+        "value": { "type": "string" }
+      }
+    }
+  }
+}

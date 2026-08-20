@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1b2a">
+  <title>RUA Analyzer | DMARC4all</title>
+  <meta name="description" content="Browser-local RFC 9990 DMARC aggregate report analyzer for XML, gzip, and ZIP files.">
+  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css?v=12">
+  <script defer src="vendor/fast-xml-parser.min.js"></script>
+  <script type="module" src="rua_analyzer.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <div class="brandbar" aria-label="ToppyMicroServices">
+      <a href="index.html" class="brand-link">
+        <img src="apple-touch-icon.png" alt="ToppyMicroServices">
+        <span class="brand-name">ToppyMicroServices</span>
+      </a>
+      <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+    </div>
+
+    <main class="rua-analyzer-shell">
+      <header class="rua-analyzer-heading">
+        <p class="pill">Browser-local</p>
+        <h1>RUA Analyzer</h1>
+        <p>Load RFC 9990 aggregate reports in XML, gzip, or ZIP form. Files remain in this browser.</p>
+      </header>
+
+      <section class="rua-analyzer-workspace" aria-label="RUA aggregate report analyzer">
+        <form id="rua-analysis-form" class="rua-analysis-input">
+          <label class="file-control" for="rua-analysis-files">Select RUA files<input id="rua-analysis-files" type="file" accept=".xml,.gz,.gzip,.zip,text/xml,application/xml,application/gzip,application/zip" multiple></label>
+          <p id="rua-analysis-file-name" class="tiny muted" aria-live="polite">No files selected.</p>
+          <label class="file-control" for="rua-diagnosis-file">Optional DNS diagnosis JSON<input id="rua-diagnosis-file" type="file" accept=".json,application/json"></label>
+          <p id="rua-diagnosis-file-name" class="tiny muted" aria-live="polite">No diagnosis selected.</p>
+		  <button type="submit" class="btn-gradient">Analyze reports</button>
+		  <button type="button" id="rua-analysis-export" class="btn-secondary" disabled>Download graph JSON</button>
+          <p class="tiny muted m-0">Inputs are limited to 10 MiB compressed and 50 MiB expanded in total. DTDs, entities, deep XML, unsafe archive paths, oversized expansion, and excessive records are rejected. Add a DMARC4all diagnosis export to assess reject-policy readiness against the report evidence.</p>
+        </form>
+
+        <section id="rua-analysis-result" class="rua-analysis-result" aria-live="polite" aria-label="RUA analysis result">
+          <p class="muted">Waiting for aggregate reports.</p>
+        </section>
+      </section>
+
+      <p class="tiny muted rua-analyzer-back"><a href="index.html">Back to DNS diagnosis</a> / <a href="rua_service.html">RUA service overview</a></p>
+    </main>
+  </div>
+</body>
+</html>

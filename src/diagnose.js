@@ -33,7 +33,6 @@ import {
 	extractMX,
 	extractNS,
 	extractTXTRecords,
-	firstRecordStartingWith,
 	firstTxtRecordStartingWith,
 	formatCnameChain,
 	fetchHeadCors,
@@ -42,7 +41,6 @@ import {
 	looksLikeSvgUrl,
 	parseBimiTags,
 	parseDkimKeyBits,
-	parseDmarcTags,
 	parseTagValue,
 	parseSvgDimensions,
 	probeHttps,
@@ -55,6 +53,7 @@ import {
 	spfHasAllQualifier,
 	spfIsIpOnly
 } from './diagnostics.js';
+import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js';
 import { esc } from './safe-html.js';
 
 export function createDiagnosisRunner(deps) {
@@ -107,12 +106,19 @@ export function createDiagnosisRunner(deps) {
 			return `v=spf1 ${tokens.join(' ')} ~all`.replace(/\s+/g, ' ').trim();
 		};
 		const remediation = [];
+		let domainTxtLookup = null;
 		const pushFixup = (item) => {
 			if (!item) return;
 			remediation.push(item);
 		};
+		const initialAuthentication = analyzeDomain(domain, {
+			observedAt: new Date().toISOString(),
+			resolver: getActiveResolverLabel()
+		});
 		const results = {
 			domain,
+			...initialAuthentication,
+			authentication: initialAuthentication,
 			meta: {
 				timestamp: new Date().toISOString(),
 				resolver: getActiveResolverLabel(),
@@ -235,17 +241,80 @@ export function createDiagnosisRunner(deps) {
 		}
 
 		try {
-			const json = await dohQuery(`_dmarc.${domain}`, 'TXT');
-			const txtRecords = extractTXTRecords(json);
-			const txt = txtRecords.map((record) => record.data);
-			const record = firstRecordStartingWith(txt, 'v=DMARC1');
+			try {
+				domainTxtLookup = await dohQuery(domain, 'TXT');
+			} catch {
+				// The later SPF lookup reports its own failure without blocking DMARC discovery.
+			}
+			const domainExistence = domainTxtLookup && domainTxtLookup.Status === 3
+				? 'nonexistent'
+				: domainTxtLookup && (domainTxtLookup.Status === undefined || domainTxtLookup.Status === 0)
+					? 'existent'
+					: 'unknown';
+			const dmarcRecords = [];
+			const dmarcLookups = [];
+			const treeWalk = buildDmarcTreeWalk(domain);
+			for (let index = 0; index < treeWalk.length; index += 1) {
+				const walkedDomain = treeWalk[index];
+				const json = await dohQuery(`_dmarc.${walkedDomain}`, 'TXT');
+				dmarcLookups.push({
+					domain: walkedDomain,
+					status: Number.isInteger(json.Status) ? json.Status : 0
+				});
+				const txtRecords = extractTXTRecords(json);
+				for (const txtRecord of txtRecords) {
+					dmarcRecords.push({
+						name: `_dmarc.${walkedDomain}`,
+						type: 'TXT',
+						ttl: txtRecord.ttl ?? null,
+						value: txtRecord.data
+					});
+				}
+
+				const partialAuthentication = analyzeDomain(domain, { dmarcLookups, domainExistence, records: dmarcRecords });
+				if (partialAuthentication.source.classification === 'unavailable') break;
+				if (partialAuthentication.source.method === 'exact-domain') break;
+				if (['psd-n', 'psd-y'].includes(partialAuthentication.organizationalDomain.method)) break;
+			}
+			const authentication = analyzeDomain(domain, {
+				observedAt: results.meta.timestamp,
+				resolver: results.meta.resolver,
+				dmarcLookups,
+				domainExistence,
+				records: dmarcRecords
+			});
+			Object.assign(results, authentication, { authentication });
+			const record = results.source.record;
 			results.dmarc.record = record;
 			if (record) {
-				const ttl = (txtRecords.find((item) => item.data === record) || {}).ttl ?? null;
-				results.meta.records.push({ name: `_dmarc.${domain}`, type: 'TXT', ttl, value: record });
+				const selectedRecord = dmarcRecords.find((item) => item.name === results.source.recordName && item.value === record);
+				results.meta.records.push({
+					name: results.source.recordName,
+					type: 'TXT',
+					ttl: selectedRecord ? selectedRecord.ttl : null,
+					value: record
+				});
 			}
 
-			if (!record) {
+			if (!record && results.source.classification === 'unavailable') {
+				const lookupError = results.findings.find((finding) => finding.code === 'DMARC_DNS_LOOKUP_ERROR');
+				results.errors.push(`DMARC DNS lookup failed with status ${lookupError ? lookupError.status : 'unknown'}`);
+				results.dmarc.findings.push(
+					mkFinding(
+						'med',
+						tr('DMARCの取得に失敗', 'Failed to retrieve DMARC'),
+						detailJaOr(
+							mkDetail(
+								'DMARC取得失敗',
+								'DNS応答が一時的または解決不能なエラーを返した可能性',
+								'再実行かdigで確認'
+							),
+							tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed')
+						),
+						`dig +short TXT _dmarc.${domain}`
+					)
+				);
+			} else if (!record) {
 				results.dmarc.findings.push(
 					mkFinding(
 						'high',
@@ -279,40 +348,39 @@ export function createDiagnosisRunner(deps) {
 					)
 				);
 			} else {
-				const tags = parseDmarcTags(record);
-				const p = (tags.p || '').toLowerCase();
+				const { dmarcPolicy } = results;
+				const tags = dmarcPolicy.tags;
+				const p = results.effectivePolicy || '';
+				const requestedPolicy = results.requestedPolicy || '';
+				const inheritedPolicy = results.source.method === 'rfc9989-dns-tree-walk';
 				const rua = tags.rua || '';
-				const pct = tags.pct || '';
-				const sp = tags.sp || '';
-				const adkim = (tags.adkim || '').toLowerCase();
-				const aspf = (tags.aspf || '').toLowerCase();
+				const pct = dmarcPolicy.percentage || '';
+				const sp = dmarcPolicy.subdomainPolicy || '';
 
-				let level = 'low';
+				const level = dmarcPolicy.posture.level;
 				const pLabel = p || tr('(不明)', '(unknown)');
 				let title = `DMARC: p=${pLabel}`;
 				let legacyDetail = tr('DMARCが設定されている.段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
 				if (p === 'none') {
-					level = 'med';
 					legacyDetail = tr('監視のみ(p=none).集計(rua)を確認しつつ quarantine/reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.');
 				}
 				if (p === 'quarantine') {
-					level = 'med';
 					legacyDetail = tr('隔離(quarantine).運用影響を確認しつつ reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.');
 				}
 				if (p === 'reject') {
-					level = 'low';
 					legacyDetail = tr('不整合のメールは拒否に指定されている。sp の明示的な指定を定義することを勧める', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.');
 				}
+				if (inheritedPolicy) {
+					legacyDetail += requestedPolicy && requestedPolicy !== p
+						? `\n${tr('要求ポリシー', 'Current')}: p=${requestedPolicy}; ${tr('実効ポリシー', 'Suggested')}: p=${p}`
+						: `\n${tr('取得元', 'Evidence')}: ${results.source.domain}`;
+				}
 				if (!rua) {
-					level = level === 'low' ? 'med' : level;
 					legacyDetail += isJa()
 						? '（rua が無い/空のため,運用上の可視化が弱い）'
 						: ' (rua is missing/empty; operational visibility is limited)';
 				}
-				if (sp && sp.toLowerCase() === 'none') level = level === 'low' ? 'med' : level;
-				if (adkim === 's' || aspf === 's') {
-					// strict alignment is acceptable
-				}
+				if (results.source.legacyTags.length) legacyDetail += `\n${t('label.note')}: ${results.source.legacyTags.join(', ')}`;
 				if (pct && pct !== '100') legacyDetail += `（pct=${pct}）`;
 
 				let advice = '運用方針と例外を確認';
@@ -331,9 +399,10 @@ export function createDiagnosisRunner(deps) {
 					legacyDetail
 				);
 
-				results.dmarc.findings.push(
-					mkFinding(level, title, detail, `TXT _dmarc.${domain}\n${record}`)
-				);
+				const evidence = inheritedPolicy
+					? `TXT ${results.source.recordName}\n${record}\n\n${tr('取得元', 'Evidence')}: ${results.source.domain}\n${tr('探索', 'Scope')}: RFC 9989 DNS Tree Walk`
+					: `TXT _dmarc.${domain}\n${record}`;
+				results.dmarc.findings.push(mkFinding(level, title, detail, evidence));
 			}
 			results.dmarc.findings.push(
 				mkFindingRich(
@@ -372,7 +441,7 @@ export function createDiagnosisRunner(deps) {
 		}
 
 		try {
-			const json = await dohQuery(domain, 'TXT');
+			const json = domainTxtLookup || await dohQuery(domain, 'TXT');
 			const txtRecords = extractTXTRecords(json);
 			const txt = txtRecords.map((record) => record.data);
 			const spfRecordObjs = txtRecords.filter((record) => String(record.data).toLowerCase().startsWith('v=spf1'));
@@ -1203,7 +1272,7 @@ export function createDiagnosisRunner(deps) {
 		results.score.spfChips = score.spfChips;
 
 		try {
-			if (!results.dmarc.record) {
+			if (!results.dmarc.record && results.source.classification !== 'unavailable') {
 				results.priority.push({
 					level: 'high',
 					title: tr('DMARC が未設定', 'DMARC missing'),
@@ -1226,10 +1295,10 @@ export function createDiagnosisRunner(deps) {
 					rollback: tr('追加した TXT を削除するか、直前の値に戻す', 'Remove the TXT you added, or restore the previous value.')
 				});
 			} else {
-				const p = (parseTagValue(results.dmarc.record, 'p') || '').toLowerCase();
-				const ruaValue = parseTagValue(results.dmarc.record, 'rua');
-				const dmarcTags = parseDmarcTags(results.dmarc.record);
-				if (p === 'none') {
+				const p = results.effectivePolicy || '';
+				const dmarcTags = results.dmarcPolicy.tags;
+				const ruaValue = dmarcTags.rua || '';
+				if (p === 'none' && results.source.method === 'exact-domain') {
 					results.priority.push({
 						level: 'med',
 						title: tr('DMARC が p=none', 'DMARC is p=none'),
@@ -1254,6 +1323,12 @@ export function createDiagnosisRunner(deps) {
 						}],
 						verify: `dig +short TXT _dmarc.${domain}`,
 						rollback: tr('値を直前の p=none レコードへ戻す', 'Restore the previous p=none record if you see false positives.')
+					});
+				} else if (p === 'none') {
+					results.priority.push({
+						level: 'med',
+						title: tr('DMARC が p=none', 'DMARC is p=none'),
+						action: tr('監視結果を見ながら quarantine/reject へ段階移行を検討', 'Review reports and consider staged move to quarantine/reject')
 					});
 				}
 				if (!ruaValue) {

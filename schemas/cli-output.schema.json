@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dmarc4all.toppymicros.com/schemas/cli-output.schema.json",
+  "title": "DMARC4all CLI output compatibility index",
+  "description": "Compatibility entry point. New output identifies its immutable versioned schema directly.",
+  "$ref": "cli-output-1.0.0.schema.json"
+}

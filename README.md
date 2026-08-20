@@ -16,6 +16,12 @@ It also includes a DMARC RUA service description page and an operational workflo
 ## Features
 
 - DMARC / SPF / DKIM quick checks (with evidence snippets)
+- RFC 9989 DMARC policy discovery with bounded DNS Tree Walk, requested/effective policy, and policy-source provenance
+- Browser-local Header / `.eml` Analyzer for reported SPF, DKIM, DMARC, ARC, and message-path evidence
+- Browser-local RFC 9990 RUA Analyzer for XML, gzip, ZIP, and multiple aggregate reports
+- Evidence-backed reject-policy readiness decisions that keep insufficient evidence separate from known risk
+- CLI and composite GitHub Action for checks, local evidence analysis, snapshots, and regression detection
+- SPF/DKIM authentication supply-chain graph with declared, observed, and unresolved evidence separated
 - Optional: DNSBL sender-IP quick check (best-effort)
 - Optional: BIMI lookup (`_bimi.<domain>`), parses `l=` (logo URL) and `a=`
 - MTA-STS / TLS-RPT, MX, CAA, DNSSEC indicators, lightweight HTTPS probes
@@ -25,6 +31,10 @@ It also includes a DMARC RUA service description page and an operational workflo
 ## Privacy / Safety
 
 - This tool does **not** send email and does **not** access mailboxes.
+- Header and `.eml` inputs are parsed locally with a 1 MiB input limit; no message content is uploaded or stored by this static site.
+- Header Analyzer results distinguish reported receiver evidence from independent verification. It does not cryptographically revalidate DKIM signatures.
+- RUA reports are parsed locally with 10 MiB compressed, 50 MiB expanded, 20-file, and 100,000-record limits. DTDs, entities, and unsafe archives are rejected.
+- Duplicate RUA report identities are counted once, conflicting duplicates are rejected, and readiness correlation requires the report policy domain to match the diagnosis policy source.
 - It queries **public DNS** via DNS-over-HTTPS (DoH) endpoints.
 - No server-side component: input is processed in your browser.
 - Network requests go to:
@@ -45,8 +55,10 @@ It also includes a DMARC RUA service description page and an operational workflo
 - Curated LLM index: https://dmarc4all.toppymicros.com/llms.txt
 - Detailed machine context: https://dmarc4all.toppymicros.com/llms-full.txt
 - AI usage and safety guidance: https://dmarc4all.toppymicros.com/ai_usage.html
-- Portable diagnosis schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
+- Portable diagnosis schema 1.2.0: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json
+- Compatibility schema index: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
 - Example diagnosis report: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
+- Example RFC 9990 RUA report: `examples/rua-report.example.xml`
 
 The browser's JSON export uses the versioned `dmarc4all-diagnosis` format and omits presentation HTML. It separates observations, readiness, remediation, evidence, limitations, and errors so automated consumers do not need to scrape the results page.
 
@@ -91,14 +103,14 @@ Current public site: https://dmarc4all.toppymicros.com/
 
 ### Release
 
-Create releases from `main` only.
+Create releases from `main` only. Replace `<tag>` with the next reviewed version.
 
 ```bash
 git checkout main
 git pull --ff-only origin main
-git tag -a v0.1.0 -m "v0.1.0"
+git tag -a <tag> -m "<tag>"
 git push origin main --follow-tags
-gh release create v0.1.0 --generate-notes
+gh release create <tag> --generate-notes
 ```
 
 ### Test
@@ -113,6 +125,51 @@ This runs:
 
 - Node built-in tests for the extracted JS modules
 - Python `unittest` coverage for the Cloudflare TXT management script
+
+### CLI
+
+The CLI requires Node.js 20.18.0 or newer. Install the locked dependencies with `npm ci --ignore-scripts` before use.
+
+Run the repository-local CLI with Node.js:
+
+```bash
+npm run dmarc4all -- check example.com --json
+npm run dmarc4all -- header message.eml --json
+npm run dmarc4all -- rua report.xml.gz --json
+npm run dmarc4all -- readiness --diagnosis diagnosis.json report.xml.gz --json
+npm run dmarc4all -- snapshot example.com --selector selector1 --output before.json
+npm run dmarc4all -- diff before.json after.json --fail-on high --json
+```
+
+Exit codes are `0` for a completed command without a configured failure, `1` for invalid input or an operational error, and `2` when `--fail-on` matches a finding. `--fail-on` accepts only `low`, `med`, or `high`. CLI JSON identifies the immutable `schemas/cli-output-1.0.0.schema.json` contract; `schemas/cli-output.schema.json` is the compatibility index. Outputs are validated with a Draft 2020-12 validator before they are written.
+
+`check` and `snapshot` query the configured public DNS-over-HTTPS resolver. Header and RUA contents are read locally. `snapshot` also checks the MTA-STS HTTPS policy unless `--no-http` is supplied. No command changes DNS or provider settings.
+
+### GitHub Action
+
+The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`, `fail-on`, and optional comma-separated `selectors`. In this repository it can be used as follows:
+
+```yaml
+- uses: ./.github/actions/dmarc4all
+  with:
+    domain: example.com
+    fail-on: high
+    selectors: selector1,selector2
+```
+
+The action emits annotations for DMARC, SPF lookup-limit, and requested DKIM-selector findings. It returns the generated JSON path as the `report` output even when a configured finding threshold exits with code 2. It requires no secrets for checks against public DNS.
+
+### Readiness decisions
+
+The readiness model returns `READY`, `CONDITIONALLY_READY`, `NOT_READY`, or `INSUFFICIENT_EVIDENCE`, with evidence references for each reason. Its default gates—100 observed messages, seven observation days, 98% aligned traffic, at most 5% unknown traffic, and at most 20% SPF-only aligned traffic—are configurable product heuristics, not RFC requirements. Review the retained evidence and organizational risk before changing a DMARC policy.
+
+### Authentication graph
+
+Open `authentication_graph.html` to visualize SPF dependencies, DKIM selectors, header evidence, and RUA observations. Load portable diagnosis JSON directly, or download graph JSON from the Header and RUA analyzers and select the exports together. The graph and its accessible table merge identical domains while retaining declared, observed, or unresolved evidence states; it does not infer a sending provider from an IP address or authentication domain. Structural node, edge, SPF-depth, term, report, and record limits bound rendering work.
+
+## Security
+
+See `SECURITY.md` for the supported-version policy, private reporting route, trust boundaries, and review invariants.
 
 ## DMARC RUA service
 
@@ -182,6 +239,12 @@ This tool sends DNS queries for the entered domain to the selected DNS-over-HTTP
 ## Code Layout
 
 - `src/core.js`: UI wiring, resolver selection, and submit flow
+- `src/authentication-core.js`: UI-independent DMARC discovery, normalized authentication evidence, and enforcement-readiness decisions
+- `src/message-analysis.js`: bounded browser-local header/EML parsing and reported-evidence normalization
+- `src/rua-analysis.js`: bounded RFC 9990 and legacy aggregate-report parsing and aggregation
+- `src/automation.js`: versioned snapshots and security-relevant diffs
+- `src/authentication-graph.js`: evidence-separated SPF/DKIM graph model
+- `bin/dmarc4all.js`: CLI entry point
 - `src/diagnose.js`: main diagnosis runner/orchestration
 - `src/diagnostics.js`: DNS/network/protocol helper functions
 - `src/render.js`: findings, report sections, exports, and DNSBL rendering
@@ -191,3 +254,4 @@ This tool sends DNS queries for the entered domain to the selected DNS-over-HTTP
 ## Docs
 
 - Service/approach spec: `docs/service-spec.md`
+- Phased implementation roadmap: `docs/roadmap.md`

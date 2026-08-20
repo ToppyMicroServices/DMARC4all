@@ -148,5 +148,8 @@
   "links.standards": "Standards & Privacy",
   "links.guides": "DNS provider guides",
   "links.ai": "AI & Machine Access",
+  "tools.header": "Header Analyzer",
+  "tools.ruaAnalyzer": "RUA Analyzer",
+  "tools.authGraph": "Authentication Graph",
 };
 })();

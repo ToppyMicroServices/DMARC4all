@@ -1,0 +1,902 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json",
+  "title": "DMARC4all portable diagnosis report",
+  "description": "Machine-readable export of a DMARC4all public-DNS diagnosis. It does not represent receiver-side DMARC conformance or message-level authentication.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "schemaVersion",
+    "generatedAt",
+    "domain",
+    "locale",
+    "scope",
+    "summary",
+    "authentication",
+    "observations",
+    "priorities",
+    "remediation",
+    "evidence",
+    "errors"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json"
+    },
+    "format": {
+      "const": "dmarc4all-diagnosis"
+    },
+    "schemaVersion": {
+      "const": "1.2.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2
+    },
+    "scope": {
+      "$ref": "#/$defs/scope"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    },
+    "authentication": {
+      "$ref": "#/$defs/authentication"
+    },
+    "observations": {
+      "$ref": "#/$defs/observations"
+    },
+    "priorities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/priority"
+      }
+    },
+    "remediation": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/remediation"
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dnsRecords",
+        "dmarcLookups"
+      ],
+      "properties": {
+        "dnsRecords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dnsRecord"
+          }
+        },
+        "dmarcLookups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dmarcLookup"
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "nullableScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "requestedPolicy",
+        "effectivePolicy",
+        "source",
+        "organizationalDomain",
+        "findings",
+        "confidence",
+        "standards"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "string"
+        },
+        "requestedPolicy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "effectivePolicy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "none",
+            "quarantine",
+            "reject",
+            null
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/authenticationSource"
+        },
+        "organizationalDomain": {
+          "$ref": "#/$defs/organizationalDomain"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/authenticationFinding"
+          }
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "low"
+          ]
+        },
+        "standards": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "authenticationSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "recordName",
+        "record",
+        "discoveryPath",
+        "classification",
+        "method",
+        "policyTag",
+        "domainExistence",
+        "legacyTags"
+      ],
+      "properties": {
+        "domain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "recordName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "record": {
+          "type": "string"
+        },
+        "discoveryPath": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "policyTag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "domainExistence": {
+          "enum": [
+            "existent",
+            "nonexistent",
+            "unknown"
+          ]
+        },
+        "legacyTags": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "organizationalDomain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "method",
+        "discoveryPath",
+        "confidence"
+      ],
+      "properties": {
+        "domain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "method": {
+          "type": "string"
+        },
+        "discoveryPath": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "low"
+          ]
+        }
+      }
+    },
+    "authenticationFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "tags",
+        "status"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "high",
+            "med",
+            "low"
+          ]
+        },
+        "tags": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "dmarcLookup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "status"
+      ],
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "status": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "resolver",
+        "limitations"
+      ],
+      "properties": {
+        "basis": {
+          "const": "public_dns"
+        },
+        "resolver": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "no_email_sent_or_received",
+              "no_mailbox_or_server_access",
+              "dkim_selectors_not_exhaustively_discoverable",
+              "results_require_header_and_rua_confirmation"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scores",
+        "enforcementReadiness",
+        "mailProvider"
+      ],
+      "properties": {
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "overall",
+            "spf"
+          ],
+          "properties": {
+            "overall": {
+              "$ref": "#/$defs/nullableScore"
+            },
+            "spf": {
+              "$ref": "#/$defs/nullableScore"
+            }
+          }
+        },
+        "enforcementReadiness": {
+          "$ref": "#/$defs/readiness"
+        },
+        "mailProvider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name",
+            "confidence",
+            "signals"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "string"
+            },
+            "signals": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "decision",
+        "status",
+        "level",
+        "policy",
+        "checks",
+        "blockers",
+        "warnings",
+        "reasons",
+        "decisionBlockers",
+        "decisionWarnings",
+        "evidence"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "decision": {
+          "enum": [
+            "READY",
+            "CONDITIONALLY_READY",
+            "NOT_READY",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        "status": {
+          "enum": [
+            "monitoring_only",
+            "ready_for_quarantine",
+            "ready_for_reject",
+            "reject_enforced"
+          ]
+        },
+        "level": {
+          "enum": [
+            "good",
+            "warn",
+            "bad"
+          ]
+        },
+        "policy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "none",
+            "quarantine",
+            "reject",
+            null
+          ]
+        },
+		"requestedPolicy": {
+		  "type": [
+			"string",
+			"null"
+		  ],
+		  "enum": [
+			"none",
+			"quarantine",
+			"reject",
+			null
+		  ]
+		},
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dmarcRecordPresent",
+            "dmarcPolicyValid",
+            "aggregateReportingConfigured",
+            "spfUsable",
+            "dkimConfirmed"
+          ],
+          "properties": {
+            "dmarcRecordPresent": {
+              "type": "boolean"
+            },
+            "dmarcPolicyValid": {
+              "type": "boolean"
+            },
+            "aggregateReportingConfigured": {
+              "type": "boolean"
+            },
+            "spfUsable": {
+              "type": "boolean"
+            },
+            "dkimConfirmed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "dmarc_record_missing",
+              "dmarc_policy_invalid",
+              "aggregate_reporting_missing",
+              "spf_not_usable",
+              "dkim_not_confirmed"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "warnings": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/readinessReason"
+          }
+        },
+        "decisionBlockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/readinessReason"
+          }
+        },
+        "decisionWarnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/readinessReason"
+          }
+        },
+        "evidence": {
+          "$ref": "#/$defs/readinessEvidence"
+        }
+      }
+    },
+    "readinessReason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "category",
+        "evidence",
+        "detail"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "enum": [
+            "blocker",
+            "warning",
+            "insufficient"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "readinessEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalMessages",
+        "alignedMessages",
+        "unalignedMessages",
+        "unknownMessages",
+        "observationDays",
+        "alignedRate",
+        "unalignedRate",
+        "unknownRate",
+        "spfOnlyRate",
+        "thresholds"
+      ],
+      "properties": {
+        "totalMessages": { "type": "integer", "minimum": 0 },
+        "alignedMessages": { "type": "integer", "minimum": 0 },
+        "unalignedMessages": { "type": "integer", "minimum": 0 },
+        "unknownMessages": { "type": "integer", "minimum": 0 },
+        "observationDays": { "type": "number", "minimum": 0 },
+        "alignedRate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "unalignedRate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "unknownRate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "spfOnlyRate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimumMessages",
+            "minimumObservationDays",
+            "minimumAlignedRate",
+            "maximumUnknownRate",
+            "maximumSpfOnlyRate"
+          ],
+          "properties": {
+            "minimumMessages": { "type": "integer", "minimum": 0 },
+            "minimumObservationDays": { "type": "integer", "minimum": 0 },
+            "minimumAlignedRate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "maximumUnknownRate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "maximumSpfOnlyRate": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dmarc",
+        "spf",
+        "dkim",
+        "bimi",
+        "mx",
+        "mtaSts",
+        "caa",
+        "dnssec",
+        "subdomains"
+      ],
+      "properties": {
+        "dmarc": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "record",
+            "policy",
+            "aggregateReportingConfigured"
+          ],
+          "properties": {
+            "record": {
+              "type": "string"
+            },
+            "policy": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "aggregateReportingConfigured": {
+              "type": "boolean"
+            }
+          }
+        },
+        "spf": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "records",
+            "recordCount",
+            "dangerousAll"
+          ],
+          "properties": {
+            "records": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "recordCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dangerousAll": {
+              "type": "boolean"
+            }
+          }
+        },
+        "dkim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "selectors",
+            "confirmedSelectors",
+            "usesCname"
+          ],
+          "properties": {
+            "selectors": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "confirmedSelectors": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "usesCname": {
+              "type": "boolean"
+            }
+          }
+        },
+        "bimi": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "record",
+            "logoUrl",
+            "evidenceDocumentUrl"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "record": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string"
+            },
+            "evidenceDocumentUrl": {
+              "type": "string"
+            }
+          }
+        },
+        "mx": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "records"
+          ],
+          "properties": {
+            "records": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        },
+        "mtaSts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "record",
+            "tlsReportingRecord"
+          ],
+          "properties": {
+            "record": {
+              "type": "string"
+            },
+            "tlsReportingRecord": {
+              "type": "string"
+            }
+          }
+        },
+        "caa": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "records"
+          ],
+          "properties": {
+            "records": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        },
+        "dnssec": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ds",
+            "dnskey"
+          ],
+          "properties": {
+            "ds": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "dnskey": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        },
+        "subdomains": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scanEnabled",
+            "found"
+          ],
+          "properties": {
+            "scanEnabled": {
+              "type": "boolean"
+            },
+            "found": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        }
+      }
+    },
+    "priority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "title",
+        "action"
+      ],
+      "properties": {
+        "severity": {
+          "enum": [
+            "high",
+            "med",
+            "low"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        }
+      }
+    },
+    "remediation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "title",
+        "summary",
+        "records",
+        "verify",
+        "rollback"
+      ],
+      "properties": {
+        "severity": {
+          "enum": [
+            "high",
+            "med",
+            "low"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fixRecord"
+          }
+        },
+        "verify": {
+          "type": "string"
+        },
+        "rollback": {
+          "type": "string"
+        }
+      }
+    },
+    "fixRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "host",
+        "type",
+        "currentValue",
+        "suggestedValue",
+        "copyText"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "currentValue": {
+          "type": "string"
+        },
+        "suggestedValue": {
+          "type": "string"
+        },
+        "copyText": {
+          "type": "string"
+        }
+      }
+    },
+    "dnsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "ttl",
+        "value"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "ttl": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

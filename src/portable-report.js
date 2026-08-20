@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+import {
+	analyzeDomain,
+	assessEnforcementReadiness as assessCoreEnforcementReadiness
+} from './authentication-core.js';
+
 export const PORTABLE_REPORT_FORMAT = 'dmarc4all-diagnosis';
-export const PORTABLE_REPORT_SCHEMA_VERSION = '1.0.0';
-export const PORTABLE_REPORT_SCHEMA_URL = 'https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json';
+export const PORTABLE_REPORT_SCHEMA_VERSION = '1.2.0';
+export const PORTABLE_REPORT_SCHEMA_URL = 'https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json';
 
 function arrayOfStrings(value) {
 	return Array.isArray(value) ? value.map((item) => String(item || '')).filter(Boolean) : [];
@@ -33,6 +38,56 @@ function cleanRecord(record) {
 		type: String(record && record.type || ''),
 		ttl: Number.isInteger(record && record.ttl) && record.ttl >= 0 ? record.ttl : null,
 		value: String(record && record.value || '')
+	};
+}
+
+function cleanAuthenticationFinding(finding) {
+	return {
+		code: String(finding && finding.code || ''),
+		severity: ['high', 'med', 'low'].includes(finding && finding.severity) ? finding.severity : 'low',
+		tags: arrayOfStrings(finding && finding.tags),
+		status: Number.isInteger(finding && finding.status) ? finding.status : null
+	};
+}
+
+function cleanAuthentication(results, meta) {
+	const fallback = analyzeDomain(String(results && results.domain || ''), {
+		resolver: String(meta && meta.resolver || ''),
+		observedAt: String(meta && meta.timestamp || ''),
+		records: Array.isArray(meta && meta.records) ? meta.records : []
+	});
+	const authentication = results && results.authentication && typeof results.authentication === 'object'
+		? results.authentication
+		: results && results.source && typeof results.source === 'object'
+			? results
+			: fallback;
+	const source = authentication.source || fallback.source;
+	const organizationalDomain = authentication.organizationalDomain || fallback.organizationalDomain;
+
+	return {
+		schemaVersion: String(authentication.schemaVersion || fallback.schemaVersion),
+		requestedPolicy: authentication.requestedPolicy || null,
+		effectivePolicy: authentication.effectivePolicy || null,
+		source: {
+			domain: source.domain ? String(source.domain) : null,
+			recordName: source.recordName ? String(source.recordName) : null,
+			record: String(source.record || ''),
+			discoveryPath: arrayOfStrings(source.discoveryPath),
+			classification: String(source.classification || 'not-found'),
+			method: String(source.method || 'none'),
+			policyTag: source.policyTag ? String(source.policyTag) : null,
+			domainExistence: String(source.domainExistence || 'unknown'),
+			legacyTags: arrayOfStrings(source.legacyTags)
+		},
+		organizationalDomain: {
+			domain: organizationalDomain && organizationalDomain.domain ? String(organizationalDomain.domain) : null,
+			method: String(organizationalDomain && organizationalDomain.method || 'initial-domain'),
+			discoveryPath: arrayOfStrings(organizationalDomain && organizationalDomain.discoveryPath),
+			confidence: String(organizationalDomain && organizationalDomain.confidence || 'low')
+		},
+		findings: Array.isArray(authentication.findings) ? authentication.findings.map(cleanAuthenticationFinding) : [],
+		confidence: String(authentication.confidence || fallback.confidence || 'low'),
+		standards: arrayOfStrings(authentication.standards || fallback.standards)
 	};
 }
 
@@ -67,46 +122,16 @@ function cleanRemediation(item) {
 }
 
 export function assessEnforcementReadiness(results) {
-	const dmarcRecord = String(results && results.dmarc && results.dmarc.record || '');
-	const spfRecords = arrayOfStrings(results && results.spf && results.spf.records);
-	const confirmedSelectors = arrayOfStrings(results && results.dkim && results.dkim.confirmedSelectors);
-	const policy = dmarcTag(dmarcRecord, 'p').toLowerCase();
-	const validPolicy = ['none', 'quarantine', 'reject'].includes(policy);
-	const hasAggregateReporting = Boolean(dmarcTag(dmarcRecord, 'rua'));
-	const spfUsable = spfRecords.length === 1 && !/\+all\b/i.test(spfRecords[0]);
-	const dkimConfirmed = confirmedSelectors.length > 0;
-	const blockers = [];
-
-	if (!dmarcRecord) blockers.push('dmarc_record_missing');
-	if (dmarcRecord && !validPolicy) blockers.push('dmarc_policy_invalid');
-	if (dmarcRecord && !hasAggregateReporting) blockers.push('aggregate_reporting_missing');
-	if (!spfUsable) blockers.push('spf_not_usable');
-	if (!dkimConfirmed) blockers.push('dkim_not_confirmed');
-
-	const checks = {
-		dmarcRecordPresent: Boolean(dmarcRecord),
-		dmarcPolicyValid: validPolicy,
-		aggregateReportingConfigured: hasAggregateReporting,
-		spfUsable,
-		dkimConfirmed
-	};
-
-	if (policy === 'reject' && hasAggregateReporting && spfUsable && dkimConfirmed) {
-		return { status: 'reject_enforced', level: 'good', policy, checks, blockers: [] };
-	}
-	if (policy === 'quarantine' && hasAggregateReporting && spfUsable && dkimConfirmed) {
-		return { status: 'ready_for_reject', level: 'good', policy, checks, blockers: [] };
-	}
-	if (policy === 'none' && hasAggregateReporting && spfUsable && dkimConfirmed) {
-		return { status: 'ready_for_quarantine', level: 'warn', policy, checks, blockers: [] };
-	}
-	return {
-		status: 'monitoring_only',
-		level: !dmarcRecord || (dmarcRecord && !validPolicy) ? 'bad' : 'warn',
-		policy: validPolicy ? policy : null,
-		checks,
-		blockers
-	};
+	return assessCoreEnforcementReadiness({
+		dmarcRecord: String(results && results.dmarc && results.dmarc.record || ''),
+		effectivePolicy: results && results.authentication ? results.authentication.effectivePolicy : undefined,
+		spfRecords: arrayOfStrings(results && results.spf && results.spf.records),
+		confirmedDkimSelectors: arrayOfStrings(results && results.dkim && results.dkim.confirmedSelectors),
+		subdomainCoverage: results && results.subdomains && results.subdomains.enabled ? 'dns-scan' : 'unknown',
+		nonexistentDomainPolicy: results && results.authentication && results.authentication.dmarcPolicy
+			? results.authentication.dmarcPolicy.nonexistentDomainPolicy || results.authentication.dmarcPolicy.subdomainPolicy || results.authentication.effectivePolicy || 'unknown'
+			: 'unknown'
+	});
 }
 
 export function buildPortableReport(results, options = {}) {
@@ -116,6 +141,7 @@ export function buildPortableReport(results, options = {}) {
 	const spfRecords = arrayOfStrings(source.spf && source.spf.records);
 	const mailProvider = source.mailProvider || {};
 	const score = source.score || {};
+	const authentication = cleanAuthentication(source, meta);
 
 	return {
 		$schema: PORTABLE_REPORT_SCHEMA_URL,
@@ -147,6 +173,7 @@ export function buildPortableReport(results, options = {}) {
 				signals: arrayOfStrings(mailProvider.signals)
 			}
 		},
+		authentication,
 		observations: {
 			dmarc: {
 				record: dmarcRecord,
@@ -191,7 +218,13 @@ export function buildPortableReport(results, options = {}) {
 		priorities: Array.isArray(source.priority) ? source.priority.map(cleanPriority) : [],
 		remediation: Array.isArray(source.fixups) ? source.fixups.map(cleanRemediation) : [],
 		evidence: {
-			dnsRecords: Array.isArray(meta.records) ? meta.records.map(cleanRecord) : []
+			dnsRecords: Array.isArray(meta.records) ? meta.records.map(cleanRecord) : [],
+			dmarcLookups: Array.isArray(source.evidence && source.evidence.dmarcLookups)
+			? source.evidence.dmarcLookups.map((lookup) => ({
+				domain: String(lookup && lookup.domain || ''),
+				status: Number.isInteger(lookup && lookup.status) ? lookup.status : null
+			}))
+			: []
 		},
 		errors: arrayOfStrings(source.errors)
 	};

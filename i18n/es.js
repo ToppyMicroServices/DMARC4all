@@ -148,5 +148,8 @@
   "links.standards": "Estándares y privacidad",
   "links.guides": "Guías por proveedor de DNS",
   "links.ai": "Acceso para IA y sistemas",
+  "tools.header": "Analizador de cabeceras",
+  "tools.ruaAnalyzer": "Analizador RUA",
+  "tools.authGraph": "Gráfico de autenticación",
 };
 })();

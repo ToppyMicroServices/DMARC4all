@@ -503,29 +503,31 @@ export function createRenderer(deps) {
 	function localizeEnforcementReadiness(results) {
 		const assessment = assessEnforcementReadiness(results);
 		const labels = {
-			reject_enforced: tr('reject 適用済み', 'Reject enforced'),
-			ready_for_reject: tr('reject へ進める候補', 'Ready for reject'),
-			ready_for_quarantine: tr('quarantine へ進める候補', 'Ready for quarantine'),
-			monitoring_only: tr('監視・準備段階', 'Monitoring only')
+			READY: tr('reject へ進める候補', 'Ready for reject'),
+			CONDITIONALLY_READY: tr('quarantine へ進める候補', 'Ready for quarantine'),
+			NOT_READY: tr('監視・準備段階', 'Monitoring only'),
+			INSUFFICIENT_EVIDENCE: tr('監視・準備段階', 'Monitoring only')
 		};
 		const nextActions = {
-			reject_enforced: tr('転送・例外・サブドメイン方針を定期確認', 'Keep reviewing forwarding, exceptions, and subdomain policy'),
-			ready_for_reject: tr('RUA で誤判定が少ないことを確認して reject へ段階移行', 'Use RUA reports to confirm low false positives, then move toward reject'),
-			ready_for_quarantine: tr('RUA と実メールヘッダを確認し、影響範囲を把握してから quarantine へ進む', 'Review RUA reports and real message headers, then move to quarantine with impact understood'),
-			monitoring_only: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics')
+			READY: tr('RUA で誤判定が少ないことを確認して reject へ段階移行', 'Use RUA reports to confirm low false positives, then move toward reject'),
+			CONDITIONALLY_READY: tr('RUA と実メールヘッダを確認し、影響範囲を把握してから quarantine へ進む', 'Review RUA reports and real message headers, then move to quarantine with impact understood'),
+			NOT_READY: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics'),
+			INSUFFICIENT_EVIDENCE: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics')
 		};
-		const blockerText = {
-			dmarc_record_missing: tr('DMARC レコードが未設定', 'DMARC record is missing'),
-			dmarc_policy_invalid: tr('DMARC policy（p=）を none / quarantine / reject のいずれかにしてください', 'DMARC policy (p=) should be none, quarantine, or reject'),
-			aggregate_reporting_missing: tr('RUA 集計レポートの宛先が未設定', 'RUA aggregate reporting is not configured'),
-			spf_not_usable: tr('SPF を 1 レコードに整理し、+all を避ける必要があります', 'SPF should be a single usable record without +all'),
-			dkim_not_confirmed: tr('DKIM 署名を実メールまたは selector で確認してください', 'DKIM signing should be confirmed by selector or real message headers')
+		const reasonText = {
+			DMARC_RECORD_MISSING: tr('DMARC レコードが未設定', 'DMARC record is missing'),
+			DMARC_POLICY_INVALID: tr('DMARC policy（p=）を none / quarantine / reject のいずれかにしてください', 'DMARC policy (p=) should be none, quarantine, or reject'),
+			AUTHENTICATION_PATH_UNCONFIRMED: tr('DKIM 署名を実メールまたは selector で確認してください', 'DKIM signing should be confirmed by selector or real message headers'),
+			RUA_VOLUME_INSUFFICIENT: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics'),
+			RUA_WINDOW_INSUFFICIENT: tr('RUA を見ながら SPF / DKIM / DMARC の土台を整える', 'Use RUA reports while strengthening SPF, DKIM, and DMARC basics')
 		};
+		const actionReasons = assessment.reasons.filter((reason) => reason.category !== 'warning').slice(0, 4);
 		return {
-			level: assessment.level,
-			label: labels[assessment.status],
-			next: nextActions[assessment.status],
-			blockers: assessment.blockers.slice(0, 4).map((code) => blockerText[code] || code)
+			level: assessment.decision === 'READY' ? 'good' : assessment.decision === 'NOT_READY' ? 'bad' : 'warn',
+			label: labels[assessment.decision],
+			decision: assessment.decision,
+			next: nextActions[assessment.decision],
+			blockers: actionReasons.map((reason) => `${reason.code}: ${reasonText[reason.code] || reason.detail}`)
 		};
 	}
 
@@ -541,7 +543,7 @@ export function createRenderer(deps) {
 						<div class="action-kicker">${esc(tr('適用準備度', 'Enforcement readiness'))}</div>
 						<div class="mini-title m-0">${esc(readiness.label)}</div>
 					</div>
-					<span class="status">${esc(readiness.label)}</span>
+					<span class="status">${esc(readiness.decision)}</span>
 				</div>
 				<p class="action-summary">${esc(readiness.next)}</p>
 				${blockerHtml}

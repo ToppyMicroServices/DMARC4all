@@ -32,6 +32,21 @@
       "name": "RUA Service",
       "short_name": "RUA",
       "url": "/rua_service.html"
+    },
+    {
+      "name": "Header Analyzer",
+      "short_name": "Headers",
+      "url": "/header_analyzer.html"
+    },
+    {
+      "name": "RUA Analyzer",
+      "short_name": "RUA files",
+      "url": "/rua_analyzer.html"
+    },
+    {
+      "name": "Authentication Graph",
+      "short_name": "Auth graph",
+      "url": "/authentication_graph.html"
     }
   ]
 }

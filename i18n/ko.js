@@ -159,5 +159,8 @@
   "links.standards": "표준 및 개인정보 보호",
   "links.guides": "DNS 제공자별 가이드",
   "links.ai": "AI 및 시스템 접근",
+  "tools.header": "헤더 분석기",
+  "tools.ruaAnalyzer": "RUA 분석기",
+  "tools.authGraph": "인증 그래프",
 };
 })();

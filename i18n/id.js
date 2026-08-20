@@ -148,5 +148,8 @@
   "links.standards": "Standar dan privasi",
   "links.guides": "Panduan penyedia DNS",
   "links.ai": "Akses untuk AI dan sistem",
+  "tools.header": "Penganalisis header",
+  "tools.ruaAnalyzer": "Penganalisis RUA",
+  "tools.authGraph": "Grafik autentikasi",
 };
 })();

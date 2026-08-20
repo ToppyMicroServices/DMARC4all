@@ -148,5 +148,8 @@
   "links.standards": "Standardid ja privaatsus",
   "links.guides": "DNS-teenusepakkujate juhendid",
   "links.ai": "Juurdepääs tehisintellektile ja süsteemidele",
+  "tools.header": "Päiseanalüsaator",
+  "tools.ruaAnalyzer": "RUA analüsaator",
+  "tools.authGraph": "Autentimisgraaf",
 };
 })();

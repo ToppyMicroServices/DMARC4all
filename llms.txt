@@ -13,8 +13,12 @@ Important interpretation notes:
 ## Primary resources
 
 - [DMARC4all diagnosis](https://dmarc4all.toppymicros.com/): Run the browser-based public DNS check and export a versioned JSON report.
+- [Header Analyzer](https://dmarc4all.toppymicros.com/header_analyzer.html): Parse pasted headers or a `.eml` file locally (1 MiB limit) to inspect reported SPF/DKIM/DMARC/ARC evidence. It does not independently verify DKIM signatures.
+- [RUA Analyzer](https://dmarc4all.toppymicros.com/rua_analyzer.html): Parse RFC 9990 XML, gzip, ZIP, and multiple aggregate reports locally. DTDs/entities and unsafe archives are rejected; results identify unaligned sources and causes.
+- [Authentication Graph](https://dmarc4all.toppymicros.com/authentication_graph.html): Compare declared SPF/DKIM infrastructure with locally supplied header and RUA observations without inferring provider identity.
 - [AI and machine access](https://dmarc4all.toppymicros.com/ai_usage.html): Current access methods, safety boundaries, report contract, and citation guidance.
-- [Portable diagnosis JSON Schema](https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json): JSON Schema 2020-12 contract for exported reports.
+- [Portable diagnosis JSON Schema 1.2.0](https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json): Immutable JSON Schema 2020-12 contract for current exports.
+- [CLI output JSON Schema 1.0.0](https://dmarc4all.toppymicros.com/schemas/cli-output-1.0.0.schema.json): Immutable envelope for check, header, RUA, readiness, snapshot, and diff output.
 - [Portable diagnosis example](https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json): Example report using reserved documentation data.
 - [Full LLM context](https://dmarc4all.toppymicros.com/llms-full.txt): Compact product, interpretation, and field-level context.
 

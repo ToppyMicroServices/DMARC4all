@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
+
 import {
 	assessEnforcementReadiness,
 	buildPortableReport,
@@ -67,13 +70,22 @@ test('buildPortableReport excludes presentation HTML and exposes the public cont
 	assert.equal(report.schemaVersion, PORTABLE_REPORT_SCHEMA_VERSION);
 	assert.equal(report.locale, 'en');
 	assert.equal(report.summary.enforcementReadiness.status, 'ready_for_quarantine');
+	assert.equal(report.summary.enforcementReadiness.decision, 'INSUFFICIENT_EVIDENCE');
+	assert.equal(report.summary.enforcementReadiness.schemaVersion, '1.0.0');
+	assert.ok(report.summary.enforcementReadiness.reasons.every((reason) => reason.evidence.length));
+	assert.equal(report.authentication.requestedPolicy, 'none');
+	assert.equal(report.authentication.effectivePolicy, 'none');
+	assert.equal(report.authentication.source.recordName, '_dmarc.example.com');
+	assert.equal(report.authentication.organizationalDomain.domain, 'example.com');
 	assert.equal(report.evidence.dnsRecords[0].ttl, 300);
+	assert.deepEqual(report.evidence.dmarcLookups, []);
 	assert.equal(report.remediation[0].verify, 'dig +short TXT _dmarc.example.com');
-	assert.doesNotMatch(JSON.stringify(report), /presentation only|findings/);
+	assert.deepEqual(report.authentication.findings, []);
+	assert.doesNotMatch(JSON.stringify(report), /presentation only/);
 });
 
 test('published schema and example stay aligned with the export constants', async () => {
-	const schema = JSON.parse(await readFile(new URL('../schemas/diagnosis-result.schema.json', import.meta.url), 'utf8'));
+	const schema = JSON.parse(await readFile(new URL('../schemas/diagnosis-result-1.2.0.schema.json', import.meta.url), 'utf8'));
 	const example = JSON.parse(await readFile(new URL('../examples/diagnosis-result.example.json', import.meta.url), 'utf8'));
 
 	assert.equal(schema.$id, PORTABLE_REPORT_SCHEMA_URL);
@@ -83,6 +95,47 @@ test('published schema and example stay aligned with the export constants', asyn
 	assert.equal(example.format, PORTABLE_REPORT_FORMAT);
 	assert.equal(example.schemaVersion, PORTABLE_REPORT_SCHEMA_VERSION);
 	assert.ok(schema.required.every((key) => Object.hasOwn(example, key)));
+	assert.ok(schema.required.includes('authentication'));
+	assert.equal(schema.properties.authentication.$ref, '#/$defs/authentication');
 	assert.ok(schema.properties.summary.$ref);
 	assert.ok(schema.properties.observations.$ref);
+	assert.deepEqual(schema.properties.evidence.required, ['dnsRecords', 'dmarcLookups']);
+	assert.equal(example.authentication.effectivePolicy, 'none');
+	assert.equal(example.authentication.source.policyTag, 'p');
+	assert.deepEqual(example.evidence.dmarcLookups, [
+		{ domain: 'example.com', status: 0 },
+		{ domain: 'com', status: 0 }
+	]);
+	const ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true });
+	addFormats(ajv);
+	const validate = ajv.compile(schema);
+	assert.equal(validate(example), true, JSON.stringify(validate.errors));
+	const generated = buildPortableReport(resultWithPolicy('none'), { locale: 'en' });
+	assert.equal(validate(generated), true, JSON.stringify(validate.errors));
+});
+
+test('unversioned diagnosis schema URI remains compatible with historical 1.0 reports', async () => {
+	const [compatibility, version1, version12] = await Promise.all([
+		readFile(new URL('../schemas/diagnosis-result.schema.json', import.meta.url), 'utf8'),
+		readFile(new URL('../schemas/diagnosis-result-1.0.0.schema.json', import.meta.url), 'utf8'),
+		readFile(new URL('../schemas/diagnosis-result-1.2.0.schema.json', import.meta.url), 'utf8')
+	].map(async (promise) => JSON.parse(await promise)));
+	const ajv = new Ajv2020({ allErrors: true, strict: true, allowUnionTypes: true });
+	addFormats(ajv);
+	ajv.addSchema(version1);
+	ajv.addSchema(version12);
+	const validate = ajv.compile(compatibility);
+	const historical = {
+		$schema: 'https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json',
+		format: 'dmarc4all-diagnosis', schemaVersion: '1.0.0', generatedAt: '2026-03-18T00:00:00.000Z',
+		domain: 'example.com', locale: 'en',
+		scope: { basis: 'public_dns', resolver: 'Cloudflare', limitations: [] },
+		summary: {
+			scores: {},
+			enforcementReadiness: { status: 'monitoring_only', level: 'warn', policy: 'none', checks: {}, blockers: [] },
+			mailProvider: {}
+		},
+		observations: {}, priorities: [], remediation: [], evidence: { dnsRecords: [] }, errors: []
+	};
+	assert.equal(validate(historical), true, JSON.stringify(validate.errors));
 });

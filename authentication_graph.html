@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1b2a">
+  <title data-tool-i18n="page.documentTitle">Authentication Supply Chain | DMARC4all</title>
+  <meta name="description" content="Visualize declared SPF and DKIM infrastructure beside locally supplied message and RUA observations.">
+  <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css?v=12">
+  <script type="module" src="authentication_graph.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <div class="brandbar" aria-label="ToppyMicroServices">
+      <a href="index.html" class="brand-link">
+        <img src="apple-touch-icon.png" alt="ToppyMicroServices">
+        <span class="brand-name">ToppyMicroServices</span>
+      </a>
+      <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+    </div>
+
+    <main class="graph-shell">
+      <header class="graph-heading">
+        <p class="pill" data-tool-i18n="page.pill">Evidence-separated</p>
+        <h1 data-tool-i18n="page.title">SPF / DKIM Authentication Supply Chain</h1>
+        <p data-tool-i18n="page.intro">Compare DNS-declared infrastructure with locally supplied observations. Unresolved references remain explicitly unresolved.</p>
+      </header>
+
+      <section class="graph-workspace" aria-label="Authentication graph builder" data-tool-i18n-aria-label="graph.aria">
+		<form id="authentication-graph-form" class="graph-input">
+          <label class="file-control" for="authentication-graph-files"><span data-tool-i18n="page.load">Load exported JSON</span><input id="authentication-graph-files" type="file" accept=".json,application/json" multiple></label>
+          <p id="authentication-graph-file-name" class="tiny muted" aria-live="polite" data-tool-i18n="graph.none">No files selected.</p>
+          <label for="authentication-graph-input" data-tool-i18n="page.input">Graph input JSON</label>
+          <textarea id="authentication-graph-input" rows="18" maxlength="2097152" spellcheck="false"></textarea>
+          <div class="header-analysis-actions">
+            <button type="button" id="authentication-graph-example" class="btn-secondary" data-tool-i18n="page.example">Load example</button>
+            <button type="submit" class="btn-gradient" data-tool-i18n="page.build">Build graph</button>
+          </div>
+          <p class="tiny muted m-0" data-tool-i18n="page.hint">Load one or more portable diagnosis, Header Analyzer, RUA Analyzer, CLI check, snapshot, or RUA JSON exports. All inputs must refer to the same domain and are processed locally.</p>
+        </form>
+
+        <section id="authentication-graph-result" class="graph-result" aria-live="polite">
+          <p class="muted" data-tool-i18n="page.waiting">Waiting for evidence.</p>
+        </section>
+      </section>
+
+      <p class="tiny muted graph-back"><a href="index.html" data-tool-i18n="page.back">Back to DNS diagnosis</a> / <a href="rua_analyzer.html" data-tool-i18n="page.rua">RUA Analyzer</a></p>
+    </main>
+  </div>
+</body>
+</html>

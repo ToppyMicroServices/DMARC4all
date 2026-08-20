@@ -42,6 +42,24 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://dmarc4all.toppymicros.com/header_analyzer.html</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dmarc4all.toppymicros.com/rua_analyzer.html</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dmarc4all.toppymicros.com/authentication_graph.html</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=en</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=es</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://dmarc4all.toppymicros.com/rua_service.html?lang=de</loc><lastmod>2026-03-21</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>

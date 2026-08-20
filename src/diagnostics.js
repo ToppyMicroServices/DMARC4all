@@ -410,8 +410,11 @@ export function longestTxtSegment(txt) {
 export function parseTagValue(record, key) {
 	const parts = String(record).split(';').map((item) => item.trim()).filter(Boolean);
 	for (const part of parts) {
-		const [rawKey, rawValue] = part.split('=');
-		if (!rawKey || rawValue === undefined) continue;
+		const separator = part.indexOf('=');
+		if (separator < 0) continue;
+		const rawKey = part.slice(0, separator);
+		const rawValue = part.slice(separator + 1);
+		if (!rawKey) continue;
 		if (rawKey.trim().toLowerCase() === key.toLowerCase()) return rawValue.trim();
 	}
 	return '';
@@ -421,11 +424,14 @@ export function parseDmarcTags(record) {
 	const output = {};
 	const parts = String(record).split(';').map((item) => item.trim()).filter(Boolean);
 	for (const part of parts) {
-		const [rawKey, rawValue] = part.split('=');
+		const separator = part.indexOf('=');
+		if (separator < 0) continue;
+		const rawKey = part.slice(0, separator);
+		const rawValue = part.slice(separator + 1);
 		if (!rawKey) continue;
 		const key = rawKey.trim().toLowerCase();
-		const value = rawValue === undefined ? '' : rawValue.trim();
-		if (key) output[key] = value;
+		const value = rawValue.trim();
+		if (/^[a-z]+$/.test(key)) output[key] = value;
 	}
 	return output;
 }

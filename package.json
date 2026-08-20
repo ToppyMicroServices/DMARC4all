@@ -2,7 +2,20 @@
   "name": "dmarc4all",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "bin": {
+    "dmarc4all": "./bin/dmarc4all.js"
+  },
   "scripts": {
-    "test": "node --test && python3 -m unittest discover -s tests -p 'test_*.py'"
+    "test": "node --test && python3 -m unittest discover -s tests -p 'test_*.py'",
+    "dmarc4all": "node ./bin/dmarc4all.js"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "fast-xml-parser": "^5.11.0",
+    "fflate": "^0.8.3"
   }
 }

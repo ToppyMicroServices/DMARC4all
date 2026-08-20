@@ -7,7 +7,7 @@ Source: https://github.com/ToppyMicroServices/DMARC4all
 License: Apache-2.0
 Portable report format: dmarc4all-diagnosis
 Portable report schema version: 1.0.0
-Schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
+Schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json
 Example: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
 
 ## What the diagnosis checks

@@ -133,12 +133,24 @@ test('createDiagnosisRunner builds staged remediation with current and suggested
 		['example.com|MX', mxAnswer('0 example-com.mail.protection.outlook.com.')],
 		['spf.protection.outlook.com|TXT', txtAnswer('v=spf1 ip4:192.0.2.10 -all')]
 	]);
-	const dohQuery = async (name, type) => answers.get(`${name}|${type}`) || {};
+	const queries = [];
+	const dohQuery = async (name, type) => {
+		queries.push(`${name}|${type}`);
+		return answers.get(`${name}|${type}`) || {};
+	};
 	const runner = createRunner({ dohQuery });
 
 	const results = await withMockFetch(() => runner('example.com'));
 	const titles = results.fixups.map((fixup) => fixup.title);
 
+	assert.equal(results.authentication.requestedPolicy, 'none');
+	assert.equal(results.authentication.effectivePolicy, 'none');
+	assert.equal(results.authentication.source.recordName, '_dmarc.example.com');
+	assert.equal(results.schemaVersion, '0.1.0');
+	assert.equal(results.effectivePolicy, 'none');
+	assert.deepEqual(results.findings, []);
+	assert.equal(results.dmarcPolicy.posture.level, 'med');
+	assert.equal(results.dmarcPolicy.aggregateReportingConfigured, false);
 	assert.equal(results.mailProvider.id, 'm365');
 	assert.equal(results.mailProvider.confidence, 'High');
 	assert.ok(titles.includes('Next candidate: move DMARC toward quarantine'));
@@ -157,6 +169,7 @@ test('createDiagnosisRunner builds staged remediation with current and suggested
 	const spfFix = results.fixups.find((fixup) => fixup.title === 'Remove +all from SPF');
 	assert.equal(spfFix.records[0].currentValue, 'v=spf1 include:spf.protection.outlook.com +all');
 	assert.equal(spfFix.records[0].suggestedValue, 'v=spf1 include:spf.protection.outlook.com ~all');
+	assert.deepEqual(queries.filter((query) => query.startsWith('_dmarc.')), ['_dmarc.example.com|TXT']);
 });
 
 test('createDiagnosisRunner consolidates multiple SPF records into one draft', async () => {
@@ -188,6 +201,63 @@ test('createDiagnosisRunner consolidates multiple SPF records into one draft', a
 		'v=spf1 include:_spf.google.com include:sendgrid.net ~all'
 	);
 	assert.match(consolidateFix.records[0].copyText, /^example\.com\. 3600 IN TXT "/);
+});
+
+test('createDiagnosisRunner follows RFC 9989 Tree Walk policy inheritance', async () => {
+	const answers = new Map([
+		['mail.example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=reject; sp=none; rua=mailto:dmarc@example.com')],
+		['mail.example.com|TXT', txtAnswer('v=spf1 -all')],
+		['mail.example.com|MX', mxAnswer('10 mail.example.com.')]
+	]);
+	const dohQuery = async (name, type) => answers.get(`${name}|${type}`) || {};
+	const runner = createRunner({ dohQuery });
+
+	const results = await withMockFetch(() => runner('mail.example.com'));
+
+	assert.equal(results.effectivePolicy, 'none');
+	assert.equal(results.source.domain, 'example.com');
+	assert.equal(results.source.method, 'rfc9989-dns-tree-walk');
+	assert.equal(results.organizationalDomain.domain, 'example.com');
+	assert.equal(results.organizationalDomain.method, 'highest-policy-record');
+	assert.equal(results.meta.records[0].name, '_dmarc.example.com');
+	assert.equal(results.meta.records[0].value, 'v=DMARC1; p=reject; sp=none; rua=mailto:dmarc@example.com');
+	assert.ok(results.priority.some((item) => item.title === 'DMARC is p=none'));
+	assert.equal(results.fixups.some((item) => item.title === 'Next candidate: move DMARC toward quarantine'), false);
+});
+
+test('createDiagnosisRunner applies np only for an NXDOMAIN Author Domain', async () => {
+	const answers = new Map([
+		['mail.example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['mail.example.com|TXT', { Status: 3 }],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=reject; sp=quarantine; np=none; rua=mailto:dmarc@example.com')],
+		['mail.example.com|MX', mxAnswer('10 mail.example.com.')]
+	]);
+	const dohQuery = async (name, type) => answers.get(`${name}|${type}`) || {};
+	const runner = createRunner({ dohQuery });
+
+	const results = await withMockFetch(() => runner('mail.example.com'));
+
+	assert.equal(results.effectivePolicy, 'none');
+	assert.equal(results.source.policyTag, 'np');
+	assert.equal(results.source.domainExistence, 'nonexistent');
+});
+
+test('createDiagnosisRunner does not offer DMARC remediation after a DNS error', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['_dmarc.example.com|TXT', { Status: 2 }],
+		['example.com|MX', mxAnswer('10 mail.example.com.')]
+	]);
+	const dohQuery = async (name, type) => answers.get(`${name}|${type}`) || {};
+	const runner = createRunner({ dohQuery });
+
+	const results = await withMockFetch(() => runner('example.com'));
+
+	assert.equal(results.source.classification, 'unavailable');
+	assert.ok(results.errors.some((error) => error.includes('status 2')));
+	assert.equal(results.fixups.some((item) => item.title === 'Safe first step: publish DMARC'), false);
 });
 
 test('createDiagnosisRunner does not confirm a revoked DKIM key', async () => {
@@ -294,7 +364,7 @@ test('createRenderer outputs provider, trust, diff, and guide sections', () => {
 	assert.match(report.innerHTML, /Action center/);
 	assert.match(report.innerHTML, /How to read this result/);
 	assert.match(report.innerHTML, /Enforcement readiness/);
-	assert.match(report.innerHTML, /Ready for quarantine/);
+	assert.match(report.innerHTML, /INSUFFICIENT_EVIDENCE/);
 	assert.match(report.innerHTML, /Microsoft 365/);
 	assert.match(report.innerHTML, /Current/);
 	assert.match(report.innerHTML, /Suggested/);

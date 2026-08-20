@@ -1,7 +1,7 @@
 {
-  "$schema": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json",
+  "$schema": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json",
   "format": "dmarc4all-diagnosis",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.2.0",
   "generatedAt": "2026-07-30T00:00:00.000Z",
   "domain": "example.com",
   "locale": "en",
@@ -21,6 +21,8 @@
       "spf": 85
     },
     "enforcementReadiness": {
+      "schemaVersion": "1.0.0",
+      "decision": "INSUFFICIENT_EVIDENCE",
       "status": "ready_for_quarantine",
       "level": "warn",
       "policy": "none",
@@ -31,7 +33,70 @@
         "spfUsable": true,
         "dkimConfirmed": true
       },
-      "blockers": []
+      "blockers": [],
+      "warnings": [
+        "SUBDOMAIN_COVERAGE_UNKNOWN",
+        "NONEXISTENT_DOMAIN_POLICY_UNKNOWN"
+      ],
+      "reasons": [
+        {
+          "code": "RUA_VOLUME_INSUFFICIENT",
+          "category": "insufficient",
+          "evidence": ["rua.summary"],
+          "detail": "Observed 0 messages; the configured product gate is 100."
+        },
+        {
+          "code": "RUA_WINDOW_INSUFFICIENT",
+          "category": "insufficient",
+          "evidence": ["rua.timeRange"],
+          "detail": "Observed 0 days; the configured product gate is 7."
+        },
+        {
+          "code": "SUBDOMAIN_COVERAGE_UNKNOWN",
+          "category": "warning",
+          "evidence": ["dns.subdomains"],
+          "detail": "Subdomain sending coverage was not supplied."
+        },
+        {
+          "code": "NONEXISTENT_DOMAIN_POLICY_UNKNOWN",
+          "category": "warning",
+          "evidence": ["dns.dmarc"],
+          "detail": "Nonexistent-domain handling was not supplied."
+        }
+      ],
+      "decisionBlockers": [],
+      "decisionWarnings": [
+        {
+          "code": "SUBDOMAIN_COVERAGE_UNKNOWN",
+          "category": "warning",
+          "evidence": ["dns.subdomains"],
+          "detail": "Subdomain sending coverage was not supplied."
+        },
+        {
+          "code": "NONEXISTENT_DOMAIN_POLICY_UNKNOWN",
+          "category": "warning",
+          "evidence": ["dns.dmarc"],
+          "detail": "Nonexistent-domain handling was not supplied."
+        }
+      ],
+      "evidence": {
+        "totalMessages": 0,
+        "alignedMessages": 0,
+        "unalignedMessages": 0,
+        "unknownMessages": 0,
+        "observationDays": 0,
+        "alignedRate": null,
+        "unalignedRate": null,
+        "unknownRate": null,
+        "spfOnlyRate": null,
+        "thresholds": {
+          "minimumMessages": 100,
+          "minimumObservationDays": 7,
+          "minimumAlignedRate": 0.98,
+          "maximumUnknownRate": 0.05,
+          "maximumSpfOnlyRate": 0.2
+        }
+      }
     },
     "mailProvider": {
       "id": "m365",
@@ -41,6 +106,38 @@
         "MX: protection.outlook.com"
       ]
     }
+  },
+  "authentication": {
+    "schemaVersion": "0.1.0",
+    "requestedPolicy": "none",
+    "effectivePolicy": "none",
+    "source": {
+      "domain": "example.com",
+      "recordName": "_dmarc.example.com",
+      "record": "v=DMARC1; p=none; rua=mailto:dmarc@example.com",
+      "discoveryPath": [
+        "_dmarc.example.com"
+      ],
+      "classification": "valid",
+      "method": "exact-domain",
+      "policyTag": "p",
+      "domainExistence": "existent",
+      "legacyTags": []
+    },
+    "organizationalDomain": {
+      "domain": "example.com",
+      "method": "highest-policy-record",
+      "discoveryPath": [
+        "_dmarc.example.com",
+        "_dmarc.com"
+      ],
+      "confidence": "high"
+    },
+    "findings": [],
+    "confidence": "high",
+    "standards": [
+      "RFC 9989"
+    ]
   },
   "observations": {
     "dmarc": {
@@ -124,6 +221,16 @@
         "type": "TXT",
         "ttl": 300,
         "value": "v=DMARC1; p=none; rua=mailto:dmarc@example.com"
+      }
+    ],
+    "dmarcLookups": [
+      {
+        "domain": "example.com",
+        "status": 0
+      },
+      {
+        "domain": "com",
+        "status": 0
       }
     ]
   },

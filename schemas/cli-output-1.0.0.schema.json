@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dmarc4all.toppymicros.com/schemas/cli-output-1.0.0.schema.json",
+  "title": "DMARC4all CLI output 1.0.0",
+  "description": "Immutable contract for check, header, RUA, readiness, snapshot, and diff output.",
+  "type": "object",
+  "required": ["$schema", "cliSchemaVersion", "command"],
+  "properties": {
+    "$schema": { "const": "https://dmarc4all.toppymicros.com/schemas/cli-output-1.0.0.schema.json" },
+    "cliSchemaVersion": { "const": "1.0.0" },
+    "command": { "enum": ["check", "header", "rua", "readiness", "snapshot", "diff"] },
+    "domain": { "type": "string", "minLength": 1, "maxLength": 253 },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "changes": { "type": "array", "items": { "$ref": "#/$defs/change" } },
+    "hasRegression": { "type": "boolean" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "command": { "const": "check" } }, "required": ["command"] },
+      "then": {
+        "required": ["domain", "authentication", "spfRecords", "dkimSelectors", "mxRecords", "findings"],
+        "properties": {
+          "authentication": { "$ref": "#/$defs/authentication" },
+          "spfRecords": { "$ref": "#/$defs/stringArray" },
+          "dkimSelectors": { "type": "array", "items": { "$ref": "#/$defs/dkimSelector" } },
+          "mxRecords": { "$ref": "#/$defs/stringArray" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "header" } }, "required": ["command"] },
+      "then": {
+        "required": ["from", "alignment", "verification"],
+        "properties": {
+          "from": { "type": "object", "required": ["domain"], "properties": { "domain": { "type": ["string", "null"] } } },
+          "alignment": { "type": "object", "required": ["spf", "dkim", "dmarc"] },
+          "verification": { "type": "object", "required": ["independentlyVerified"], "properties": { "independentlyVerified": { "const": false } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "rua" } }, "required": ["command"] },
+      "then": {
+        "required": ["reports", "summary"],
+        "properties": {
+          "reports": { "type": "array", "items": { "$ref": "#/$defs/reportEnvelope" } },
+          "summary": { "$ref": "#/$defs/ruaSummary" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "readiness" } }, "required": ["command"] },
+      "then": {
+        "required": ["assessment", "summary"],
+        "properties": {
+          "assessment": { "$ref": "#/$defs/readiness" },
+          "summary": { "$ref": "#/$defs/ruaSummary" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "snapshot" } }, "required": ["command"] },
+      "then": {
+        "required": ["schemaVersion", "domain", "observedAt", "dmarc", "spf", "dkim", "dnssec", "mx", "mtaSts", "findings"],
+        "properties": {
+          "schemaVersion": { "const": "1.0.0" },
+          "dmarc": { "type": "object", "required": ["record", "effectivePolicy"] },
+          "spf": { "type": "object", "required": ["records", "lookupTerms"] },
+          "dkim": { "type": "object", "required": ["selectors"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "diff" } }, "required": ["command"] },
+      "then": {
+        "required": ["schemaVersion", "domain", "beforeObservedAt", "afterObservedAt", "changes", "hasRegression"],
+        "properties": { "schemaVersion": { "const": "1.0.0" } }
+      }
+    }
+  ],
+  "$defs": {
+    "stringArray": { "type": "array", "items": { "type": "string" } },
+    "finding": {
+      "type": "object",
+      "required": ["code", "severity"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["low", "med", "high"] },
+        "evidence": { "$ref": "#/$defs/stringArray" },
+        "detail": { "type": "string" }
+      }
+    },
+    "change": {
+      "type": "object",
+      "required": ["code", "severity", "before", "after", "evidence"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["low", "med", "high"] },
+        "evidence": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "dkimSelector": {
+      "type": "object",
+      "required": ["domain", "selector", "status", "record"],
+      "properties": {
+        "domain": { "type": "string", "minLength": 1 },
+        "selector": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["present", "missing", "unknown"] },
+        "record": { "type": "string" }
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "required": ["schemaVersion", "effectivePolicy", "source", "findings", "evidence"],
+      "properties": {
+        "schemaVersion": { "type": "string" },
+        "effectivePolicy": { "type": ["string", "null"], "enum": ["none", "quarantine", "reject", null] },
+        "source": { "type": "object", "required": ["classification", "method", "discoveryPath"] },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "evidence": { "type": "object", "required": ["dnsRecords", "dmarcLookups"] }
+      }
+    },
+    "reportEnvelope": {
+      "type": "object",
+      "required": ["name", "report"],
+      "properties": {
+        "name": { "type": "string" },
+        "report": {
+          "type": "object",
+          "required": ["schemaVersion", "format", "reporter", "timeRange", "policy", "records"],
+          "properties": { "schemaVersion": { "const": "1.0.0" }, "records": { "type": "array" } }
+        }
+      }
+    },
+    "ruaSummary": {
+      "type": "object",
+      "required": ["totalMessages", "alignedMessages", "unalignedMessages", "unknownMessages", "observationDays", "failureContributors"],
+      "properties": {
+        "totalMessages": { "type": "integer", "minimum": 0 },
+        "alignedMessages": { "type": "integer", "minimum": 0 },
+        "unalignedMessages": { "type": "integer", "minimum": 0 },
+        "unknownMessages": { "type": "integer", "minimum": 0 },
+        "observationDays": { "type": "integer", "minimum": 0 },
+        "failureContributors": { "type": "array" }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "required": ["schemaVersion", "decision", "status", "policy", "checks", "reasons", "decisionBlockers", "decisionWarnings", "evidence"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "decision": { "enum": ["READY", "CONDITIONALLY_READY", "NOT_READY", "INSUFFICIENT_EVIDENCE"] },
+        "status": { "enum": ["monitoring_only", "ready_for_quarantine", "ready_for_reject", "reject_enforced"] },
+        "policy": { "type": ["string", "null"], "enum": ["none", "quarantine", "reject", null] },
+        "checks": { "type": "object" },
+        "reasons": { "type": "array" },
+        "decisionBlockers": { "type": "array" },
+        "decisionWarnings": { "type": "array" },
+        "evidence": { "type": "object", "required": ["totalMessages", "observationDays", "thresholds"] }
+      }
+    }
+  }
+}

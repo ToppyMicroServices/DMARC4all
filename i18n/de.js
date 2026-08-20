@@ -148,5 +148,8 @@
   "links.standards": "Standards und Datenschutz",
   "links.guides": "Anleitungen für DNS-Anbieter",
   "links.ai": "Zugriff für KI und Systeme",
+  "tools.header": "Header-Analyse",
+  "tools.ruaAnalyzer": "RUA-Analyse",
+  "tools.authGraph": "Authentifizierungsgraph",
 };
 })();

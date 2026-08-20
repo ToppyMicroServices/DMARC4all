@@ -148,5 +148,8 @@
   "links.standards": "Tiêu chuẩn và quyền riêng tư",
   "links.guides": "Hướng dẫn theo nhà cung cấp DNS",
   "links.ai": "Truy cập cho AI và hệ thống",
+  "tools.header": "Trình phân tích tiêu đề",
+  "tools.ruaAnalyzer": "Trình phân tích RUA",
+  "tools.authGraph": "Sơ đồ xác thực",
 };
 })();

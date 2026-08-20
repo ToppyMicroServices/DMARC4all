@@ -148,5 +148,8 @@
   "links.standards": "標準とプライバシー",
   "links.guides": "DNS 事業者別ガイド",
   "links.ai": "AI・機械向けアクセス",
+  "tools.header": "メールヘッダー解析",
+  "tools.ruaAnalyzer": "RUAレポート解析",
+  "tools.authGraph": "認証グラフ",
 };
 })();
