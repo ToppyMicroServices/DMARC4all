@@ -244,7 +244,7 @@ function emitAnnotations(findings) {
 	for (const item of findings) {
 		const level = item.severity === 'high' ? 'error' : 'warning';
 		const detail = String(item.detail || item.code || '').replace(/[\r\n]/g, ' ');
-		process.stdout.write(`::${level} title=${item.code}::${detail}\n`);
+		process.stderr.write(`::${level} title=${item.code}::${detail}\n`);
 	}
 }
 

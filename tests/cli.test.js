@@ -25,9 +25,12 @@ test('CLI header command returns machine-readable local evidence', () => {
 	assert.equal(output.verification.independentlyVerified, false);
 });
 
-function runCli(argumentsList) {
+function runCli(argumentsList, options = {}) {
 	return new Promise((resolve, reject) => {
-		const child = spawn(process.execPath, ['./bin/dmarc4all.js', ...argumentsList], { encoding: 'utf8' });
+		const child = spawn(process.execPath, ['./bin/dmarc4all.js', ...argumentsList], {
+			encoding: 'utf8',
+			env: { ...process.env, ...(options.env || {}) }
+		});
 		let stdout = '';
 		let stderr = '';
 		child.stdout.setEncoding('utf8');
@@ -72,9 +75,10 @@ test('CLI check and Action path retain automation findings and report output on 
 	const snapshotResult = await runCli([
 		'snapshot', 'example.com', '--resolver', `http://127.0.0.1:${address.port}/dns-query`,
 		'--selector', 'missing', '--no-http', '--json'
-	]);
+	], { env: { GITHUB_ACTIONS: 'true' } });
 	assert.equal(snapshotResult.status, 0, snapshotResult.stderr);
 	const snapshot = JSON.parse(snapshotResult.stdout);
+	assert.match(snapshotResult.stderr, /::error title=SPF_LOOKUP_LIMIT::/);
 	assert.equal(snapshot.command, 'snapshot');
 	assert.deepEqual(snapshot.findings.map((item) => item.code).sort(), ['DKIM_SELECTOR_MISSING', 'SPF_LOOKUP_LIMIT']);
 	assert.equal(snapshot.mtaSts.policyStatus, 'missing');
