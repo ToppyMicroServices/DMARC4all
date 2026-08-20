@@ -55,7 +55,8 @@ test('composite Action exposes public-DNS inputs and a report output without sec
 	assert.match(action, /^\s{2}report:/m);
 	assert.match(action, /set \+e[\s\S]+status=\$\?[\s\S]+GITHUB_OUTPUT[\s\S]+exit "\$status"/);
 	assert.doesNotMatch(action, /secrets\./);
-	assert.match(workflow, /actions\/setup-node@v4[\s\S]+node-version: '22'[\s\S]+npm ci --ignore-scripts[\s\S]+npm test/);
+	assert.match(action, /actions\/setup-node@v7[\s\S]+node-version: '22'/);
+	assert.match(workflow, /actions\/setup-node@v7[\s\S]+node-version: '22'[\s\S]+npm ci --ignore-scripts[\s\S]+npm test/);
 	assert.match(cli, /probeHttp: command === 'snapshot'/);
 	assert.match(cli, /redirect: 'manual'/);
 });
