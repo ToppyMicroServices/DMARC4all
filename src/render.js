@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js';
-import { isExplicitNoMailProfile } from './diagnostics.js';
+import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js?v=20';
+import { isExplicitNoMailProfile } from './diagnostics.js?v=20';
 
 export function createRenderer(deps) {
 	const {

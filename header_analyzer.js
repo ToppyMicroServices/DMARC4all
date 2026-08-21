@@ -1,9 +1,9 @@
-import { MAX_MESSAGE_INPUT_BYTES, analyzeMessageInput } from './src/message-analysis.js';
-import { HEADER_ANALYZER_MESSAGES } from './src/header-analyzer-i18n.js';
-import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './src/i18n.js';
-import { downloadJson } from './src/local-export.js';
-import { registerPwa } from './src/pwa.js';
-import { createToolI18n } from './src/tool-i18n.js';
+import { MAX_MESSAGE_INPUT_BYTES, analyzeMessageInput } from './src/message-analysis.js?v=20';
+import { HEADER_ANALYZER_MESSAGES } from './src/header-analyzer-i18n.js?v=20';
+import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './src/i18n.js?v=20';
+import { downloadJson } from './src/local-export.js?v=20';
+import { registerPwa } from './src/pwa.js?v=20';
+import { createToolI18n } from './src/tool-i18n.js?v=20';
 
 const form = document.getElementById('header-analysis-form');
 const input = document.getElementById('header-analysis-input');

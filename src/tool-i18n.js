@@ -1,4 +1,4 @@
-import { LANG_STORAGE_KEY } from './i18n.js';
+import { LANG_STORAGE_KEY } from './i18n.js?v=20';
 
 export function createToolI18n(messages) {
 	let saved = '';

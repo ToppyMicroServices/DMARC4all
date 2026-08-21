@@ -1,4 +1,4 @@
-import { parseDmarcTags } from './diagnostics.js';
+import { parseDmarcTags } from './diagnostics.js?v=20';
 
 export const DIAGNOSIS_RESULT_SCHEMA_VERSION = '0.1.0';
 export const READINESS_RESULT_SCHEMA_VERSION = '1.0.0';

@@ -17,9 +17,9 @@
 import {
 	analyzeDomain,
 	assessEnforcementReadiness as assessCoreEnforcementReadiness
-} from './authentication-core.js';
-import { classifyMailProfile } from './diagnostics.js';
-import { sanitizePublicHttpsUrl } from './safe-html.js';
+} from './authentication-core.js?v=20';
+import { classifyMailProfile } from './diagnostics.js?v=20';
+import { sanitizePublicHttpsUrl } from './safe-html.js?v=20';
 
 export const PORTABLE_REPORT_FORMAT = 'dmarc4all-diagnosis';
 export const PORTABLE_REPORT_SCHEMA_VERSION = '1.3.0';

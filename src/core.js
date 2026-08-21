@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { dom } from './dom.js';
-import { esc, sanitizeUrl, setSafeInnerHTML } from './safe-html.js';
-import { createDiagnosisRunner } from './diagnose.js';
-import { normalizeDohUrl, normalizeDomain, dkimLookupHints, runDnsblQuick } from './diagnostics.js';
-import { createI18n, LANG_STORAGE_KEY } from './i18n.js';
-import { createRenderer } from './render.js';
+import { dom } from './dom.js?v=20';
+import { esc, sanitizeUrl, setSafeInnerHTML } from './safe-html.js?v=20';
+import { createDiagnosisRunner } from './diagnose.js?v=20';
+import { normalizeDohUrl, normalizeDomain, dkimLookupHints, runDnsblQuick } from './diagnostics.js?v=20';
+import { createI18n, LANG_STORAGE_KEY } from './i18n.js?v=20';
+import { createRenderer } from './render.js?v=20';
 
 const {
 	form,
@@ -42,6 +42,8 @@ const {
 let lastDiagnosisRun = null;
 let languageRerunInProgress = false;
 let diagnosisInProgress = false;
+
+if (externalProbes && !ENTERPRISE_MODE) externalProbes.disabled = false;
 
 const DOH_PROVIDERS = [
 	{ id: 'cloudflare', labelKey: 'form.resolver.cloudflare', url: 'https://cloudflare-dns.com/dns-query', kind: 'doh-json' },

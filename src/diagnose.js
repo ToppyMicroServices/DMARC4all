@@ -53,9 +53,9 @@ import {
 	spfEstimateLookupRisk,
 	spfHasAllQualifier,
 	spfIsIpOnly
-} from './diagnostics.js';
-import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js';
-import { esc, sanitizePublicHttpsUrl } from './safe-html.js';
+} from './diagnostics.js?v=20';
+import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js?v=20';
+import { esc, sanitizePublicHttpsUrl } from './safe-html.js?v=20';
 
 export function createDiagnosisRunner(deps) {
 	const {

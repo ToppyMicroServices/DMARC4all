@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { sanitizePublicHttpsUrl } from './safe-html.js';
+import { sanitizePublicHttpsUrl } from './safe-html.js?v=20';
 
 export async function probeHttps(host) {
 	const url = sanitizePublicHttpsUrl(`https://${host}/`);

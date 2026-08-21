@@ -1,4 +1,4 @@
-import { evaluateAlignment } from './authentication-core.js';
+import { evaluateAlignment } from './authentication-core.js?v=20';
 
 export const MAX_MESSAGE_INPUT_BYTES = 1024 * 1024;
 export const MAX_HEADER_BYTES = 256 * 1024;

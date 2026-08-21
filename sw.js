@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v19';
+const CACHE_VERSION = 'v20';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
 const OFFLINE_FALLBACK = '/offline.html';
 
@@ -40,72 +40,72 @@ const PRECACHE_PATHS = [
 	'/schemas/cli-output.schema.json',
 	'/schemas/cli-output-1.0.0.schema.json',
 	'/examples/diagnosis-result.example.json',
-	'/app.js',
-	'/header_analyzer.js',
-	'/rua_analyzer.js',
-	'/authentication_graph.js',
-	'/document_i18n.js?v=2',
-	'/site.js',
-	'/manifest.webmanifest',
-	'/styles.css?v=12',
+	'/app.js?v=20',
+	'/header_analyzer.js?v=20',
+	'/rua_analyzer.js?v=20',
+	'/authentication_graph.js?v=20',
+	'/document_i18n.js?v=3',
+	'/site.js?v=20',
+	'/manifest.webmanifest?v=2',
+	'/styles.css?v=13',
 	'/favicon.ico',
 	'/apple-touch-icon.png',
 	'/icon-192.png',
 	'/icon-512.png',
 	'/assets/favicon.ico',
 	'/vendor/dompurify.min.js',
-	'/vendor/fflate.browser.js',
+	'/vendor/fflate.browser.js?v=20',
 	'/vendor/fast-xml-parser.min.js',
 	'/rua_config.js',
-	'/rua_i18n.js?v=4',
-	'/src/core.js',
-	'/src/authentication-core.js',
-	'/src/authentication-graph.js',
-	'/src/authentication-graph-i18n.js',
-	'/src/header-analyzer-i18n.js',
+	'/rua_i18n.js?v=5',
+	'/src/core.js?v=20',
+	'/src/authentication-core.js?v=20',
+	'/src/authentication-graph.js?v=20',
+	'/src/authentication-graph-i18n.js?v=20',
+	'/src/header-analyzer-i18n.js?v=20',
 	'/src/automation.js',
 	'/src/cli-contract.js',
-	'/src/diagnose.js',
-	'/src/diagnostics.js',
-	'/src/dom.js',
-	'/src/i18n.js',
-	'/src/local-export.js',
-	'/src/message-analysis.js',
-	'/src/offline-i18n.js',
-	'/src/rua-analysis.js',
-	'/src/rua-analyzer-i18n.js',
-	'/src/tool-i18n.js',
-	'/src/pwa.js',
-	'/src/portable-report.js',
-	'/src/render.js',
-	'/src/safe-html.js',
-	'/i18n/de.js',
-	'/i18n/de_extra.js',
-	'/i18n/document_pages.js?v=3',
-	'/i18n/en.js',
-	'/i18n/es.js',
-	'/i18n/es_extra.js',
-	'/i18n/et.js',
-	'/i18n/et_extra.js',
-	'/i18n/extra_tr_ko.js',
-	'/i18n/extra_tr_my.js',
-	'/i18n/id.js',
-	'/i18n/id_extra.js',
-	'/i18n/ja.js',
-	'/i18n/km.js',
-	'/i18n/km_extra.js',
-	'/i18n/ko.js',
-	'/i18n/my.js',
-	'/i18n/ru.js',
-	'/i18n/ru_extra.js',
+	'/src/diagnose.js?v=20',
+	'/src/diagnostics.js?v=20',
+	'/src/dom.js?v=20',
+	'/src/i18n.js?v=20',
+	'/src/local-export.js?v=20',
+	'/src/message-analysis.js?v=20',
+	'/src/offline-i18n.js?v=20',
+	'/src/rua-analysis.js?v=20',
+	'/src/rua-analyzer-i18n.js?v=20',
+	'/src/tool-i18n.js?v=20',
+	'/src/pwa.js?v=20',
+	'/src/portable-report.js?v=20',
+	'/src/render.js?v=20',
+	'/src/safe-html.js?v=20',
+	'/i18n/de.js?v=20',
+	'/i18n/de_extra.js?v=20',
+	'/i18n/document_pages.js?v=4',
+	'/i18n/en.js?v=20',
+	'/i18n/es.js?v=20',
+	'/i18n/es_extra.js?v=20',
+	'/i18n/et.js?v=20',
+	'/i18n/et_extra.js?v=20',
+	'/i18n/extra_tr_ko.js?v=20',
+	'/i18n/extra_tr_my.js?v=20',
+	'/i18n/id.js?v=20',
+	'/i18n/id_extra.js?v=20',
+	'/i18n/ja.js?v=20',
+	'/i18n/km.js?v=20',
+	'/i18n/km_extra.js?v=20',
+	'/i18n/ko.js?v=20',
+	'/i18n/my.js?v=20',
+	'/i18n/ru.js?v=20',
+	'/i18n/ru_extra.js?v=20',
 	'/i18n/rua_page.js?v=4',
-	'/i18n/th.js',
-	'/i18n/th_extra.js',
-	'/i18n/ui_extra.js',
-	'/i18n/vi.js',
-	'/i18n/vi_extra.js',
-	'/i18n/zh.js',
-	'/i18n/zh_extra.js',
+	'/i18n/th.js?v=20',
+	'/i18n/th_extra.js?v=20',
+	'/i18n/ui_extra.js?v=20',
+	'/i18n/vi.js?v=20',
+	'/i18n/vi_extra.js?v=20',
+	'/i18n/zh.js?v=20',
+	'/i18n/zh_extra.js?v=20',
 	'/assets/fonts/fonts.css',
 	'/assets/fonts/-F63fjptAgt5VM-kVkqdyU8n1i8q131nj-o.woff2',
 	'/assets/fonts/-F63fjptAgt5VM-kVkqdyU8n1iAq131nj-otFQ.woff2',
@@ -161,7 +161,7 @@ self.addEventListener('fetch', (event) => {
 	}
 
 	if (RUNTIME_CACHE_RE.test(url.pathname) || PRECACHE_PATHS.includes(url.pathname)) {
-		event.respondWith(staleWhileRevalidate(request));
+		event.respondWith(staleWhileRevalidate(request, event));
 	}
 });
 
@@ -169,7 +169,13 @@ async function networkFirst(request) {
 	const cache = await caches.open(SHELL_CACHE);
 	try {
 		const response = await fetch(request);
-		cache.put(request, response.clone());
+		if (response.ok) {
+			try {
+				await cache.put(request, response.clone());
+			} catch {
+				// A cache write failure must not hide a valid network response.
+			}
+		}
 		return response;
 	} catch {
 		const cached = await cache.match(request) || await cache.match(request, { ignoreSearch: true });
@@ -180,17 +186,25 @@ async function networkFirst(request) {
 	}
 }
 
-async function staleWhileRevalidate(request) {
+async function staleWhileRevalidate(request, fetchEvent) {
 	const cache = await caches.open(SHELL_CACHE);
 	const cached = await cache.match(request);
 
-	const networkFetch = fetch(request).then((response) => {
-		cache.put(request, response.clone());
+	const networkFetch = fetch(request).then(async (response) => {
+		if (response.ok) {
+			try {
+				await cache.put(request, response.clone());
+			} catch {
+				// A cache write failure must not hide a valid network response.
+			}
+		}
 		return response;
 	}).catch(() => null);
 
 	if (cached) {
-		eventually(networkFetch);
+		const cacheRefresh = networkFetch.then(() => undefined);
+		if (fetchEvent && typeof fetchEvent.waitUntil === 'function') fetchEvent.waitUntil(cacheRefresh);
+		else eventually(cacheRefresh);
 		return cached;
 	}
 

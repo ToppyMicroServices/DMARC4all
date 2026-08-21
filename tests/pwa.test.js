@@ -41,7 +41,7 @@ test('service worker waits after install and skips waiting only on an explicit m
 					async put() {}
 				};
 			},
-			async keys() { return ['dmarc4all-shell-v18', 'unrelated-cache']; },
+			async keys() { return ['dmarc4all-shell-v18', 'dmarc4all-shell-v19', 'unrelated-cache']; },
 			async delete(key) { deletedCaches.push(key); return true; }
 		},
 		fetch: async () => new Response('ok'),
@@ -81,7 +81,7 @@ test('service worker waits after install and skips waiting only on an explicit m
 	let activatePromise;
 	listeners.activate({ waitUntil(promise) { activatePromise = promise; } });
 	await activatePromise;
-	assert.deepEqual(deletedCaches, ['dmarc4all-shell-v18']);
+	assert.deepEqual(deletedCaches, ['dmarc4all-shell-v18', 'dmarc4all-shell-v19']);
 	assert.equal(claimCalls, 1, 'first install and explicit updates must still claim clients on activation');
 });
 
@@ -224,7 +224,258 @@ test('manifest provides installable PNG icons and the service worker precaches t
 		assert.equal(png.readUInt32BE(20), expectedSize);
 	}
 
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v19';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v20';/);
+});
+
+test('release assets bypass an older shell cache before diagnostics are enabled', async () => {
+	const index = await readText('index.html');
+	const enterprise = await readText('index_enterprise.html');
+	const app = await readText('app.js');
+	const core = await readText('src/core.js');
+	const serviceWorker = await readText('sw.js');
+
+	assert.match(index, /href="manifest\.webmanifest\?v=2"/);
+	assert.match(index, /href="styles\.css\?v=13"/);
+	assert.match(index, /src="app\.js\?v=20"/);
+	assert.match(index, /id="external-probes"[^>]*disabled/);
+	assert.match(index, /id="go-deep-btn"[^>]*disabled/);
+	assert.match(enterprise, /src="app\.js\?v=20"/);
+	assert.match(enterprise, /id="go-deep-btn"[^>]*disabled/);
+	assert.doesNotMatch(index, /src="i18n\/[^"?]+\.js"/);
+	assert.match(app, /from '\.\/src\/pwa\.js\?v=20'/);
+	assert.match(app, /import '\.\/src\/core\.js\?v=20'/);
+	assert.match(core, /externalProbes\.disabled = false/);
+	assert.match(core, /goDeepBtn\.disabled = diagnosisInProgress/);
+	assert.match(serviceWorker, /'\/app\.js\?v=20'/);
+	assert.match(serviceWorker, /'\/styles\.css\?v=13'/);
+});
+
+test('all versioned page assets and module imports match the release cache generation', async () => {
+	const serviceWorker = await readText('sw.js');
+	const precacheBlock = serviceWorker.match(/const PRECACHE_PATHS = \[([\s\S]*?)\n\];/);
+	assert.ok(precacheBlock, 'service worker must declare its shell assets');
+	const precachePaths = [...precacheBlock[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+	assert.equal(new Set(precachePaths).size, precachePaths.length, 'precache paths must be unique');
+	for (const path of precachePaths) {
+		if (path === '/') continue;
+		await readFile(fixtureUrl(path.split('?')[0].replace(/^\//, '')));
+	}
+	const htmlFiles = [
+		'index.html',
+		'index_enterprise.html',
+		'header_analyzer.html',
+		'rua_analyzer.html',
+		'authentication_graph.html',
+		'rua_service.html',
+		'rua_service_enterprise.html',
+		'ai_usage.html',
+		'standards_privacy.html',
+		'dns_provider_guides.html',
+		'offline.html'
+	];
+	for (const file of htmlFiles) {
+		const html = await readText(file);
+		for (const match of html.matchAll(/(?:src|href)="([^"#]+\?v=\d+)"/g)) {
+			const path = `/${match[1].replace(/^\.\//, '').replace(/^\//, '')}`;
+			assert.ok(serviceWorker.includes(`'${path}'`), `${file} asset ${path} must be precached exactly`);
+		}
+	}
+
+	const moduleFiles = [
+		'app.js',
+		'site.js',
+		'header_analyzer.js',
+		'rua_analyzer.js',
+		'authentication_graph.js',
+		'src/core.js',
+		'src/authentication-core.js',
+		'src/diagnose.js',
+		'src/diagnostics.js',
+		'src/message-analysis.js',
+		'src/offline-i18n.js',
+		'src/portable-report.js',
+		'src/render.js',
+		'src/tool-i18n.js'
+	];
+	for (const file of moduleFiles) {
+		const source = await readText(file);
+		for (const match of source.matchAll(/(?:from\s+|import\s+)['"](\.[^'"]+\.js(?:\?[^'"]*)?)['"]/g)) {
+			assert.match(match[1], /\?v=20$/, `${file} import ${match[1]} must bypass an older worker cache`);
+		}
+	}
+});
+
+test('a versioned runtime cache miss prefers the network over a queryless asset', async () => {
+	const source = await readText('sw.js');
+	const listeners = {};
+	const oldResponse = new Response('old');
+	const freshResponse = new Response('fresh');
+	let ignoreSearchMatches = 0;
+	const cache = {
+		async match(_request, options = {}) {
+			if (options.ignoreSearch) {
+				ignoreSearchMatches += 1;
+				return oldResponse;
+			}
+			return null;
+		},
+		async put() {}
+	};
+	vm.runInNewContext(source, {
+		URL,
+		Request,
+		Response,
+		caches: { async open() { return cache; }, async keys() { return []; } },
+		fetch: async () => freshResponse,
+		self: {
+			location: { origin: 'https://dmarc4all.toppymicros.com' },
+			addEventListener(type, listener) { listeners[type] = listener; },
+			skipWaiting() {},
+			clients: { claim() {} }
+		}
+	});
+	let responsePromise;
+	listeners.fetch({
+		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=21' },
+		respondWith(value) { responsePromise = value; },
+		waitUntil() {}
+	});
+	const response = await responsePromise;
+	assert.equal(await response.text(), 'fresh');
+	assert.equal(ignoreSearchMatches, 0, 'online upgrades must not reuse a queryless old asset');
+});
+
+test('a cached runtime response keeps its background refresh alive', async () => {
+	const source = await readText('sw.js');
+	const listeners = {};
+	const cachedResponse = new Response('cached');
+	const freshResponse = new Response('fresh');
+	const cachedWrites = [];
+	const cache = {
+		async match() { return cachedResponse; },
+		async put(_request, response) { cachedWrites.push(await response.text()); }
+	};
+	vm.runInNewContext(source, {
+		URL,
+		Request,
+		Response,
+		caches: { async open() { return cache; }, async keys() { return []; } },
+		fetch: async () => freshResponse,
+		self: {
+			location: { origin: 'https://dmarc4all.toppymicros.com' },
+			addEventListener(type, listener) { listeners[type] = listener; },
+			skipWaiting() {},
+			clients: { claim() {} }
+		}
+	});
+	let responsePromise;
+	let refreshPromise;
+	listeners.fetch({
+		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=20' },
+		respondWith(value) { responsePromise = value; },
+		waitUntil(value) { refreshPromise = value; }
+	});
+	const response = await responsePromise;
+	assert.equal(await response.text(), 'cached');
+	assert.ok(refreshPromise, 'the service worker must extend the refresh lifetime');
+	await refreshPromise;
+	assert.deepEqual(cachedWrites, ['fresh']);
+});
+
+test('a versioned runtime asset fails closed when its exact version is unavailable offline', async () => {
+	const source = await readText('sw.js');
+	const listeners = {};
+	let ignoreSearchMatches = 0;
+	const cache = {
+		async match(_request, options = {}) {
+			if (options.ignoreSearch) ignoreSearchMatches += 1;
+			return null;
+		},
+		async put() {}
+	};
+	vm.runInNewContext(source, {
+		URL,
+		Request,
+		Response,
+		caches: { async open() { return cache; }, async keys() { return []; } },
+		fetch: async () => { throw new Error('offline'); },
+		self: {
+			location: { origin: 'https://dmarc4all.toppymicros.com' },
+			addEventListener(type, listener) { listeners[type] = listener; },
+			skipWaiting() {},
+			clients: { claim() {} }
+		}
+	});
+	let responsePromise;
+	listeners.fetch({
+		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=21' },
+		respondWith(value) { responsePromise = value; },
+		waitUntil() {}
+	});
+	const response = await responsePromise;
+	assert.equal(response.status, 504);
+	assert.equal(ignoreSearchMatches, 0, 'runtime code must never cross release generations');
+});
+
+test('failed cache writes do not hide valid navigation responses', async () => {
+	const source = await readText('sw.js');
+	const listeners = {};
+	const cache = {
+		async match() { return null; },
+		async put() { throw new Error('quota exceeded'); }
+	};
+	vm.runInNewContext(source, {
+		URL,
+		Request,
+		Response,
+		caches: { async open() { return cache; }, async keys() { return []; } },
+		fetch: async () => new Response('network-page'),
+		self: {
+			location: { origin: 'https://dmarc4all.toppymicros.com' },
+			addEventListener(type, listener) { listeners[type] = listener; },
+			skipWaiting() {},
+			clients: { claim() {} }
+		}
+	});
+	let responsePromise;
+	listeners.fetch({
+		request: { method: 'GET', mode: 'navigate', url: 'https://dmarc4all.toppymicros.com/index.html' },
+		respondWith(value) { responsePromise = value; }
+	});
+	const response = await responsePromise;
+	assert.equal(await response.text(), 'network-page');
+});
+
+test('runtime error responses are returned without entering the shell cache', async () => {
+	const source = await readText('sw.js');
+	const listeners = {};
+	let cacheWrites = 0;
+	const cache = {
+		async match() { return null; },
+		async put() { cacheWrites += 1; }
+	};
+	vm.runInNewContext(source, {
+		URL,
+		Request,
+		Response,
+		caches: { async open() { return cache; }, async keys() { return []; } },
+		fetch: async () => new Response('missing', { status: 404 }),
+		self: {
+			location: { origin: 'https://dmarc4all.toppymicros.com' },
+			addEventListener(type, listener) { listeners[type] = listener; },
+			skipWaiting() {},
+			clients: { claim() {} }
+		}
+	});
+	let responsePromise;
+	listeners.fetch({
+		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=21' },
+		respondWith(value) { responsePromise = value; },
+		waitUntil() {}
+	});
+	const response = await responsePromise;
+	assert.equal(response.status, 404);
+	assert.equal(cacheWrites, 0);
 });
 
 test('offline page uses the exact versioned stylesheet path in the shell cache', async () => {
@@ -235,8 +486,8 @@ test('offline page uses the exact versioned stylesheet path in the shell cache',
 
 	assert.ok(stylesheet, 'offline stylesheet must use the root-relative versioned path');
 	assert.ok(serviceWorker.includes(`'${stylesheet[1]}'`));
-	assert.match(offlinePage, /src="\.\/src\/offline-i18n\.js"/);
-	assert.match(serviceWorker, /'\/src\/offline-i18n\.js'/);
+	assert.match(offlinePage, /src="\.\/src\/offline-i18n\.js\?v=20"/);
+	assert.match(serviceWorker, /'\/src\/offline-i18n\.js\?v=20'/);
 	for (const lang of ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru']) {
 		assert.match(offlineI18n, new RegExp(`\\n\\t${lang}: \\[`));
 	}

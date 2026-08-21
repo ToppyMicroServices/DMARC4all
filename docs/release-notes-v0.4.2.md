@@ -16,6 +16,7 @@ This patch release aligns the published privacy boundary with actual browser beh
 - Require complete RUA report metadata and reject conflicting reuse of a policy-domain/report-ID pair so duplicate evidence cannot inflate readiness totals.
 - Bind every Header Analyzer export to one From domain before it can contribute evidence to an Authentication Graph.
 - Add installable 192 px and 512 px PWA icons, repair the offline stylesheet cache key, and localize the offline and update experiences.
+- Version the release asset graph and keep new diagnosis controls disabled until the current modules load, preventing an existing PWA cache from mixing new privacy copy with old network behavior.
 - Correct the release procedure, public Action example, security boundary, and sitemap metadata.
 
 ## Testing

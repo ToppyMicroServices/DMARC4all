@@ -1,4 +1,4 @@
-import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './i18n.js';
+import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './i18n.js?v=20';
 
 const MESSAGES = {
 	ja: ['DMARC4all オフライン', 'オフライン', 'ライブ診断には接続が必要です', 'アプリ画面はオフラインでも開けますが、DNS照会と、明示的に有効化したRDAP／HTTPS参照チェックにはネットワーク接続が必要です。', 'クイック診断を開く', 'RUAガイドを開く'],

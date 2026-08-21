@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { registerPwa } from './src/pwa.js';
-import './src/core.js';
+import { registerPwa } from './src/pwa.js?v=20';
+import './src/core.js?v=20';
 
 registerPwa();

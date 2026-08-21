@@ -38,9 +38,9 @@
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="manifest" href="manifest.webmanifest?v=2">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -70,32 +70,32 @@
     }
   </script>
   <script defer src="vendor/dompurify.min.js"></script>
-  <script defer src="i18n/ja.js"></script>
-  <script defer src="i18n/en.js"></script>
-  <script defer src="i18n/es.js"></script>
-  <script defer src="i18n/de.js"></script>
-  <script defer src="i18n/ko.js"></script>
-  <script defer src="i18n/vi.js"></script>
-  <script defer src="i18n/th.js"></script>
-  <script defer src="i18n/km.js"></script>
-  <script defer src="i18n/my.js"></script>
-  <script defer src="i18n/id.js"></script>
-  <script defer src="i18n/et.js"></script>
-  <script defer src="i18n/zh.js"></script>
-  <script defer src="i18n/ru.js"></script>
-  <script defer src="i18n/vi_extra.js"></script>
-  <script defer src="i18n/th_extra.js"></script>
-  <script defer src="i18n/km_extra.js"></script>
-  <script defer src="i18n/id_extra.js"></script>
-  <script defer src="i18n/et_extra.js"></script>
-  <script defer src="i18n/zh_extra.js"></script>
-  <script defer src="i18n/ru_extra.js"></script>
-  <script defer src="i18n/es_extra.js"></script>
-  <script defer src="i18n/de_extra.js"></script>
-  <script defer src="i18n/extra_tr_my.js"></script>
-  <script defer src="i18n/extra_tr_ko.js"></script>
-  <script defer src="i18n/ui_extra.js"></script>
-  <script type="module" src="app.js"></script>
+  <script defer src="i18n/ja.js?v=20"></script>
+  <script defer src="i18n/en.js?v=20"></script>
+  <script defer src="i18n/es.js?v=20"></script>
+  <script defer src="i18n/de.js?v=20"></script>
+  <script defer src="i18n/ko.js?v=20"></script>
+  <script defer src="i18n/vi.js?v=20"></script>
+  <script defer src="i18n/th.js?v=20"></script>
+  <script defer src="i18n/km.js?v=20"></script>
+  <script defer src="i18n/my.js?v=20"></script>
+  <script defer src="i18n/id.js?v=20"></script>
+  <script defer src="i18n/et.js?v=20"></script>
+  <script defer src="i18n/zh.js?v=20"></script>
+  <script defer src="i18n/ru.js?v=20"></script>
+  <script defer src="i18n/vi_extra.js?v=20"></script>
+  <script defer src="i18n/th_extra.js?v=20"></script>
+  <script defer src="i18n/km_extra.js?v=20"></script>
+  <script defer src="i18n/id_extra.js?v=20"></script>
+  <script defer src="i18n/et_extra.js?v=20"></script>
+  <script defer src="i18n/zh_extra.js?v=20"></script>
+  <script defer src="i18n/ru_extra.js?v=20"></script>
+  <script defer src="i18n/es_extra.js?v=20"></script>
+  <script defer src="i18n/de_extra.js?v=20"></script>
+  <script defer src="i18n/extra_tr_my.js?v=20"></script>
+  <script defer src="i18n/extra_tr_ko.js?v=20"></script>
+  <script defer src="i18n/ui_extra.js?v=20"></script>
+  <script type="module" src="app.js?v=20"></script>
 </head>
 <body>
   <div class="shell">
@@ -178,7 +178,7 @@
                   <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
                 </label>
                 <label class="flex-label">
-                  <input type="checkbox" id="external-probes" class="w-auto"> <span data-i18n="form.externalProbes">公開RDAP・HTTPSも確認する（任意：rdap.org と転送先のレジストリRDAP、対象ドメイン、BIMI URLへ接続）</span>
+                  <input type="checkbox" id="external-probes" class="w-auto" disabled> <span data-i18n="form.externalProbes">公開RDAP・HTTPSも確認する（任意：rdap.org と転送先のレジストリRDAP、対象ドメイン、BIMI URLへ接続）</span>
                 </label>
               </div>
               <div class="resolver-panel">
@@ -204,7 +204,7 @@
                 <p class="tiny text-warn" id="resolver-error"></p>
               </div>
               <div class="grid">
-                <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep">診断を実行</button>
+                <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep" disabled>診断を実行</button>
               </div>
               <details class="form-notes">
                 <summary data-i18n="form.moreInfo">Usage notes & privacy</summary>
