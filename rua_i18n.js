@@ -172,7 +172,9 @@
 		const btns = Array.from(document.querySelectorAll('[data-lang-choice]'));
 		btns.forEach(btn => {
 			const v = btn.getAttribute('data-lang-choice');
-			btn.classList.toggle('active', v === currentLang);
+			const active = v === currentLang;
+			btn.classList.toggle('active', active);
+			btn.setAttribute('aria-pressed', active ? 'true' : 'false');
 		});
 		const activeButton = btns.find(btn => btn.classList.contains('active'));
 		const switcher = activeButton?.closest('.lang-switch');
@@ -190,6 +192,18 @@
 			const key = el.getAttribute('data-i18n-html');
 			if (!key) return;
 			setSafeInnerHTML(el, fmt(t(key)));
+		});
+		updateInternalLinks();
+	}
+
+	function updateInternalLinks() {
+		document.querySelectorAll('a[href]').forEach(anchor => {
+			const raw = anchor.dataset.baseHref || anchor.getAttribute('href') || '';
+			if (!anchor.dataset.baseHref) anchor.dataset.baseHref = raw;
+			if (!/^(?:\.\/)?(?:index(?:_enterprise)?|rua_service(?:_enterprise)?|header_analyzer|rua_analyzer|authentication_graph|standards_privacy|dns_provider_guides|ai_usage)\.html(?:[?#]|$)/.test(raw)) return;
+			const url = new URL(raw, window.location.href);
+			url.searchParams.set('lang', currentLang);
+			anchor.setAttribute('href', `${url.pathname.split('/').pop()}${url.search}${url.hash}`);
 		});
 	}
 
@@ -312,6 +326,11 @@
 			saved = '';
 		}
 		currentLang = langFromQuery() || langFromDocument() || ((saved && SUPPORTED_LANGS.includes(saved)) ? saved : detectLang());
+		try {
+			localStorage.setItem(LANG_KEY, currentLang);
+		} catch {
+			// ignore
+		}
 
 		Array.from(document.querySelectorAll('[data-lang-choice]')).forEach(btn => {
 			btn.addEventListener('click', () => {

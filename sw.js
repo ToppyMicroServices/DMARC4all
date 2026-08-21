@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v18';
+const CACHE_VERSION = 'v19';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
 const OFFLINE_FALLBACK = '/offline.html';
 
@@ -36,6 +36,7 @@ const PRECACHE_PATHS = [
 	'/schemas/diagnosis-result.schema.json',
 	'/schemas/diagnosis-result-1.0.0.schema.json',
 	'/schemas/diagnosis-result-1.2.0.schema.json',
+	'/schemas/diagnosis-result-1.3.0.schema.json',
 	'/schemas/cli-output.schema.json',
 	'/schemas/cli-output-1.0.0.schema.json',
 	'/examples/diagnosis-result.example.json',
@@ -49,6 +50,8 @@ const PRECACHE_PATHS = [
 	'/styles.css?v=12',
 	'/favicon.ico',
 	'/apple-touch-icon.png',
+	'/icon-192.png',
+	'/icon-512.png',
 	'/assets/favicon.ico',
 	'/vendor/dompurify.min.js',
 	'/vendor/fflate.browser.js',
@@ -59,6 +62,7 @@ const PRECACHE_PATHS = [
 	'/src/authentication-core.js',
 	'/src/authentication-graph.js',
 	'/src/authentication-graph-i18n.js',
+	'/src/header-analyzer-i18n.js',
 	'/src/automation.js',
 	'/src/cli-contract.js',
 	'/src/diagnose.js',
@@ -67,7 +71,9 @@ const PRECACHE_PATHS = [
 	'/src/i18n.js',
 	'/src/local-export.js',
 	'/src/message-analysis.js',
+	'/src/offline-i18n.js',
 	'/src/rua-analysis.js',
+	'/src/rua-analyzer-i18n.js',
 	'/src/tool-i18n.js',
 	'/src/pwa.js',
 	'/src/portable-report.js',
@@ -122,7 +128,6 @@ self.addEventListener('install', (event) => {
 	event.waitUntil(
 		caches.open(SHELL_CACHE)
 			.then((cache) => cache.addAll(PRECACHE_PATHS.map((path) => new Request(path, { cache: 'reload' }))))
-			.then(() => self.skipWaiting())
 	);
 });
 
@@ -138,7 +143,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
 	if (event.data && event.data.type === 'SKIP_WAITING') {
-		self.skipWaiting();
+		const activation = self.skipWaiting();
+		if (typeof event.waitUntil === 'function') event.waitUntil(activation);
 	}
 });
 
@@ -166,7 +172,7 @@ async function networkFirst(request) {
 		cache.put(request, response.clone());
 		return response;
 	} catch {
-		const cached = await cache.match(request);
+		const cached = await cache.match(request) || await cache.match(request, { ignoreSearch: true });
 		if (cached) return cached;
 		const offline = await cache.match(OFFLINE_FALLBACK);
 		if (offline) return offline;

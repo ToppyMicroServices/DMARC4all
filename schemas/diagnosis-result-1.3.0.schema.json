@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json",
+  "title": "DMARC4all portable diagnosis report",
+  "description": "Machine-readable export of a DMARC4all public-DNS diagnosis with explicit external-reference provenance and mail-profile applicability.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "format",
+    "schemaVersion",
+    "generatedAt",
+    "domain",
+    "locale",
+    "scope",
+    "summary",
+    "authentication",
+    "observations",
+    "priorities",
+    "remediation",
+    "evidence",
+    "errors"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json"
+    },
+    "format": {
+      "const": "dmarc4all-diagnosis"
+    },
+    "schemaVersion": {
+      "const": "1.3.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2
+    },
+    "scope": {
+      "$ref": "#/$defs/scope"
+    },
+    "summary": {
+      "$ref": "#/$defs/summary"
+    },
+    "authentication": {
+      "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/authentication"
+    },
+    "observations": {
+      "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/observations"
+    },
+    "priorities": {
+      "type": "array",
+      "items": {
+        "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/priority"
+      }
+    },
+    "remediation": {
+      "type": "array",
+      "items": {
+        "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/remediation"
+      }
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nullableScore": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "resolver",
+        "externalReferenceChecks",
+        "limitations"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "public_dns",
+            "public_dns_with_external_references"
+          ]
+        },
+        "resolver": {
+          "type": "string"
+        },
+        "externalReferenceChecks": {
+          "$ref": "#/$defs/externalReferenceChecks"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "no_email_sent_or_received",
+              "no_mailbox_or_server_access",
+              "dkim_selectors_not_exhaustively_discoverable",
+              "results_require_header_and_rua_confirmation"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "externalReferenceChecks": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "basis": {
+                "const": "public_dns"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "basis": {
+                "const": "public_dns_with_external_references"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "externalReferenceChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "attemptedSources"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "attemptedSources": {
+          "type": "array",
+          "description": "Network source categories attempted during the run. rdap_bootstrap_with_registry_redirect is the fixed rdap.org request and may include the responsible registry RDAP service after redirect.",
+          "items": {
+            "enum": [
+              "rdap_bootstrap_with_registry_redirect",
+              "checked_domain_https",
+              "published_bimi_https"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attemptedSources": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attemptedSources": {
+                "type": "array",
+                "contains": {
+                  "const": "rdap_bootstrap_with_registry_redirect"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scores",
+        "enforcementReadiness",
+        "enforcementReadinessApplicable",
+        "mailProfile",
+        "mailProvider"
+      ],
+      "properties": {
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "overall",
+            "spf"
+          ],
+          "properties": {
+            "overall": {
+              "$ref": "#/$defs/nullableScore"
+            },
+            "spf": {
+              "$ref": "#/$defs/nullableScore"
+            }
+          }
+        },
+        "enforcementReadiness": {
+          "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/readiness"
+        },
+        "enforcementReadinessApplicable": {
+          "type": "boolean"
+        },
+        "mailProfile": {
+          "enum": [
+            "no_mail",
+            "mail_capable",
+            "null_mx_conflict",
+            "unknown"
+          ]
+        },
+        "mailProvider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name",
+            "confidence",
+            "signals"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "string"
+            },
+            "signals": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mailProfile": {
+                "const": "no_mail"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enforcementReadinessApplicable": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "enforcementReadinessApplicable": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dnsRecords",
+        "dmarcLookups"
+      ],
+      "properties": {
+        "dnsRecords": {
+          "type": "array",
+          "items": {
+            "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/dnsRecord"
+          }
+        },
+        "dmarcLookups": {
+          "type": "array",
+          "items": {
+            "$ref": "diagnosis-result-1.2.0.schema.json#/$defs/dmarcLookup"
+          }
+        }
+      }
+    }
+  }
+}

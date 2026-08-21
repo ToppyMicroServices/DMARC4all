@@ -201,6 +201,93 @@ test('standards page identifies the published DMARC RFCs', () => {
 	}
 });
 
+test('localized network boundaries and Null MX guidance remain semantically complete', () => {
+	const { window } = loadBrowserLocales();
+	const languages = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'];
+	const nullMxKeys = [
+		'mx.null.title', 'mx.null.detail', 'mx.nullConflict.title', 'mx.nullConflict.detail',
+		'mx.notApplicable', 'mx.noMailProfile.title', 'mx.noMailProfile.detail',
+		'mx.transportNotApplicable.title', 'mx.transportNotApplicable.detail',
+		'mx.null.step1', 'mx.null.step2', 'mx.null.step3'
+	];
+	const registryRdapPatterns = {
+		ja: /レジストリRDAP/,
+		en: /registry RDAP/i,
+		es: /RDAP del registro/i,
+		de: /Registry-RDAP/i,
+		ko: /레지스트리 RDAP/,
+		vi: /RDAP của cơ quan đăng ký/,
+		th: /RDAP ของรีจิสทรี/,
+		km: /RDAP របស់បញ្ជីឈ្មោះ/,
+		my: /registry RDAP/i,
+		id: /RDAP registri/i,
+		et: /registri RDAP/i,
+		zh: /注册局 RDAP/,
+		ru: /RDAP реестра/i
+	};
+
+	for (const lang of languages) {
+		const locale = window.I18N[lang];
+		for (const key of ['form.externalProbes', 'form.note', 'report.querying', 'report.publicDnsOnlyFootnote']) {
+			assert.match(locale[key], /RDAP/i, `${lang}.${key} must disclose RDAP`);
+			assert.match(locale[key], /HTTPS/i, `${lang}.${key} must disclose HTTPS`);
+		}
+		assert.match(locale['form.externalProbes'], /rdap\.org/i, `${lang}.form.externalProbes must name rdap.org`);
+		assert.match(locale['form.externalProbes'], registryRdapPatterns[lang], `${lang}.form.externalProbes must disclose the registry RDAP redirect`);
+		assert.match(locale['form.externalProbes'], /BIMI/i, `${lang}.form.externalProbes must name BIMI URLs`);
+		assert.match(locale['form.privacy'], /DoH/i, `${lang}.form.privacy must name the selected DoH resolver`);
+		assert.match(locale['form.privacy'], /rdap\.org/i, `${lang}.form.privacy must name rdap.org`);
+		assert.match(locale['form.privacy'], registryRdapPatterns[lang], `${lang}.form.privacy must disclose the registry RDAP redirect`);
+		assert.match(locale['form.privacy'], /BIMI/i, `${lang}.form.privacy must name BIMI URLs`);
+		for (const key of ['form.externalProbes', 'form.privacy']) {
+			assert.match(locale[key], /apex[\s\S]+www[\s\S]+mta-sts/i, `${lang}.${key} must enumerate the checked HTTPS hosts`);
+		}
+		assert.match(locale['form.enterpriseNote'], /DoH/i, `${lang}.form.enterpriseNote must name the selected DoH resolver`);
+		assert.match(locale['form.enterprisePrivacy'], /DoH/i, `${lang}.form.enterprisePrivacy must name the selected DoH resolver`);
+		assert.doesNotMatch(locale['form.enterprisePrivacy'], /RDAP|rdap\.org|BIMI/i, `${lang}.form.enterprisePrivacy must remain DoH-only`);
+		for (const key of nullMxKeys) assert.ok(locale[key].trim(), `${lang}.${key} must not be empty`);
+		for (const key of ['mx.null.title', 'mx.null.detail', 'mx.nullConflict.title', 'mx.nullConflict.detail', 'mx.notApplicable', 'mx.transportNotApplicable.title', 'mx.transportNotApplicable.detail']) {
+			assert.match(locale[key], /Null MX|MX/, `${lang}.${key} must identify MX context`);
+		}
+		assert.match(locale['mx.null.detail'], /0 \./, `${lang}.mx.null.detail must preserve the Null MX record`);
+		assert.match(locale['mx.null.step2'], /0 \./, `${lang}.mx.null.step2 must preserve the Null MX record`);
+		for (const token of ['Null MX', 'SPF', '-all', 'DMARC', 'p=reject', 'DKIM', 'RUA', 'BIMI', 'TLS']) {
+			assert.ok(locale['mx.noMailProfile.detail'].includes(token), `${lang}.mx.noMailProfile.detail must name ${token}`);
+		}
+	}
+});
+
+test('standards and AI pages disclose opt-in network checks and schema 1.3.0 in every language', () => {
+	const { window } = loadBrowserLocales();
+
+	for (const lang of Object.keys(window.DOCUMENT_I18N.standards)) {
+		assert.match(window.DOCUMENT_I18N.standards[lang]['policy.li1'], /RDAP/i, `${lang} standards policy must disclose RDAP`);
+		assert.match(window.DOCUMENT_I18N.standards[lang]['policy.li1'], /HTTPS/i, `${lang} standards policy must disclose HTTPS`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['interpret.body'], />1\.3\.0</, `${lang} AI page must identify schema 1.3.0`);
+		assert.doesNotMatch(window.DOCUMENT_I18N.ai[lang]['interpret.body'], />1\.0\.0</, `${lang} AI page contains the stale schema version`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['safe.li2'], /1\.3\.0/, `${lang} AI safety steps must identify schema 1.3.0`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['safe.li2'], /scope\.externalReferenceChecks/, `${lang} AI safety steps must disclose external reference checks`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['safe.li3'], /summary\.enforcementReadinessApplicable/, `${lang} AI safety steps must check readiness applicability`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['safe.li3'], /summary\.enforcementReadiness\.decision/, `${lang} AI safety steps must identify the readiness decision`);
+		assert.match(window.DOCUMENT_I18N.ai[lang]['safe.li3'], /\btrue\b[\s\S]+\bfalse\b/, `${lang} AI safety steps must condition the primary decision on applicability`);
+	}
+
+	const aiFallback = fs.readFileSync(path.join(PROJECT_ROOT, 'ai_usage.html'), 'utf8');
+	const fullContext = fs.readFileSync(path.join(PROJECT_ROOT, 'llms-full.txt'), 'utf8');
+	assert.match(aiFallback, />1\.3\.0</);
+	assert.doesNotMatch(aiFallback, />1\.0\.0</);
+	assert.match(aiFallback, /scope\.externalReferenceChecks/);
+	assert.match(aiFallback, /summary\.enforcementReadinessApplicable/);
+	assert.match(aiFallback, /summary\.enforcementReadiness\.decision/);
+	assert.match(aiFallback, /primary readiness decision/);
+	assert.match(fullContext, /Portable report schema version: 1\.3\.0/);
+	assert.match(fullContext, /scope\.externalReferenceChecks/);
+	assert.match(fullContext, /summary\.enforcementReadinessApplicable/);
+	assert.match(fullContext, /summary\.enforcementReadiness\.decision/);
+	assert.match(fullContext, /READY[\s\S]+CONDITIONALLY_READY[\s\S]+NOT_READY[\s\S]+INSUFFICIENT_EVIDENCE/);
+	assert.match(fullContext, /legacy lower-case status/i);
+});
+
 test('RUA cards keep readable text inside the dark hero', () => {
 	const styles = fs.readFileSync(path.join(PROJECT_ROOT, 'styles.css'), 'utf8');
 	assert.match(styles, /\.hero \.card \.tiny,\s*\.hero \.card \.muted\s*\{\s*color: #475569;/);

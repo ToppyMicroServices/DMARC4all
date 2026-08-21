@@ -194,10 +194,9 @@
     document.querySelectorAll('a[href]').forEach(anchor => {
       const raw = anchor.dataset.baseHref || anchor.getAttribute('href') || '';
       if (!anchor.dataset.baseHref) anchor.dataset.baseHref = raw;
-      if (!/^(?:\.\/)?(?:index|standards_privacy|dns_provider_guides|ai_usage|rua_service(?:_enterprise)?)\.html(?:[?#]|$)/.test(raw)) return;
+      if (!/^(?:\.\/)?(?:index(?:_enterprise)?|standards_privacy|dns_provider_guides|ai_usage|rua_service(?:_enterprise)?|header_analyzer|rua_analyzer|authentication_graph)\.html(?:[?#]|$)/.test(raw)) return;
       const url = new URL(raw, window.location.href);
-      if (currentLang === defaultLang) url.searchParams.delete('lang');
-      else url.searchParams.set('lang', currentLang);
+      url.searchParams.set('lang', currentLang);
       anchor.setAttribute('href', `${url.pathname.split('/').pop()}${url.search}${url.hash}`);
     });
   }
@@ -205,7 +204,9 @@
   function applyI18n() {
     root.lang = currentLang;
     document.querySelectorAll('[data-lang-choice]').forEach(button => {
-      button.classList.toggle('active', button.dataset.langChoice === currentLang);
+      const active = button.dataset.langChoice === currentLang;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     const nav = document.querySelector('.lang-switch');
     if (nav) {
@@ -250,6 +251,11 @@
   function init() {
     if (!Object.keys(pageMap).length) return;
     currentLang = langFromQuery() || savedLang() || detectLang();
+    try {
+      localStorage.setItem(LANG_KEY, currentLang);
+    } catch {
+      // Language selection remains active for the current page.
+    }
     document.querySelectorAll('[data-lang-choice]').forEach(button => {
       button.addEventListener('click', () => setLang(button.dataset.langChoice || defaultLang));
     });

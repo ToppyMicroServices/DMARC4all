@@ -136,5 +136,5 @@ Release: `vNext.6` - Authentication Graph.
 
 The schema gate runs Ajv in Draft 2020-12 mode against generated CLI and
 portable-diagnosis output. Immutable schema URIs are published per contract
-version; the unversioned diagnosis URI is retained only as a compatibility
-index for historical 1.0.0 reports.
+version; the unversioned diagnosis URI is retained as a compatibility index
+that accepts the 1.0.0, 1.2.0, and 1.3.0 contracts.

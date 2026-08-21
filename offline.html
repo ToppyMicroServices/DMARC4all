@@ -6,22 +6,18 @@
   <title>DMARC4all Offline</title>
   <link rel="icon" href="./favicon.ico">
   <link rel="stylesheet" href="./assets/fonts/fonts.css">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="/styles.css?v=12">
+  <script type="module" src="./src/offline-i18n.js"></script>
 </head>
 <body>
   <main class="page-shell">
     <section class="hero card">
-      <div class="eyebrow">Offline</div>
-      <h1>Connection Needed For Live Checks</h1>
-      <p class="lead">
-        The app shell is available offline, but DNS, RDAP, and BIMI diagnostics need a live network connection.
-      </p>
-      <p class="muted">
-        UI はオフラインでも開けますが、DNS / RDAP / BIMI の診断はオンライン接続が必要です。
-      </p>
+      <div class="eyebrow" data-offline-i18n="eyebrow">Offline</div>
+      <h1 data-offline-i18n="title">Connection needed for live checks</h1>
+      <p class="lead" data-offline-i18n="body">The app shell is available offline, but live DNS checks and any explicitly enabled RDAP/HTTPS reference checks need a network connection.</p>
       <div class="hero-actions">
-        <a class="btn btn-gradient" href="./index.html">Open Quick Check</a>
-        <a class="btn btn-ghost" href="./rua_service.html">Open RUA Guide</a>
+        <a class="btn btn-gradient" href="./index.html" data-offline-i18n="quickCheck">Open Quick Check</a>
+        <a class="btn btn-ghost" href="./rua_service.html" data-offline-i18n="ruaGuide">Open RUA Guide</a>
       </div>
     </section>
   </main>

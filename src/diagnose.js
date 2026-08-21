@@ -20,6 +20,7 @@ import {
 	approxByteLength,
 	buildSpfExpansion,
 	checkBimiSvgRequirements,
+	classifyMxRecords,
 	computeOverallScore,
 	detectDnsHostingProviderFromNS,
 	detectMailProvider,
@@ -37,6 +38,7 @@ import {
 	formatCnameChain,
 	fetchHeadCors,
 	fetchTextCors,
+	isExplicitNoMailProfile,
 	longestTxtSegment,
 	looksLikeSvgUrl,
 	parseBimiTags,
@@ -44,7 +46,6 @@ import {
 	parseTagValue,
 	parseSvgDimensions,
 	probeHttps,
-	probeImage,
 	probeUrlNoCors,
 	rdapExtractRegistrar,
 	rdapLookupDomain,
@@ -54,7 +55,7 @@ import {
 	spfIsIpOnly
 } from './diagnostics.js';
 import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js';
-import { esc } from './safe-html.js';
+import { esc, sanitizePublicHttpsUrl } from './safe-html.js';
 
 export function createDiagnosisRunner(deps) {
 	const {
@@ -74,6 +75,8 @@ export function createDiagnosisRunner(deps) {
 	} = deps;
 
 	return async function runDiagnosis(domain, opts = {}) {
+		const allowExternalProbes = !ENTERPRISE_MODE && opts.externalProbes === true;
+		let explicitlyNoMailProfile = false;
 		const buildTxtFixRecord = (name, value, ttl = 3600) => `${name}. ${ttl} IN TXT "${value.replace(/"/g, '\\"')}"`;
 		const dmarcTagsToRecord = (tags) => {
 			const preferred = ['v', 'p', 'sp', 'pct', 'adkim', 'aspf', 'fo', 'ri', 'rua', 'ruf'];
@@ -122,6 +125,8 @@ export function createDiagnosisRunner(deps) {
 			meta: {
 				timestamp: new Date().toISOString(),
 				resolver: getActiveResolverLabel(),
+				enterpriseMode: !!ENTERPRISE_MODE,
+				externalProbes: allowExternalProbes,
 				records: []
 			},
 			priority: [],
@@ -134,7 +139,7 @@ export function createDiagnosisRunner(deps) {
 			spf: { records: [], findings: [] },
 			dkim: { selectors: [], findings: [], usesCname: false },
 			bimi: { name: '', record: '', l: '', a: '', findings: [] },
-			mx: { records: [], findings: [] },
+			mx: { records: [], isNullMx: false, nullMxConflict: false, findings: [] },
 			mta_sts: { record: '', tlsrpt: '', findings: [] },
 			caa: { records: [], findings: [] },
 			dnssec: { ds: [], dnskey: [], findings: [] },
@@ -143,7 +148,7 @@ export function createDiagnosisRunner(deps) {
 			errors: []
 		};
 
-		if (!ENTERPRISE_MODE) {
+		if (allowExternalProbes) {
 			try {
 				const { url, json } = await rdapLookupDomain(domain);
 				results.registrar.rdapUrl = url;
@@ -182,7 +187,7 @@ export function createDiagnosisRunner(deps) {
 					)
 				);
 			}
-		} else {
+		} else if (ENTERPRISE_MODE) {
 			results.registrar.findings.push(
 				mkFinding(
 					'low',
@@ -969,37 +974,26 @@ export function createDiagnosisRunner(deps) {
 
 				const safeLogo = sanitizeUrl(tags.l);
 				const safeA = sanitizeUrl(tags.a);
+				const fetchLogo = sanitizePublicHttpsUrl(tags.l);
+				const fetchA = sanitizePublicHttpsUrl(tags.a);
 				const aLower = String(tags.a || '').toLowerCase();
 				const aIsKnownNonUrl = aLower === 'self' || aLower === 'none';
-				const allowExternalBimiFetch = !ENTERPRISE_MODE;
+				const allowExternalBimiFetch = allowExternalProbes;
 
-				if (!allowExternalBimiFetch && tags.l) {
+				if (ENTERPRISE_MODE && !allowExternalBimiFetch && tags.l) {
 					extra.push(tr('外部ロゴ取得はEnterpriseモードで無効', 'External logo fetch is disabled in enterprise mode.'));
 				}
-				if (allowExternalBimiFetch && tags.l && String(tags.l).toLowerCase().startsWith('https://') && safeLogo) {
+				if (allowExternalBimiFetch && tags.l && String(tags.l).toLowerCase().startsWith('https://') && safeLogo && !fetchLogo) {
+					level = 'med';
+					problems.push(tr('ローカルまたは非公開ネットワークのロゴURLは自動取得しない', 'Local or private-network logo URLs are not fetched automatically'));
+				}
+				if (allowExternalBimiFetch && fetchLogo) {
 					if (!looksLikeSvgUrl(tags.l)) {
 						level = 'med';
 						problems.push(tr('l= はSVG（.svg）を指すのが一般的', 'l= typically points to an SVG (.svg)'));
 					}
 
-					const imgProbe = await probeImage(safeLogo, 6500);
-					if (imgProbe.ok) {
-						if (imgProbe.width && imgProbe.height) {
-							extra.push(trf('ロゴ画像ロード: OK（{w}x{h}）', 'Logo image load: OK ({w}x{h})', { w: imgProbe.width, h: imgProbe.height }));
-							const ratio = imgProbe.width / imgProbe.height;
-							if (!Number.isFinite(ratio) || Math.abs(ratio - 1) > 0.05) {
-								level = 'med';
-								problems.push(tr('ロゴ画像が正方形でない可能性（推奨は正方形）', 'Logo may not be square (square is recommended)'));
-							}
-						} else {
-							extra.push(tr('ロゴ画像ロード: OK（寸法は取得できず）', 'Logo image load: OK (dimensions unavailable)'));
-						}
-					} else {
-						level = 'med';
-						problems.push(tr('ロゴ画像が読み込めない（URL/存在/到達性を確認）', 'Logo image failed to load (check URL/existence/reachability)'));
-					}
-
-					const fetched = await fetchTextCors(safeLogo, 6500);
+					const fetched = await fetchTextCors(fetchLogo, 6500);
 					if (fetched.ok) {
 						const ct = String(fetched.ct || '').toLowerCase();
 						const looksSvg = ct.includes('image/svg+xml') || /<svg[\s>]/i.test(fetched.text || '');
@@ -1009,7 +1003,7 @@ export function createDiagnosisRunner(deps) {
 						} else {
 							let sizeBytes = null;
 							let sizeLabel = tr('SVGサイズ（推定）', 'SVG size (approx)');
-							const head = await fetchHeadCors(safeLogo, 4500);
+							const head = await fetchHeadCors(fetchLogo, 4500);
 							if (head && head.ok && Number.isFinite(head.contentLength)) {
 								sizeBytes = head.contentLength;
 								sizeLabel = tr('SVGサイズ（Content-Length）', 'SVG size (Content-Length)');
@@ -1046,7 +1040,7 @@ export function createDiagnosisRunner(deps) {
 						level = 'med';
 						problems.push(trf('ロゴURLが HTTP {code} を返した', 'Logo URL returned HTTP {code}', { code: fetched.status }));
 					} else {
-						const probe = await probeUrlNoCors(safeLogo, 5500);
+						const probe = await probeUrlNoCors(fetchLogo, 5500);
 						if (probe.ok) {
 							extra.push(tr('ロゴURL到達性: OK（CORSのため内容/サイズは未検証）', 'Logo URL reachable (content/size not verified due to CORS)'));
 						} else {
@@ -1056,8 +1050,12 @@ export function createDiagnosisRunner(deps) {
 					}
 				}
 
-				if (tags.a && !aIsKnownNonUrl && String(tags.a).toLowerCase().startsWith('https://') && safeA) {
-					const fetched = await fetchTextCors(safeA, 6500, 180_000);
+				if (allowExternalBimiFetch && tags.a && !aIsKnownNonUrl && String(tags.a).toLowerCase().startsWith('https://') && safeA && !fetchA) {
+					level = 'med';
+					problems.push(tr('ローカルまたは非公開ネットワークの証明書URLは自動取得しない', 'Local or private-network certificate URLs are not fetched automatically'));
+				}
+				if (allowExternalBimiFetch && tags.a && !aIsKnownNonUrl && fetchA) {
+					const fetched = await fetchTextCors(fetchA, 6500, 180_000);
 					if (fetched.ok) {
 						const text = String(fetched.text || '');
 						if (/-----BEGIN CERTIFICATE-----/i.test(text)) {
@@ -1070,7 +1068,7 @@ export function createDiagnosisRunner(deps) {
 						level = 'med';
 						problems.push(trf('a= URLが HTTP {code} を返した', 'a= URL returned HTTP {code}', { code: fetched.status }));
 					} else {
-						const probe = await probeUrlNoCors(safeA, 5500);
+						const probe = await probeUrlNoCors(fetchA, 5500);
 						if (probe.ok) extra.push(tr('a= URL到達性: OK（CORSのため内容未検証）', 'a= URL reachable (content not verified due to CORS)'));
 						else {
 							level = 'med';
@@ -1088,9 +1086,7 @@ export function createDiagnosisRunner(deps) {
 				const aLine = safeA
 					? `<div class="mt-6"><strong>a=</strong><a href="${esc(safeA)}" target="_blank" rel="noopener noreferrer">${esc(tags.a)}</a></div>`
 					: `<div class="mt-6"><strong>a=</strong><span class="mono mono-inline">${esc(tags.a || t('label.noneParen'))}</span></div>`;
-				const preview = safeLogo
-					? `<img src="${esc(safeLogo)}" alt="BIMI logo" loading="lazy" referrerpolicy="no-referrer" class="bimi-logo">`
-					: '';
+				const preview = '';
 				const checksBlock = extra.length
 					? `<div class="mt-10"><div class="mini-title">${esc(t('label.additionalChecks'))}</div><ul>${extra.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></div>`
 					: '';
@@ -1113,48 +1109,67 @@ export function createDiagnosisRunner(deps) {
 
 		try {
 			const mx = extractMX(await dohQuery(domain, 'MX'));
+			const mxClassification = classifyMxRecords(mx);
 			results.mx.records = mx;
+			results.mx.isNullMx = mxClassification.isNullMx;
+			results.mx.nullMxConflict = mxClassification.hasNullMxConflict;
 			if (!mx.length) {
 				results.mx.findings.push(mkFinding('med', tr('MX が見つからない', 'MX not found'), tr('業務メール用ドメインでMXが無い場合,受信が別ドメイン/別経路の可能性.設計を確認する', 'If this is a mail domain and MX is missing, inbound mail may use another domain/path. Review the design.'), `dig +short MX ${domain}`));
+			} else if (mxClassification.isNullMx) {
+				results.mx.findings.push(mkFinding('low', t('mx.null.title'), t('mx.null.detail'), mx.join('\n')));
+			} else if (mxClassification.hasNullMxConflict) {
+				results.mx.findings.push(mkFinding('high', t('mx.nullConflict.title'), t('mx.nullConflict.detail'), mx.join('\n')));
 			} else {
 				results.mx.findings.push(mkFinding('low', tr('MX を確認', 'Check MX'), tr('MXは受信先（メールサーバ）を示す.利用SaaS（Microsoft 365/Google等）と整合するか確認する', 'MX indicates inbound mail servers. Confirm it matches your provider (Microsoft 365/Google/etc.).'), mx.join('\n')));
+			}
+			explicitlyNoMailProfile = isExplicitNoMailProfile(results);
+			if (explicitlyNoMailProfile) {
+				const evidence = [`MX ${mx.join(', ')}`, `TXT ${domain} ${results.spf.records[0]}`, `TXT ${results.source.recordName} ${results.dmarc.record}`].join('\n');
+				const noMailFinding = () => mkFinding('low', t('mx.noMailProfile.title'), t('mx.noMailProfile.detail'), evidence);
+				results.dmarc.findings = [noMailFinding()];
+				results.dkim.findings = [noMailFinding()];
+				results.bimi.findings = [noMailFinding()];
 			}
 		} catch (error) {
 			results.errors.push(`MX 取得に失敗: ${String(error)}`);
 			results.mx.findings.push(mkFinding('med', tr('MXの取得に失敗', 'Failed to retrieve MX'), tr('公開DNS照会が失敗した可能性', 'Public DNS lookup may have failed'), `dig +short MX ${domain}`));
 		}
 
-		try {
-			const stsRecords = extractTXTRecords(await dohQuery(`_mta-sts.${domain}`, 'TXT'));
-			const stsRecord = firstTxtRecordStartingWith(stsRecords, 'v=STSv1');
-			results.mta_sts.record = stsRecord ? stsRecord.data : '';
-			if (stsRecord) {
-				results.meta.records.push({ name: `_mta-sts.${domain}`, type: 'TXT', ttl: stsRecord.ttl ?? null, value: stsRecord.data });
+		if (!results.mx.isNullMx) {
+			try {
+				const stsRecords = extractTXTRecords(await dohQuery(`_mta-sts.${domain}`, 'TXT'));
+				const stsRecord = firstTxtRecordStartingWith(stsRecords, 'v=STSv1');
+				results.mta_sts.record = stsRecord ? stsRecord.data : '';
+				if (stsRecord) {
+					results.meta.records.push({ name: `_mta-sts.${domain}`, type: 'TXT', ttl: stsRecord.ttl ?? null, value: stsRecord.data });
+				}
+			} catch {
+				results.mta_sts.record = '';
 			}
-		} catch {
-			results.mta_sts.record = '';
+
+			try {
+				const tlsRecords = extractTXTRecords(await dohQuery(`_smtp._tls.${domain}`, 'TXT'));
+				const tlsRecord = firstTxtRecordStartingWith(tlsRecords, 'v=TLSRPTv1');
+				results.mta_sts.tlsrpt = tlsRecord ? tlsRecord.data : '';
+				if (tlsRecord) {
+					results.meta.records.push({ name: `_smtp._tls.${domain}`, type: 'TXT', ttl: tlsRecord.ttl ?? null, value: tlsRecord.data });
+				}
+			} catch {
+				results.mta_sts.tlsrpt = '';
+			}
 		}
 
-		try {
-			const tlsRecords = extractTXTRecords(await dohQuery(`_smtp._tls.${domain}`, 'TXT'));
-			const tlsRecord = firstTxtRecordStartingWith(tlsRecords, 'v=TLSRPTv1');
-			results.mta_sts.tlsrpt = tlsRecord ? tlsRecord.data : '';
-			if (tlsRecord) {
-				results.meta.records.push({ name: `_smtp._tls.${domain}`, type: 'TXT', ttl: tlsRecord.ttl ?? null, value: tlsRecord.data });
-			}
-		} catch {
-			results.mta_sts.tlsrpt = '';
-		}
-
-		if (!results.mta_sts.record) {
+		if (results.mx.isNullMx) {
+			results.mta_sts.findings.push(mkFinding('low', t('mx.transportNotApplicable.title'), t('mx.transportNotApplicable.detail'), 'MX 0 .'));
+		} else if (!results.mta_sts.record) {
 			results.mta_sts.findings.push(mkFinding('med', tr('MTA-STS なし（TLS強制の仕組みなし）', 'MTA-STS missing (no TLS enforcement)'), tr('受信側のTLSを強制したい場合に有効.まずはTLS-RPTと併せて段階導入を検討', 'Useful if you want to enforce TLS for inbound mail. Consider staged rollout alongside TLS-RPT.'), `dig +short TXT _mta-sts.${domain}`));
 		} else {
 			results.mta_sts.findings.push(mkFinding('low', tr('MTA-STS: TXTあり', 'MTA-STS: TXT present'), tr('TXT（id）設定を確認.別途 https://mta-sts.<domain>/.well-known/mta-sts.txt の公開が必要', 'Confirm the TXT (id). You also need to host https://mta-sts.<domain>/.well-known/mta-sts.txt'), `TXT _mta-sts.${domain}\n${results.mta_sts.record}`));
 		}
 
-		if (!results.mta_sts.tlsrpt) {
+		if (!results.mx.isNullMx && !results.mta_sts.tlsrpt) {
 			results.mta_sts.findings.push(mkFinding('low', tr('TLS-RPT なし（任意）', 'TLS-RPT missing (optional)'), tr('TLSの失敗レポートを受けたい場合はTLS-RPTを追加する', 'Add TLS-RPT if you want reports about TLS failures.'), `dig +short TXT _smtp._tls.${domain}`));
-		} else {
+		} else if (!results.mx.isNullMx) {
 			results.mta_sts.findings.push(mkFinding('low', tr('TLS-RPT: TXTあり', 'TLS-RPT: TXT present'), tr('rua の宛先が運用可能か確認する', 'Confirm the rua address is deliverable and monitored.'), `TXT _smtp._tls.${domain}\n${results.mta_sts.tlsrpt}`));
 		}
 
@@ -1200,28 +1215,30 @@ export function createDiagnosisRunner(deps) {
 			results.dnssec.findings.push(mkFinding('low', tr('DNSSEC: DSなし（任意/方針次第）', 'DNSSEC: DS missing (optional/policy)'), tr('ポリシーや要件により導入判断.メール認証（SPF/DKIM/DMARC）とは別軸', 'Adoption depends on policy/requirements. Separate concern from email auth (SPF/DKIM/DMARC).'), `dig +short DS ${domain}`));
 		}
 
-		try {
-			const webTargets = [`${domain}`, `www.${domain}`, `mta-sts.${domain}`];
-			const checks = [];
-			for (const host of webTargets) {
-				checks.push(await probeHttps(host));
+		if (allowExternalProbes) {
+			try {
+				const webTargets = results.mx.isNullMx ? [`${domain}`, `www.${domain}`] : [`${domain}`, `www.${domain}`, `mta-sts.${domain}`];
+				const checks = [];
+				for (const host of webTargets) {
+					checks.push(await probeHttps(host));
+				}
+				results.web.checks = checks;
+				const okCount = checks.filter((item) => item.ok).length;
+				results.web.findings.push(
+					mkFinding(
+						'low',
+						tr('HTTPS到達性（参考）', 'HTTPS reachability (reference)'),
+						trf(
+							'https:// への到達性を確認（no-corsのため厳密な判定ではない）.OK={ok}/{total}',
+							'Check basic reachability over https:// (not strict due to no-cors). OK={ok}/{total}',
+							{ ok: okCount, total: checks.length }
+						),
+						checks.map((item) => `${item.ok ? 'OK' : 'NG'} ${item.evidence}`).join('\n')
+					)
+				);
+			} catch {
+				// ignore best-effort web probe errors
 			}
-			results.web.checks = checks;
-			const okCount = checks.filter((item) => item.ok).length;
-			results.web.findings.push(
-				mkFinding(
-					'low',
-					tr('HTTPS到達性（参考）', 'HTTPS reachability (reference)'),
-					trf(
-						'https:// への到達性を確認（no-corsのため厳密な判定ではない）.OK={ok}/{total}',
-						'Check basic reachability over https:// (not strict due to no-cors). OK={ok}/{total}',
-						{ ok: okCount, total: checks.length }
-					),
-					checks.map((item) => `${item.ok ? 'OK' : 'NG'} ${item.evidence}`).join('\n')
-				)
-			);
-		} catch {
-			// ignore best-effort web probe errors
 		}
 
 		const doSub = !!(opts && opts.subdomainScan);
@@ -1272,7 +1289,7 @@ export function createDiagnosisRunner(deps) {
 		results.score.spfChips = score.spfChips;
 
 		try {
-			if (!results.dmarc.record && results.source.classification !== 'unavailable') {
+			if (!explicitlyNoMailProfile && !results.dmarc.record && results.source.classification !== 'unavailable') {
 				results.priority.push({
 					level: 'high',
 					title: tr('DMARC が未設定', 'DMARC missing'),
@@ -1294,7 +1311,7 @@ export function createDiagnosisRunner(deps) {
 					verify: `dig +short TXT _dmarc.${domain}`,
 					rollback: tr('追加した TXT を削除するか、直前の値に戻す', 'Remove the TXT you added, or restore the previous value.')
 				});
-			} else {
+			} else if (!explicitlyNoMailProfile) {
 				const p = results.effectivePolicy || '';
 				const dmarcTags = results.dmarcPolicy.tags;
 				const ruaValue = dmarcTags.rua || '';
@@ -1432,7 +1449,7 @@ export function createDiagnosisRunner(deps) {
 			}
 
 			const dkimConfirmed = (results.dkim && Array.isArray(results.dkim.confirmedSelectors)) ? results.dkim.confirmedSelectors : [];
-			if (!dkimConfirmed.length) {
+			if (!dkimConfirmed.length && !explicitlyNoMailProfile) {
 				results.priority.push({
 					level: 'high',
 					title: tr('DKIM が未確認/未設定', 'DKIM unverified/missing'),
@@ -1447,7 +1464,7 @@ export function createDiagnosisRunner(deps) {
 				});
 			}
 
-			if (!results.mta_sts.record) {
+			if (!results.mx.isNullMx && !results.mta_sts.record) {
 				const idStamp = results.meta.timestamp.slice(0, 10).replace(/-/g, '') + '01';
 				const mtaStsValue = `v=STSv1; id=${idStamp}`;
 				pushFixup({
@@ -1467,7 +1484,7 @@ export function createDiagnosisRunner(deps) {
 				});
 			}
 
-			if (!results.mta_sts.tlsrpt) {
+			if (!results.mx.isNullMx && !results.mta_sts.tlsrpt) {
 				const tlsRptValue = `v=TLSRPTv1; rua=mailto:tlsrpt@${domain}`;
 				pushFixup({
 					level: 'low',
@@ -1492,7 +1509,7 @@ export function createDiagnosisRunner(deps) {
 		results.mailProvider = detectMailProvider({
 			mxRecords: results.mx.records,
 			spfRecords: results.spf.records,
-			dkimSelectors: results.dkim.selectors || [],
+			dkimSelectors: results.dkim.confirmedSelectors || [],
 			dkimUsesCname: !!results.dkim.usesCname
 		});
 		results.fixups = remediation;

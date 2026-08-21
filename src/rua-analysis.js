@@ -19,6 +19,13 @@ function text(value) {
 	return String(value ?? '').trim();
 }
 
+function requiredMetadataText(value, field) {
+	if (typeof value !== 'string') throw new TypeError(`Invalid ${field}`);
+	const parsed = value.trim();
+	if (!parsed) throw new TypeError(`Invalid ${field}`);
+	return parsed;
+}
+
 function number(value, field) {
 	const input = String(value ?? '').trim();
 	if (!/^(?:0|[1-9][0-9]*)$/.test(input)) throw new TypeError(`Invalid ${field}`);
@@ -142,6 +149,7 @@ export function parseRuaXml(xml, dependencies, options = {}) {
 	const metadata = feedback.report_metadata || {};
 	const dateRange = metadata.date_range || {};
 	const publishedPolicy = feedback.policy_published || {};
+	const policyDomain = canonicalDomain(publishedPolicy.domain);
 	const xmlRecords = asArray(feedback.record);
 	if (xmlRecords.length > limits.maxRecords) throw new RangeError('RUA XML exceeds the record count limit');
 	if (xmlRecords.length !== inspectedRecordCount) throw new TypeError('RUA XML record structure is ambiguous');
@@ -174,6 +182,10 @@ export function parseRuaXml(xml, dependencies, options = {}) {
 			}
 		};
 	});
+	if (!policyDomain) throw new TypeError('Every RUA report requires a policy domain');
+	const organization = requiredMetadataText(metadata.org_name, 'report organization');
+	const email = requiredMetadataText(metadata.email, 'report email');
+	const reportId = requiredMetadataText(metadata.report_id, 'report ID');
 	const begin = number(dateRange.begin, 'report begin');
 	const end = number(dateRange.end, 'report end');
 	if (end < begin) throw new TypeError('RUA report end precedes report begin');
@@ -187,9 +199,9 @@ export function parseRuaXml(xml, dependencies, options = {}) {
 		},
 		standards: [currentFormat ? 'RFC 9990' : 'RFC 7489'],
 		reporter: {
-			organization: text(metadata.org_name) || null,
-			email: text(metadata.email) || null,
-			reportId: text(metadata.report_id) || null,
+			organization,
+			email,
+			reportId,
 			generator: text(metadata.generator) || null
 		},
 		timeRange: {
@@ -197,7 +209,7 @@ export function parseRuaXml(xml, dependencies, options = {}) {
 			end
 		},
 		policy: {
-			domain: canonicalDomain(publishedPolicy.domain) || null,
+			domain: policyDomain,
 			discoveryMethod: text(publishedPolicy.discovery_method).toLowerCase() || null,
 			adkim: text(publishedPolicy.adkim).toLowerCase() || 'r',
 			aspf: text(publishedPolicy.aspf).toLowerCase() || 'r',
@@ -206,8 +218,8 @@ export function parseRuaXml(xml, dependencies, options = {}) {
 			np: text(publishedPolicy.np).toLowerCase() || null,
 			testing: text(publishedPolicy.testing).toLowerCase() || null
 		},
-			records
-		};
+		records
+	};
 }
 
 function assertExpandedSize(bytes, compressedLength, limits) {
@@ -322,15 +334,7 @@ export function parseRuaInputs(inputs, dependencies, options = {}) {
 			if (totalExpandedBytes > maxTotalExpandedBytes) throw new RangeError('RUA inputs exceed the total expanded size limit');
 			const report = parseRuaXml(decoded.xml, dependencies, options);
 			const canonicalReport = JSON.stringify(report);
-			const reportId = report.reporter && report.reporter.reportId;
-			const identity = reportId ? JSON.stringify([
-				report.policy && report.policy.domain || null,
-				report.reporter.organization || null,
-				report.reporter.email || null,
-				reportId,
-				report.timeRange.begin,
-				report.timeRange.end
-			]) : canonicalReport;
+			const identity = JSON.stringify([report.policy.domain, report.reporter.reportId]);
 			if (reportIdentities.has(identity)) {
 				if (reportIdentities.get(identity) !== canonicalReport) throw new TypeError('Conflicting RUA reports reuse the same report identity');
 				continue;
@@ -349,7 +353,9 @@ export function assertRuaPolicyDomain(items, expectedDomain) {
 	if (!expected) throw new TypeError('A diagnosis policy domain is required to correlate RUA evidence');
 	const reports = asArray(items).map((item) => item && item.report ? item.report : item).filter(Boolean);
 	if (!reports.length) throw new TypeError('At least one RUA report is required');
-	const domains = [...new Set(reports.map((report) => canonicalDomain(report.policy && report.policy.domain)).filter(Boolean))];
+	const reportDomains = reports.map((report) => canonicalDomain(report.policy && report.policy.domain));
+	if (reportDomains.some((reportDomain) => !reportDomain)) throw new TypeError('Every RUA report requires a policy domain');
+	const domains = [...new Set(reportDomains)];
 	if (domains.length !== 1 || domains[0] !== expected) {
 		throw new TypeError(`RUA policy domain does not match the diagnosis policy domain (${expected})`);
 	}

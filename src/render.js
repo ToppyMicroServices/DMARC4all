@@ -15,6 +15,7 @@
  */
 
 import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js';
+import { isExplicitNoMailProfile } from './diagnostics.js';
 
 export function createRenderer(deps) {
 	const {
@@ -166,13 +167,15 @@ export function createRenderer(deps) {
 			? topSorted.map((item) => `- ${item.title}: ${item.action}`)
 			: [`- ${t('label.noneParen')}`];
 
+		const noInboundMail = results && results.mailProvider && results.mailProvider.id === 'noInboundMail';
+		const explicitlyNoMailProfile = isExplicitNoMailProfile(results);
 		const sections = [
 			{ name: 'DMARC', status: (results.dmarc && results.dmarc.record) ? statusText('configured') : statusText('missing') },
 			{ name: 'SPF', status: (results.spf && results.spf.records && results.spf.records.length) ? `TXT ${results.spf.records.length}` : statusText('missing') },
-			{ name: 'DKIM', status: (results.dkim && results.dkim.selectors && results.dkim.selectors.length) ? t('status.candidates').replace('{n}', String(results.dkim.selectors.length)) : statusText('unverified') },
-			{ name: 'BIMI', status: (results.bimi && results.bimi.record) ? statusText('configured') : statusText('optionalMissing') },
+			{ name: 'DKIM', status: explicitlyNoMailProfile ? t('mx.notApplicable') : (results.dkim && results.dkim.selectors && results.dkim.selectors.length) ? t('status.candidates').replace('{n}', String(results.dkim.selectors.length)) : statusText('unverified') },
+			{ name: 'BIMI', status: explicitlyNoMailProfile ? t('mx.notApplicable') : (results.bimi && results.bimi.record) ? statusText('configured') : statusText('optionalMissing') },
 			{ name: 'MX', status: (results.mx && results.mx.records && results.mx.records.length) ? `MX ${results.mx.records.length}` : statusText('none') },
-			{ name: 'MTA-STS / TLS-RPT', status: (results.mta_sts && results.mta_sts.record && results.mta_sts.tlsrpt) ? statusText('configured') : statusText('missing') }
+			{ name: 'MTA-STS / TLS-RPT', status: noInboundMail ? t('mx.notApplicable') : (results.mta_sts && results.mta_sts.record && results.mta_sts.tlsrpt) ? statusText('configured') : statusText('missing') }
 		];
 		const sectionLines = sections.map((section) => `- ${section.name}: ${section.status}`);
 
@@ -433,19 +436,19 @@ export function createRenderer(deps) {
 	}
 
 	function renderTrustPanel(results) {
-		const resolver = (results && results.meta && results.meta.resolver) ? results.meta.resolver : tr('不明', 'Unknown');
 		const evidenceCount = (results && results.meta && Array.isArray(results.meta.records)) ? results.meta.records.length : 0;
+		const enterpriseMode = !!(results && results.meta && results.meta.enterpriseMode);
 		return `
 			<section class="trust-panel">
 				<div class="mini-title m-0">${esc(tr('判定の前提', 'How to read this result'))}</div>
 				<div class="trust-grid mt-12">
 					<div class="card p-16 trust-card">
 						<div class="action-kicker">${esc(tr('診断範囲', 'Scope'))}</div>
-						<div class="trust-copy">${esc(tr('公開DNSだけを参照し、メール送受信やサーバー内部の設定には触れていません。', 'Only public DNS was checked. Mail flow and private server-side settings were not accessed.'))}</div>
+						<div class="trust-copy">${esc(t(enterpriseMode ? 'form.enterpriseNote' : 'form.note'))}</div>
 					</div>
 					<div class="card p-16 trust-card">
 						<div class="action-kicker">${esc(tr('第三者通信', 'Third-party requests'))}</div>
-						<div class="trust-copy">${esc(trf('DNS照会は {resolver} を通じて行いました。必要なら独自 DoH へ切り替えられます。', 'DNS lookups were sent via {resolver}. You can switch to your own DoH endpoint if needed.', { resolver }))}</div>
+						<div class="trust-copy">${esc(t(enterpriseMode ? 'form.enterprisePrivacy' : 'form.privacy'))}</div>
 					</div>
 					<div class="card p-16 trust-card">
 						<div class="action-kicker">${esc(tr('判定根拠', 'Evidence'))}</div>
@@ -459,6 +462,7 @@ export function createRenderer(deps) {
 	function renderProviderPlaybook(results) {
 		const provider = results && results.mailProvider ? results.mailProvider : null;
 		if (!provider) return '';
+		if (provider.id === 'invalidMx') return '';
 		let steps = [];
 		if (provider.id === 'm365') {
 			steps = [
@@ -472,6 +476,8 @@ export function createRenderer(deps) {
 				tr('SPF に include:_spf.google.com が入っているか確認', 'Confirm SPF includes include:_spf.google.com'),
 				tr('MX が Google Workspace 向けになっているかも併せて確認', 'Also confirm MX records point to Google Workspace')
 			];
+		} else if (provider.id === 'noInboundMail') {
+			steps = [t('mx.null.step1'), t('mx.null.step2'), t('mx.null.step3')];
 		} else {
 			steps = [
 				tr('使っている送信サービスごとに SPF include と DKIM selector を棚卸し', 'Inventory SPF includes and DKIM selectors for each sender you actually use'),
@@ -482,15 +488,18 @@ export function createRenderer(deps) {
 		const signals = Array.isArray(provider.signals) && provider.signals.length
 			? `<ul class="list mt-10">${provider.signals.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`
 			: '';
+		const providerName = provider.id === 'noInboundMail' ? t('mx.null.title') : provider.name;
+		const providerReason = provider.id === 'noInboundMail' ? t('mx.null.detail') : provider.reason;
+		const providerConfidence = t(`confidence.${String(provider.confidence || 'Low').toLowerCase()}`);
 		return `
 			<section class="card p-16 provider-card">
 				<div class="action-card-head">
 					<div>
 						<div class="action-kicker">${esc(tr('推定メール基盤', 'Estimated mail platform'))}</div>
-						<div class="mini-title m-0">${esc(provider.name)} <span class="status">${esc(provider.confidence)}</span></div>
+						<div class="mini-title m-0">${esc(providerName)} <span class="status">${esc(providerConfidence)}</span></div>
 					</div>
 				</div>
-				<p class="action-summary">${esc(provider.reason || '')}</p>
+				<p class="action-summary">${esc(providerReason || '')}</p>
 				<div class="action-detail">
 					<div class="action-detail-label">${esc(tr('まず見る場所', 'Where to start'))}</div>
 					<ul class="list mt-10">${steps.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
@@ -532,6 +541,7 @@ export function createRenderer(deps) {
 	}
 
 	function renderEnforcementReadiness(results) {
+		if (isExplicitNoMailProfile(results)) return '';
 		const readiness = localizeEnforcementReadiness(results);
 		const blockerHtml = readiness.blockers.length
 			? `<ul class="list mt-10">${readiness.blockers.map((item) => `<li>${esc(item)}</li>`).join('')}</ul>`
@@ -553,6 +563,7 @@ export function createRenderer(deps) {
 	}
 
 	function renderGuides(results) {
+		if (isExplicitNoMailProfile(results)) return '';
 		const dmarcRecord = results && results.dmarc ? results.dmarc.record : '';
 		const dmarcP = dmarcRecord ? ((/;\s*p=([^;]+)/i.exec(`; ${dmarcRecord}`) || [])[1] || '').toLowerCase() : '';
 		const dmarcStage = !dmarcRecord ? 0 : dmarcP === 'none' ? 1 : dmarcP === 'quarantine' ? 2 : 3;
@@ -601,6 +612,7 @@ export function createRenderer(deps) {
 	}
 
 	function renderResults(results) {
+		const explicitlyNoMailProfile = isExplicitNoMailProfile(results);
 		const err = (results.errors && results.errors.length)
 			? `<div class="finding med">
 					 <div><strong>${esc(t('label.note'))}</strong></div>
@@ -622,9 +634,9 @@ export function createRenderer(deps) {
 
 		const dnsHostBodyRaw = ((results.dnsHosting && results.dnsHosting.findings) ? results.dnsHosting.findings.join('') : '') + dnsHostLinks;
 		const registrarBodyRaw = ((results.registrar && results.registrar.findings) ? results.registrar.findings.join('') : '');
-		const dmarcBodyRaw = ((results.dmarc && results.dmarc.findings) ? results.dmarc.findings.join('') : '') + getDmarcRuaExampleHtml();
+		const dmarcBodyRaw = ((results.dmarc && results.dmarc.findings) ? results.dmarc.findings.join('') : '') + (explicitlyNoMailProfile ? '' : getDmarcRuaExampleHtml());
 		const spfBodyRaw = ((results.spf && results.spf.findings) ? results.spf.findings.join('') : '');
-		const dkimCnameNote = (results.dkim && results.dkim.usesCname)
+		const dkimCnameNote = (!explicitlyNoMailProfile && results.dkim && results.dkim.usesCname)
 			? `<div class="tiny muted">${esc(t('dkim.cnameDelegationOtherToolsNote'))}</div>`
 			: '';
 		const dkimBodyRaw = (((results.dkim && results.dkim.findings) ? results.dkim.findings.join('') : '') + dkimCnameNote);
@@ -665,10 +677,15 @@ export function createRenderer(deps) {
 		const dnsHostStatus = (results.dnsHosting && results.dnsHosting.provider)
 			? `${t('status.estimated')}: ${results.dnsHosting.provider}`
 			: t('status.unknown');
-		const registrarStatus = (results.registrar && (results.registrar.registrar || (results.registrar.nameservers && results.registrar.nameservers.length)))
+		const externalProbesEnabled = !!(results.meta && results.meta.externalProbes);
+		const registrarStatus = !externalProbesEnabled
+			? statusText('disabled')
+			: (results.registrar && (results.registrar.registrar || (results.registrar.nameservers && results.registrar.nameservers.length)))
 			? t('status.ok')
 			: t('status.unavailableUnknown');
-		const mtaStatus = (results.mta_sts && results.mta_sts.record && results.mta_sts.tlsrpt)
+		const mtaStatus = results.mailProvider && results.mailProvider.id === 'noInboundMail'
+			? t('mx.notApplicable')
+			: (results.mta_sts && results.mta_sts.record && results.mta_sts.tlsrpt)
 			? statusText('configured')
 			: (results.mta_sts && results.mta_sts.record)
 				? statusText('partial')
@@ -755,19 +772,21 @@ export function createRenderer(deps) {
 				${mkSection('SPF', (results.spf && results.spf.records && results.spf.records.length) ? `TXT ${results.spf.records.length}` : statusText('missing'), spfBody)}
 				${mkSection(
 					'DKIM',
-					(results.dkim && Array.isArray(results.dkim.selectors) && results.dkim.selectors.length)
+					explicitlyNoMailProfile
+						? t('mx.notApplicable')
+						: (results.dkim && Array.isArray(results.dkim.selectors) && results.dkim.selectors.length)
 						? t('status.candidates').replace('{n}', String(results.dkim.selectors.length))
 						: statusText('unverified'),
 					dkimBody
 				)}
-				${mkSection('BIMI', (results.bimi && results.bimi.record) ? statusText('configured') : statusText('optionalMissing'), bimiBody)}
+				${mkSection('BIMI', explicitlyNoMailProfile ? t('mx.notApplicable') : (results.bimi && results.bimi.record) ? statusText('configured') : statusText('optionalMissing'), bimiBody)}
 				${mkSection('MX', (results.mx && results.mx.records && results.mx.records.length) ? `MX ${results.mx.records.length}` : statusText('none'), mxBody)}
 				${mkSection('MTA-STS / TLS-RPT', mtaStatus, mtaBody)}
 				${mkSection(t('section.dnsHosting'), dnsHostStatus, dnsHostBody)}
 				${mkSection(t('section.registrar'), registrarStatus, registrarBody)}
 				${mkSection('CAA', (results.caa && results.caa.records && results.caa.records.length) ? statusText('configured') : statusText('optionalNone'), caaBody)}
 				${mkSection('DNSSEC', (results.dnssec && results.dnssec.ds && results.dnssec.ds.length) ? statusText('likelyEnabled') : statusText('optionalMissing'), dnssecBody)}
-				${mkSection(t('section.httpsReference'), statusText('lightcheck'), webBody)}
+				${mkSection(t('section.httpsReference'), externalProbesEnabled ? statusText('lightcheck') : statusText('disabled'), webBody)}
 				${mkSection(t('section.subdomainOptional'), (results.subdomains && results.subdomains.enabled) ? statusText('enabled') : statusText('disabled'), subBody)}
 			</div>
 			<p class="footnote">${esc(t('report.publicDnsOnlyFootnote'))}</p>

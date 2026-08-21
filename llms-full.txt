@@ -6,8 +6,8 @@ Canonical site: https://dmarc4all.toppymicros.com/
 Source: https://github.com/ToppyMicroServices/DMARC4all
 License: Apache-2.0
 Portable report format: dmarc4all-diagnosis
-Portable report schema version: 1.0.0
-Schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json
+Portable report schema version: 1.3.0
+Schema: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json
 Example: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
 
 ## What the diagnosis checks
@@ -16,7 +16,7 @@ Example: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.jso
 - SPF TXT records, risky +all use, multiple-record conditions, and a bounded expansion view.
 - Common DKIM selector candidates and CNAME delegation signals. This is not exhaustive selector discovery.
 - BIMI, MX, MTA-STS, TLS-RPT, CAA, and DNSSEC public records.
-- Optional lightweight HTTPS and small-scale subdomain checks.
+- Explicitly opted-in public RDAP and lightweight HTTPS reference checks, plus optional small-scale subdomain checks.
 - Best-effort DNS hosting and mail-platform signals.
 
 ## What the diagnosis does not establish
@@ -30,20 +30,22 @@ Example: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.jso
 
 ## Privacy and network behavior
 
-The domain entered by the user is sent to the selected DNS-over-HTTPS resolver. The public build defaults to Cloudflare and can also use another listed resolver or a custom HTTPS DoH endpoint. The public build may query rdap.org, the checked domain for lightweight HTTPS reachability, and an HTTPS BIMI logo URL. DMARC4all has no application backend for browser diagnostics and does not collect submitted domains itself, but third-party endpoints may process or log requests under their own policies.
+By default, the domain entered by the user is sent only to the selected DNS-over-HTTPS resolver. The public build defaults to Cloudflare and can also use another listed resolver or a custom HTTPS DoH endpoint. A separate, unchecked option can enable public RDAP/HTTPS reference checks; when enabled, the browser may contact rdap.org and the registry RDAP service to which it redirects, the checked domain and its www / mta-sts hosts, and HTTPS BIMI l= / a= URLs. Automatic checked-domain and BIMI retrieval rejects local, loopback, link-local, and private-network URL literals and does not follow redirects. The fixed rdap.org bootstrap request can follow its registry-RDAP redirect so that the lookup can complete. The enterprise/offline entry point does not offer these external checks and limits diagnosis traffic to the selected DoH endpoint. DMARC4all has no application backend for browser diagnostics and does not collect submitted domains itself, but contacted third-party endpoints may process or log requests under their own policies.
 
 ## Enforcement readiness
 
-The machine-readable status is one of:
+The primary machine-readable readiness field is summary.enforcementReadiness.decision. Its values are:
 
-- monitoring_only: prerequisites visible in public DNS are incomplete or the DMARC policy is not ready to advance.
-- ready_for_quarantine: p=none is present, aggregate reporting is configured, SPF is represented by one usable record without +all, and at least one DKIM selector was confirmed.
-- ready_for_reject: p=quarantine is present and the same public-DNS prerequisites are met.
-- reject_enforced: p=reject is present and the same public-DNS prerequisites are met.
+- READY: the configured product gates have no blockers, insufficient-evidence conditions, or warnings.
+- CONDITIONALLY_READY: evidence volume and observation window meet the configured gates, but one or more warnings still require review.
+- NOT_READY: one or more blockers are present.
+- INSUFFICIENT_EVIDENCE: no blocker was found, but the required RUA message volume or observation window was not supplied.
 
-These states are deliberately conservative summaries of public DNS. Even ready_for_quarantine and ready_for_reject require confirmation from DMARC aggregate reports and representative real-message headers before a policy change.
+The lower-case summary.enforcementReadiness.status values monitoring_only, ready_for_quarantine, ready_for_reject, and reject_enforced are retained only as a compatibility summary of DNS posture. They are not the readiness decision and must not drive a DNS or policy change. The primary decision is also a product heuristic, not deployment authorization; read its reasons and evidence and require representative message headers, recent aggregate reports, sender inventory, change review, and human approval.
 
-Blocker codes:
+Read summary.enforcementReadinessApplicable before interpreting that decision. It is false for an explicit no-mail profile (sole Null MX, SPF -all, effective DMARC reject, and no confirmed DKIM path), where sender-enforcement rollout guidance is not applicable. summary.mailProfile identifies no_mail, mail_capable, null_mx_conflict, or unknown.
+
+Legacy DNS-posture blocker codes retained with the compatibility status (do not substitute them for the primary decision reasons):
 
 - dmarc_record_missing
 - dmarc_policy_invalid
@@ -56,8 +58,8 @@ Blocker codes:
 The browser's Export JSON action produces a versioned object that excludes HTML rendering fragments. Stable top-level fields are:
 
 - $schema, format, schemaVersion, generatedAt, domain, locale
-- scope: public-DNS basis, resolver, and limitation codes
-- summary: scores, enforcementReadiness, and estimated mail provider
+- scope: public-DNS basis, resolver, external-reference opt-in provenance, and limitation codes
+- summary: scores, enforcementReadiness, its applicability, mail profile, and estimated mail provider
 - observations: DMARC, SPF, DKIM, BIMI, MX, MTA-STS/TLS-RPT, CAA, DNSSEC, and optional subdomain results
 - priorities: human-readable prioritized actions in the selected UI language
 - remediation: suggested record changes, verification steps, and rollback text in the selected UI language
@@ -70,8 +72,8 @@ Consumers should validate the declared schema version, reject unknown versions, 
 
 1. Ask the operator to confirm that they manage the domain or have permission to test it.
 2. Run the browser diagnosis or ask the operator for an exported JSON report.
-3. Read scope.limitations and errors before interpreting scores.
-4. Use summary.enforcementReadiness as a triage signal, not a deployment authorization.
+3. Read scope.externalReferenceChecks, scope.limitations, and errors before interpreting scores.
+4. Check summary.enforcementReadinessApplicable, then use summary.enforcementReadiness.decision as the primary triage signal only when applicable. Read its reasons and evidence, and do not treat it as deployment authorization. Do not drive changes from the legacy lower-case status.
 5. Compare remediation currentValue and suggestedValue.
 6. Confirm all legitimate senders, current DNS values, provider-specific requirements, real-message alignment, and recent aggregate reports.
 7. Present a staged change with verification and rollback.
@@ -81,7 +83,7 @@ Consumers should validate the declared schema version, reject unknown versions, 
 
 Suggested factual citation:
 
-DMARC4all, ToppyMicroServices, "DMARC4all public-DNS email authentication diagnostic," https://dmarc4all.toppymicros.com/ (accessed YYYY-MM-DD).
+DMARC4all, ToppyMicroServices, "DMARC4all email authentication diagnostic," https://dmarc4all.toppymicros.com/ (accessed YYYY-MM-DD).
 
 When citing a diagnosis, include the checked domain only if disclosure is appropriate, plus generatedAt, resolver, schemaVersion, and the relevant evidence. Do not describe DMARC4all output as a certification.
 

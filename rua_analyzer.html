@@ -5,8 +5,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d1b2a">
-  <title>RUA Analyzer | DMARC4all</title>
+  <title data-tool-i18n="page.documentTitle">RUA Analyzer | DMARC4all</title>
   <meta name="description" content="Browser-local RFC 9990 DMARC aggregate report analyzer for XML, gzip, and ZIP files.">
+  <link rel="canonical" href="https://dmarc4all.toppymicros.com/rua_analyzer.html">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
@@ -21,33 +22,50 @@
         <img src="apple-touch-icon.png" alt="ToppyMicroServices">
         <span class="brand-name">ToppyMicroServices</span>
       </a>
-      <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language" data-tool-i18n-aria-label="lang.label">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語" aria-pressed="false">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English" aria-pressed="false">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español" aria-pressed="false">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch" aria-pressed="false">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어" aria-pressed="false">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt" aria-pressed="false">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย" aria-pressed="false">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ" aria-pressed="false">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ" aria-pressed="false">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia" aria-pressed="false">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti" aria-pressed="false">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文" aria-pressed="false">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский" aria-pressed="false">RU</button>
+        </nav>
+        <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      </div>
     </div>
 
     <main class="rua-analyzer-shell">
       <header class="rua-analyzer-heading">
-        <p class="pill">Browser-local</p>
-        <h1>RUA Analyzer</h1>
-        <p>Load RFC 9990 aggregate reports in XML, gzip, or ZIP form. Files remain in this browser.</p>
+        <p class="pill" data-tool-i18n="page.pill">Browser-local</p>
+        <h1 data-tool-i18n="page.title">RUA Analyzer</h1>
+        <p data-tool-i18n="page.intro">Load RFC 9990 aggregate reports in XML, gzip, or ZIP form. Files remain in this browser.</p>
       </header>
 
-      <section class="rua-analyzer-workspace" aria-label="RUA aggregate report analyzer">
+      <section class="rua-analyzer-workspace" aria-label="RUA aggregate report analyzer" data-tool-i18n-aria-label="page.workspaceAria">
         <form id="rua-analysis-form" class="rua-analysis-input">
-          <label class="file-control" for="rua-analysis-files">Select RUA files<input id="rua-analysis-files" type="file" accept=".xml,.gz,.gzip,.zip,text/xml,application/xml,application/gzip,application/zip" multiple></label>
-          <p id="rua-analysis-file-name" class="tiny muted" aria-live="polite">No files selected.</p>
-          <label class="file-control" for="rua-diagnosis-file">Optional DNS diagnosis JSON<input id="rua-diagnosis-file" type="file" accept=".json,application/json"></label>
-          <p id="rua-diagnosis-file-name" class="tiny muted" aria-live="polite">No diagnosis selected.</p>
-		  <button type="submit" class="btn-gradient">Analyze reports</button>
-		  <button type="button" id="rua-analysis-export" class="btn-secondary" disabled>Download graph JSON</button>
-          <p class="tiny muted m-0">Inputs are limited to 10 MiB compressed and 50 MiB expanded in total. DTDs, entities, deep XML, unsafe archive paths, oversized expansion, and excessive records are rejected. Add a DMARC4all diagnosis export to assess reject-policy readiness against the report evidence.</p>
+          <label class="file-control" for="rua-analysis-files"><span data-tool-i18n="page.selectFiles">Select RUA files</span><input id="rua-analysis-files" type="file" accept=".xml,.gz,.gzip,.zip,text/xml,application/xml,application/gzip,application/zip" multiple></label>
+          <p id="rua-analysis-file-name" class="tiny muted" aria-live="polite" data-tool-i18n="page.noFiles">No files selected.</p>
+          <label class="file-control" for="rua-diagnosis-file"><span data-tool-i18n="page.selectDiagnosis">Optional DNS diagnosis JSON</span><input id="rua-diagnosis-file" type="file" accept=".json,application/json"></label>
+          <p id="rua-diagnosis-file-name" class="tiny muted" aria-live="polite" data-tool-i18n="page.noDiagnosis">No diagnosis selected.</p>
+		  <button type="submit" id="rua-analysis-submit" class="btn-gradient" data-tool-i18n="page.analyze">Analyze reports</button>
+		  <button type="button" id="rua-analysis-export" class="btn-secondary" disabled data-tool-i18n="page.export">Download graph JSON</button>
+          <p class="tiny muted m-0" data-tool-i18n="page.hint">Inputs are limited to 10 MiB compressed and 50 MiB expanded in total. DTDs, entities, deep XML, unsafe archive paths, oversized expansion, and excessive records are rejected. Add a DMARC4all diagnosis export to assess reject-policy readiness against the report evidence.</p>
         </form>
 
-        <section id="rua-analysis-result" class="rua-analysis-result" aria-live="polite" aria-label="RUA analysis result">
-          <p class="muted">Waiting for aggregate reports.</p>
+        <section id="rua-analysis-result" class="rua-analysis-result" aria-live="polite" aria-label="RUA analysis result" data-tool-i18n-aria-label="page.resultAria">
+          <p class="muted" data-tool-i18n="page.waiting">Waiting for aggregate reports.</p>
         </section>
       </section>
 
-      <p class="tiny muted rua-analyzer-back"><a href="index.html">Back to DNS diagnosis</a> / <a href="rua_service.html">RUA service overview</a></p>
+      <p class="tiny muted rua-analyzer-back"><a href="index.html" data-tool-i18n="page.back">Back to DNS diagnosis</a> / <a href="rua_service.html" data-tool-i18n="page.service">RUA service overview</a></p>
     </main>
   </div>
 </body>

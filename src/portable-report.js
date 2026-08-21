@@ -18,10 +18,12 @@ import {
 	analyzeDomain,
 	assessEnforcementReadiness as assessCoreEnforcementReadiness
 } from './authentication-core.js';
+import { classifyMailProfile } from './diagnostics.js';
+import { sanitizePublicHttpsUrl } from './safe-html.js';
 
 export const PORTABLE_REPORT_FORMAT = 'dmarc4all-diagnosis';
-export const PORTABLE_REPORT_SCHEMA_VERSION = '1.2.0';
-export const PORTABLE_REPORT_SCHEMA_URL = 'https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json';
+export const PORTABLE_REPORT_SCHEMA_VERSION = '1.3.0';
+export const PORTABLE_REPORT_SCHEMA_URL = 'https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json';
 
 function arrayOfStrings(value) {
 	return Array.isArray(value) ? value.map((item) => String(item || '')).filter(Boolean) : [];
@@ -142,6 +144,19 @@ export function buildPortableReport(results, options = {}) {
 	const mailProvider = source.mailProvider || {};
 	const score = source.score || {};
 	const authentication = cleanAuthentication(source, meta);
+	const externalReferencesEnabled = meta.externalProbes === true;
+	const attemptedCheckedDomainReference = externalReferencesEnabled
+		&& Boolean(sanitizePublicHttpsUrl(`https://${String(source.domain || '')}/`));
+	const attemptedBimiReference = externalReferencesEnabled && [source.bimi && source.bimi.l, source.bimi && source.bimi.a]
+		.some((url) => Boolean(sanitizePublicHttpsUrl(url)));
+	const attemptedSources = externalReferencesEnabled
+		? [
+			'rdap_bootstrap_with_registry_redirect',
+			...(attemptedCheckedDomainReference ? ['checked_domain_https'] : []),
+			...(attemptedBimiReference ? ['published_bimi_https'] : [])
+		]
+		: [];
+	const mailProfile = classifyMailProfile(source);
 
 	return {
 		$schema: PORTABLE_REPORT_SCHEMA_URL,
@@ -151,8 +166,12 @@ export function buildPortableReport(results, options = {}) {
 		domain: String(source.domain || ''),
 		locale: String(options.locale || meta.locale || 'und'),
 		scope: {
-			basis: 'public_dns',
+			basis: externalReferencesEnabled ? 'public_dns_with_external_references' : 'public_dns',
 			resolver: String(meta.resolver || ''),
+			externalReferenceChecks: {
+				enabled: externalReferencesEnabled,
+				attemptedSources
+			},
 			limitations: [
 				'no_email_sent_or_received',
 				'no_mailbox_or_server_access',
@@ -166,6 +185,8 @@ export function buildPortableReport(results, options = {}) {
 				spf: Number.isFinite(score.spf) ? score.spf : null
 			},
 			enforcementReadiness: assessEnforcementReadiness(source),
+			enforcementReadinessApplicable: mailProfile !== 'no_mail',
+			mailProfile,
 			mailProvider: {
 				id: String(mailProvider.id || 'generic'),
 				name: String(mailProvider.name || ''),

@@ -26,6 +26,7 @@ const {
 	report,
 	goDeepBtn,
 	subdomainScan,
+	externalProbes,
 	dnsblCheck,
 	consentCheckbox,
 	langSelect,
@@ -240,6 +241,7 @@ function applyI18n() {
 		langChoiceButtons.forEach((button) => {
 			const value = button.getAttribute('data-lang-choice');
 			button.classList.toggle('active', value === lang);
+			button.setAttribute('aria-pressed', value === lang ? 'true' : 'false');
 		});
 		const activeButton = langChoiceButtons.find((button) => button.classList.contains('active'));
 		const switcher = activeButton?.closest('.lang-switch');
@@ -268,6 +270,7 @@ function applyI18n() {
 		el.setAttribute('aria-label', t(key));
 	});
 	updateSeo(lang);
+	updateInternalLinks(lang);
 	updateDiagnosisButtonState();
 	updateResolverUi();
 }
@@ -320,6 +323,11 @@ function initI18n() {
 		saved = '';
 	}
 	setLangValue(initialLang(saved) || detectLang());
+	try {
+		localStorage.setItem(LANG_STORAGE_KEY, getLang());
+	} catch {
+		// ignore storage failures
+	}
 	if (langSelect) {
 		langSelect.value = getLang();
 		langSelect.addEventListener('change', (event) => setLang(event.target.value));
@@ -361,6 +369,23 @@ function updateLangUrl(lang) {
 	} catch {
 		// ignore URL update failures
 	}
+}
+
+function updateInternalLinks(lang) {
+	document.querySelectorAll('a[href]').forEach((anchor) => {
+		const raw = anchor.dataset.baseHref || anchor.getAttribute('href') || '';
+		if (!anchor.dataset.baseHref) anchor.dataset.baseHref = raw;
+		if (!raw || raw.startsWith('#')) return;
+		try {
+			const url = new URL(raw, window.location.href);
+			if (url.origin !== window.location.origin || !/\.html$/i.test(url.pathname)) return;
+			url.searchParams.set('lang', lang);
+			const page = url.pathname.split('/').pop();
+			anchor.setAttribute('href', `${page}${url.search}${url.hash}`);
+		} catch {
+			// ignore malformed links
+		}
+	});
 }
 
 function upsertMeta(selector, attributes) {
@@ -438,7 +463,8 @@ function updateSeo(lang) {
 		},
 		featureList: [
 			'DMARC, SPF, DKIM, BIMI, DNSSEC, MTA-STS, and TLS-RPT checks',
-			'Browser-only public DNS diagnostics',
+			'Browser-only public DNS diagnostics by default',
+			'Optional opt-in public RDAP and HTTPS reference checks',
 			'Copy-ready DNS remediation guidance'
 		]
 	}, null, 2);
@@ -496,6 +522,7 @@ async function handleSubmit(event, deepFlag) {
 	try {
 		const options = {
 			subdomainScan: !!(subdomainScan && subdomainScan.checked),
+			externalProbes: !!(externalProbes && externalProbes.checked),
 			goDeep: !!deepFlag
 		};
 		lastDiagnosisRun = { domain, options, deepFlag: !!deepFlag, results: null };

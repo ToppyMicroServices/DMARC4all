@@ -99,12 +99,12 @@
         <article class="card p-16 guide-card">
           <div class="action-kicker" data-doc-i18n="interpret.kicker">Interpret</div>
           <h2 data-doc-i18n="interpret.title">Versioned JSON contract</h2>
-          <p data-doc-i18n-html="interpret.body">The diagnosis page exports <span class="mono mono-inline">dmarc4all-diagnosis</span> JSON. Version <span class="mono mono-inline">1.0.0</span> excludes rendering HTML and separates summary, observations, remediation, evidence, limitations, and errors.</p>
+          <p data-doc-i18n-html="interpret.body">The diagnosis page exports <span class="mono mono-inline">dmarc4all-diagnosis</span> JSON. Version <span class="mono mono-inline">1.3.0</span> excludes rendering HTML and separates summary, observations, remediation, evidence, limitations, and errors.</p>
         </article>
         <article class="card p-16 guide-card">
           <div class="action-kicker" data-doc-i18n="validate.kicker">Validate</div>
           <h2 data-doc-i18n="validate.title">Schema and example</h2>
-          <p data-doc-i18n-html="validate.body">Use the <a href="schemas/diagnosis-result-1.2.0.schema.json">versioned JSON Schema 2020-12 document</a> to validate current exports and the <a href="examples/diagnosis-result.example.json">example report</a> to test consumers.</p>
+          <p data-doc-i18n-html="validate.body">Use the <a href="schemas/diagnosis-result-1.3.0.schema.json">versioned JSON Schema 2020-12 document</a> to validate current exports and the <a href="examples/diagnosis-result.example.json">example report</a> to test consumers.</p>
         </article>
         <article class="card p-16 guide-card">
           <div class="action-kicker" data-doc-i18n="boundary.kicker">Current boundary</div>
@@ -117,8 +117,8 @@
         <h2 data-doc-i18n="safe.title">Safe automation contract</h2>
         <ol class="list">
           <li data-doc-i18n="safe.li1">Confirm that the operator manages the domain or has explicit permission to test it.</li>
-          <li data-doc-i18n-html="safe.li2">Read <span class="mono mono-inline">scope.limitations</span> and <span class="mono mono-inline">errors</span> before interpreting the score.</li>
-          <li data-doc-i18n-html="safe.li3">Treat <span class="mono mono-inline">enforcementReadiness</span> as triage, not approval to change DNS.</li>
+          <li data-doc-i18n-html="safe.li2">Read <span class="mono mono-inline">scope.externalReferenceChecks</span>, <span class="mono mono-inline">scope.limitations</span>, and <span class="mono mono-inline">errors</span> before interpreting the score.</li>
+          <li data-doc-i18n-html="safe.li3">Check <span class="mono mono-inline">summary.enforcementReadinessApplicable</span> first. When it is true, use <span class="mono mono-inline">summary.enforcementReadiness.decision</span> as the primary readiness decision; it is triage, not approval to change DNS. When false, readiness is not applicable.</li>
           <li data-doc-i18n="safe.li4">Compare current and suggested values, then confirm the authorized sender inventory and provider requirements.</li>
           <li data-doc-i18n="safe.li5">Verify representative message headers and recent DMARC aggregate reports before moving to quarantine or reject.</li>
           <li data-doc-i18n="safe.li6">Require human approval and a rollback plan before applying any DNS change.</li>

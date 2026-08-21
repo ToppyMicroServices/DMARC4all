@@ -19,6 +19,7 @@ export const dom = {
 	report: document.getElementById('report'),
 	goDeepBtn: document.getElementById('go-deep-btn'),
 	subdomainScan: document.getElementById('subdomain-scan'),
+	externalProbes: document.getElementById('external-probes'),
 	dnsblCheck: document.getElementById('dnsbl-check'),
 	consentCheckbox: document.getElementById('consent'),
 	langSelect: document.getElementById('lang-select'),

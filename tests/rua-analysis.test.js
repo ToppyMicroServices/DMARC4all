@@ -23,6 +23,10 @@ const reportXml = `<?xml version="1.0" encoding="UTF-8"?>
   <record><row><source_ip>198.51.100.20</source_ip><count>3</count><policy_evaluated><disposition>quarantine</disposition><dkim>fail</dkim><spf>fail</spf></policy_evaluated></row><identifiers><header_from>example.com</header_from></identifiers><auth_results><dkim><domain>bad.example.net</domain><result>fail</result></dkim></auth_results></record>
 </feedback>`;
 
+const legacyReportXml = reportXml
+	.replace(' xmlns="urn:ietf:params:xml:ns:dmarc-2.0"', '')
+	.replace('  <version>1.0</version>\n', '');
+
 test('parseRuaXml creates a canonical RFC 9990 report model', () => {
 	const report = parseRuaXml(reportXml, dependencies);
 
@@ -34,6 +38,43 @@ test('parseRuaXml creates a canonical RFC 9990 report model', () => {
 	assert.equal(report.records.length, 2);
 	assert.deepEqual(report.records[0].dkim.results, [{ domain: 'example.com', selector: 's1', result: 'pass' }]);
 	assert.equal(report.records[1].spf.evaluated, 'fail');
+});
+
+test('parseRuaXml requires complete scalar report metadata for current and legacy reports', () => {
+	for (const xml of [reportXml, legacyReportXml]) {
+		assert.throws(
+			() => parseRuaXml(xml.replace('<org_name>Example Receiver</org_name>', ''), dependencies),
+			/Invalid report organization/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<email>dmarc@example.net</email>', '<email> </email>'), dependencies),
+			/Invalid report email/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<report_id>report-1</report_id>', ''), dependencies),
+			/Invalid report ID/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<report_id>report-1</report_id>', '<report_id><value>report-1</value></report_id>'), dependencies),
+			/Invalid report ID/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<begin>1711843200</begin>', ''), dependencies),
+			/Invalid report begin/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<end>1711929600</end>', '<end> </end>'), dependencies),
+			/Invalid report end/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<begin>1711843200</begin>', '<begin>not-a-time</begin>'), dependencies),
+			/Invalid report begin/
+		);
+		assert.throws(
+			() => parseRuaXml(xml.replace('<date_range><begin>1711843200</begin><end>1711929600</end></date_range>', ''), dependencies),
+			/Invalid report begin/
+		);
+	}
 });
 
 test('decodeRuaInput accepts raw XML, gzip, and ZIP with bounded expansion', () => {
@@ -104,6 +145,10 @@ test('parseRuaXml rejects DTDs and archive resource limits', () => {
 	assert.throws(() => parseRuaXml('<!DOCTYPE feedback><feedback/>', dependencies), /DTD/);
 	assert.throws(() => parseRuaXml('<feedback><record/></feedback>', dependencies), /Invalid record count/);
 	assert.throws(
+		() => parseRuaXml(reportXml.replace('<domain>example.com</domain>', ''), dependencies),
+		/Every RUA report requires a policy domain/
+	);
+	assert.throws(
 		() => decodeRuaInput({ name: 'daily.xml', bytes: strToU8(reportXml) }, dependencies, { maxInputBytes: 8 }),
 		/compressed size limit/
 	);
@@ -130,11 +175,41 @@ test('RUA correlation binds policy domains and rejects conflicting report identi
 	const reports = parseRuaInputs([{ name: 'a.xml', bytes: strToU8(reportXml) }], dependencies);
 	assert.equal(assertRuaPolicyDomain(reports, 'Example.COM.'), 'example.com');
 	assert.throws(() => assertRuaPolicyDomain(reports, 'other.example'), /does not match/);
-	const conflicting = reportXml.replace('<count>12</count>', '<count>13</count>');
+	const report = reports[0].report;
 	assert.throws(
-		() => parseRuaInputs([{ name: 'a.xml', bytes: strToU8(reportXml) }, { name: 'b.xml', bytes: strToU8(conflicting) }], dependencies),
-		/Conflicting RUA reports/
+		() => assertRuaPolicyDomain([reports[0], { report: { ...report, policy: { ...report.policy, domain: '' } } }], 'example.com'),
+		/Every RUA report requires a policy domain/
 	);
+	assert.throws(
+		() => assertRuaPolicyDomain([reports[0], { report: { ...report, policy: { ...report.policy, domain: 'other.example' } } }], 'example.com'),
+		/does not match/
+	);
+	const conflictingVariants = [
+		reportXml.replace('Example Receiver', 'Other Receiver'),
+		reportXml.replace('dmarc@example.net', 'other@example.net'),
+		reportXml.replace('<end>1711929600</end>', '<end>1712016000</end>'),
+		reportXml.replace('<count>12</count>', '<count>13</count>'),
+		reportXml.replace('Example Receiver', 'Other Receiver').replace('<count>12</count>', '<count>60</count>')
+	];
+	for (const conflicting of conflictingVariants) {
+		assert.throws(
+			() => parseRuaInputs([{ name: 'a.xml', bytes: strToU8(reportXml) }, { name: 'b.xml', bytes: strToU8(conflicting) }], dependencies),
+			/Conflicting RUA reports/
+		);
+	}
+	const normalizedDuplicate = reportXml
+		.replace('<report_id>report-1</report_id>', '<report_id> report-1 </report_id>')
+		.replace('<policy_published><domain>example.com</domain>', '<policy_published><domain>Example.COM.</domain>');
+	assert.equal(parseRuaInputs([
+		{ name: 'a.xml', bytes: strToU8(reportXml) },
+		{ name: 'normalized.xml', bytes: strToU8(normalizedDuplicate) }
+	], dependencies).length, 1);
+	const distinctReports = parseRuaInputs([
+		{ name: 'a.xml', bytes: strToU8(reportXml) },
+		{ name: 'b.xml', bytes: strToU8(reportXml.replace('<report_id>report-1</report_id>', '<report_id>report-2</report_id>')) }
+	], dependencies);
+	assert.equal(distinctReports.length, 2);
+	assert.equal(summarizeRuaReports(distinctReports).totalMessages, 30);
 	const alignedSixty = reportXml
 		.replace('<count>12</count>', '<count>60</count>')
 		.replace('<end>1711929600</end>', '<end>1712361600</end>')
@@ -176,7 +251,7 @@ test('RUA parsing enforces cumulative archive file and pre-materialization recor
 });
 
 test('parseRuaXml labels old aggregate-report input as compatibility evidence', () => {
-	const legacy = parseRuaXml(reportXml.replace(' xmlns="urn:ietf:params:xml:ns:dmarc-2.0"', '').replace('  <version>1.0</version>\n', ''), dependencies);
+	const legacy = parseRuaXml(legacyReportXml, dependencies);
 	assert.equal(legacy.format.type, 'legacy-rfc7489');
 	assert.deepEqual(legacy.standards, ['RFC 7489']);
 });

@@ -87,7 +87,7 @@ function createTranslator() {
 function createRunner(overrides = {}) {
 	const { t, tr, trf } = createTranslator();
 	return createDiagnosisRunner({
-		ENTERPRISE_MODE: true,
+		ENTERPRISE_MODE: overrides.enterpriseMode ?? true,
 		DKIM_SELECTOR_CANDIDATES: ['selector1', 'selector2', 'google'],
 		detailJaOr: (_ja, fallback) => fallback,
 		dohQuery: overrides.dohQuery,
@@ -103,9 +103,9 @@ function createRunner(overrides = {}) {
 	});
 }
 
-async function withMockFetch(fn) {
+async function withMockFetch(fn, fetchImpl = async () => ({ ok: true })) {
 	const originalFetch = globalThis.fetch;
-	globalThis.fetch = async () => ({ ok: true });
+	globalThis.fetch = fetchImpl;
 	try {
 		return await fn();
 	} finally {
@@ -278,6 +278,130 @@ test('createDiagnosisRunner does not confirm a revoked DKIM key', async () => {
 	assert.ok(results.priority.some((item) => item.title === 'DKIM unverified/missing'));
 	assert.ok(results.fixups.some((item) => item.title === 'Enable DKIM in your sender'));
 	assert.match(results.dkim.findings.join(''), /Unusable DKIM key record detected/);
+});
+
+test('public diagnosis makes no non-DNS requests unless external probes are enabled', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=none')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['example.com|MX', mxAnswer('10 mail.example.net.')]
+	]);
+	const calls = [];
+	const runner = createRunner({
+		enterpriseMode: false,
+		dohQuery: async (name, type) => answers.get(`${name}|${type}`) || {}
+	});
+	const fetchImpl = async (url) => {
+		calls.push(String(url));
+		return {
+			ok: true,
+			status: 200,
+			headers: { get: () => null },
+			json: async () => ({ entities: [], nameservers: [] }),
+			text: async () => ''
+		};
+	};
+
+	const defaultResults = await withMockFetch(() => runner('example.com'), fetchImpl);
+	assert.deepEqual(calls, []);
+	assert.equal(defaultResults.meta.externalProbes, false);
+
+	const optedInResults = await withMockFetch(() => runner('example.com', { externalProbes: true }), fetchImpl);
+	assert.equal(optedInResults.meta.externalProbes, true);
+	assert.ok(calls.some((url) => url === 'https://rdap.org/domain/example.com'));
+	assert.ok(calls.some((url) => url === 'https://example.com/'));
+	assert.ok(calls.some((url) => url === 'https://www.example.com/'));
+	assert.ok(calls.some((url) => url === 'https://mta-sts.example.com/'));
+});
+
+test('enterprise diagnosis never follows BIMI or HTTPS probe URLs', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=none')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['default._bimi.example.com|TXT', txtAnswer('v=BIMI1; l=https://assets.example.net/logo.svg; a=https://assets.example.net/vmc.pem')],
+		['example.com|MX', mxAnswer('10 mail.example.net.')]
+	]);
+	const calls = [];
+	const runner = createRunner({
+		enterpriseMode: true,
+		dohQuery: async (name, type) => answers.get(`${name}|${type}`) || {}
+	});
+
+	await withMockFetch(
+		() => runner('example.com', { externalProbes: true }),
+		async (url) => {
+			calls.push(String(url));
+			throw new Error('unexpected external request');
+		}
+	);
+
+	assert.deepEqual(calls, []);
+});
+
+test('public BIMI checks reject private destinations and do not auto-load images', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=none')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['default._bimi.example.com|TXT', txtAnswer('v=BIMI1; l=https://127.0.0.1:9443/logo.svg; a=https://192.168.1.9/vmc.pem')],
+		['example.com|MX', mxAnswer('10 mail.example.net.')]
+	]);
+	const calls = [];
+	const runner = createRunner({
+		enterpriseMode: false,
+		dohQuery: async (name, type) => answers.get(`${name}|${type}`) || {}
+	});
+
+	const results = await withMockFetch(
+		() => runner('example.com', { externalProbes: true }),
+		async (url, options = {}) => {
+			calls.push({ url: String(url), redirect: options.redirect || '' });
+			return {
+				ok: true,
+				status: 200,
+				headers: { get: () => null },
+				json: async () => ({ entities: [], nameservers: [] }),
+				text: async () => ''
+			};
+		}
+	);
+
+	assert.equal(calls.some((call) => /127\.0\.0\.1|192\.168\.1\.9/.test(call.url)), false);
+	assert.equal(calls.filter((call) => call.url !== 'https://rdap.org/domain/example.com').every((call) => call.redirect === 'error'), true);
+	assert.match(results.bimi.findings.join(''), /private-network/);
+});
+
+test('Null MX is reported without provider or inbound TLS remediation', async () => {
+	const answers = new Map([
+		['example.com|NS', nsAnswer('ns1.example.net.', 'ns2.example.net.')],
+		['_dmarc.example.com|TXT', txtAnswer('v=DMARC1; p=reject')],
+		['example.com|TXT', txtAnswer('v=spf1 -all')],
+		['google._domainkey.example.com|TXT', txtAnswer('v=DKIM1; p=')],
+		['example.com|MX', mxAnswer('0 .')]
+	]);
+	const queries = [];
+	const runner = createRunner({
+		enterpriseMode: false,
+		dohQuery: async (name, type) => {
+			queries.push(`${name}|${type}`);
+			return answers.get(`${name}|${type}`) || {};
+		}
+	});
+
+	const results = await withMockFetch(() => runner('example.com'));
+
+	assert.equal(results.mx.isNullMx, true);
+	assert.equal(results.mailProvider.id, 'noInboundMail');
+	assert.equal(results.score.overall, 100);
+	assert.deepEqual(results.dmarc.findings, results.dkim.findings);
+	assert.deepEqual(results.dmarc.findings, results.bimi.findings);
+	assert.match(results.dmarc.findings[0], /mx\.noMailProfile\.title/);
+	assert.equal(results.fixups.some((item) => /MTA-STS|TLS-RPT/.test(item.title)), false);
+	assert.equal(results.fixups.some((item) => /DKIM|rua/.test(item.title)), false);
+	assert.equal(results.priority.some((item) => /DKIM|rua/.test(item.title)), false);
+	assert.equal(queries.some((query) => query.startsWith('_mta-sts.') || query.startsWith('_smtp._tls.')), false);
 });
 
 test('createRenderer outputs provider, trust, diff, and guide sections', () => {

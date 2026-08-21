@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import { sanitizePublicHttpsUrl } from './safe-html.js';
+
 export async function probeHttps(host) {
-	const url = `https://${host}/`;
+	const url = sanitizePublicHttpsUrl(`https://${host}/`);
+	if (!url) return { host, ok: false, blocked: true, evidence: '', error: 'Local or private-network HTTPS destination blocked' };
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), 6000);
 	try {
-		await fetch(url, { method: 'GET', mode: 'no-cors', redirect: 'follow', signal: controller.signal });
+		await fetch(url, { method: 'GET', mode: 'no-cors', redirect: 'error', signal: controller.signal });
 		return { host, ok: true, evidence: url, note: '応答あり (no-cors のためステータス/ヘッダは未取得)' };
 	} catch (error) {
 		return { host, ok: false, evidence: url, error: String(error) };
@@ -166,7 +169,41 @@ export function extractMX(json) {
 		.map((item) => String(item.data).trim());
 }
 
+export function classifyMxRecords(mxRecords = []) {
+	const records = (mxRecords || [])
+		.map((item) => String(item || '').trim())
+		.filter(Boolean);
+	const nullMxRecords = records.filter((item) => /^0\s+\.$/.test(item));
+	const isNullMx = records.length === 1 && nullMxRecords.length === 1;
+	return {
+		records,
+		hasNullMx: nullMxRecords.length > 0,
+		isNullMx,
+		hasNullMxConflict: nullMxRecords.length > 0 && !isNullMx
+	};
+}
+
 export function detectMailProvider({ mxRecords = [], spfRecords = [], dkimSelectors = [], dkimUsesCname = false } = {}) {
+	const mxClassification = classifyMxRecords(mxRecords);
+	if (mxClassification.isNullMx) {
+		return {
+			id: 'noInboundMail',
+			name: 'Inbound mail disabled (Null MX)',
+			confidence: 'High',
+			reason: 'The sole MX record is 0 ., which declares that this domain does not accept inbound mail.',
+			signals: ['MX: Null MX (0 .)']
+		};
+	}
+	if (mxClassification.hasNullMxConflict) {
+		return {
+			id: 'invalidMx',
+			name: 'Conflicting MX configuration',
+			confidence: 'High',
+			reason: 'A Null MX record must be the only MX record for the domain.',
+			signals: mxClassification.records.map((item) => `MX: ${item}`)
+		};
+	}
+
 	const mxJoined = (mxRecords || []).join('\n').toLowerCase();
 	const spfJoined = (spfRecords || []).join('\n').toLowerCase();
 	const selectors = (dkimSelectors || []).map((item) => String(item || '').toLowerCase());
@@ -215,7 +252,8 @@ export function detectMailProvider({ mxRecords = [], spfRecords = [], dkimSelect
 
 	const ranking = Object.entries(score).sort((a, b) => b[1] - a[1]);
 	const [id, value] = ranking[0];
-	if (!value) {
+	const minimumStrongScore = (id === 'm365' || id === 'googleWorkspace') ? 3 : 1;
+	if (!value || value < minimumStrongScore) {
 		return {
 			id: 'generic',
 			name: 'Generic / custom mail stack',
@@ -648,15 +686,42 @@ function computeSpfScore(spfRecords) {
 	return { score: clamp(score, 0, 100), chips };
 }
 
+export function isExplicitNoMailProfile(results) {
+	const mxClassification = classifyMxRecords(results && results.mx ? results.mx.records : []);
+	const spfRecords = results && results.spf && Array.isArray(results.spf.records) ? results.spf.records : [];
+	const confirmedSelectors = results && results.dkim && Array.isArray(results.dkim.confirmedSelectors) ? results.dkim.confirmedSelectors : [];
+	return mxClassification.isNullMx
+		&& spfRecords.length === 1
+		&& /^v=spf1\s+-all$/i.test(String(spfRecords[0] || '').trim())
+		&& results.effectivePolicy === 'reject'
+		&& confirmedSelectors.length === 0;
+}
+
+export function classifyMailProfile(results) {
+	const mxClassification = classifyMxRecords(results && results.mx ? results.mx.records : []);
+	if (mxClassification.hasNullMxConflict) return 'null_mx_conflict';
+	if (isExplicitNoMailProfile(results)) return 'no_mail';
+	if (mxClassification.records.length) return 'mail_capable';
+	return 'unknown';
+}
+
 export function computeOverallScore(results) {
 	let score = 100;
 	const chips = [];
+	const mxClassification = classifyMxRecords(results && results.mx ? results.mx.records : []);
+	const explicitlyNoMailProfile = isExplicitNoMailProfile(results);
+	if (mxClassification.hasNullMxConflict) {
+		score -= 25;
+		chips.push('Inbound mail: Null MX conflict');
+	}
 
 	if (!results.dmarc || !results.dmarc.record) {
 		score -= 35;
 		chips.push('DMARC: missing');
 	} else {
-		const policy = parseTagValue(results.dmarc.record, 'p') || '';
+		const policy = Object.hasOwn(results, 'effectivePolicy')
+			? String(results.effectivePolicy || '').toLowerCase()
+			: parseTagValue(results.dmarc.record, 'p') || '';
 		if (policy === 'none') {
 			score -= 15;
 			chips.push('DMARC: p=none');
@@ -670,32 +735,38 @@ export function computeOverallScore(results) {
 			chips.push('DMARC: p?');
 		}
 		const rua = parseTagValue(results.dmarc.record, 'rua');
-		if (!rua) {
+		if (!explicitlyNoMailProfile && !rua) {
 			score -= 5;
 			chips.push('DMARC: rua missing');
 		}
 		const subdomainPolicy = parseTagValue(results.dmarc.record, 'sp');
-		if (!subdomainPolicy) {
+		if (!explicitlyNoMailProfile && !subdomainPolicy) {
 			score -= 2;
 			chips.push('DMARC: sp missing');
 		}
 	}
 
-	try {
-		const hasMtaSts = !!(results.mta_sts && results.mta_sts.record);
-		const hasTlsRpt = !!(results.mta_sts && results.mta_sts.tlsrpt);
-		if (!hasMtaSts && !hasTlsRpt) {
-			score -= 1;
-			chips.push('MTA-STS/TLS-RPT: missing');
-		} else {
-			if (hasMtaSts) chips.push('MTA-STS: ok');
-			if (hasTlsRpt) chips.push('TLS-RPT: ok');
+	if (explicitlyNoMailProfile) {
+		chips.push('Inbound mail: Null MX');
+	} else {
+		try {
+			const hasMtaSts = !!(results.mta_sts && results.mta_sts.record);
+			const hasTlsRpt = !!(results.mta_sts && results.mta_sts.tlsrpt);
+			if (!hasMtaSts && !hasTlsRpt) {
+				score -= 1;
+				chips.push('MTA-STS/TLS-RPT: missing');
+			} else {
+				if (hasMtaSts) chips.push('MTA-STS: ok');
+				if (hasTlsRpt) chips.push('TLS-RPT: ok');
+			}
+		} catch {
+			// ignore lightweight score enrichment failures
 		}
-	} catch {
-		// ignore lightweight score enrichment failures
 	}
 
-	if (!results.dkim || !Array.isArray(results.dkim.confirmedSelectors) || results.dkim.confirmedSelectors.length === 0) {
+	if (explicitlyNoMailProfile) {
+		chips.push('DKIM: not applicable');
+	} else if (!results.dkim || !Array.isArray(results.dkim.confirmedSelectors) || results.dkim.confirmedSelectors.length === 0) {
 		score -= 18;
 		chips.push('DKIM: missing');
 	} else {
@@ -794,13 +865,66 @@ export async function probeUrlNoCors(url, timeoutMs = 5500) {
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
 	try {
-		await fetch(String(url), { method: 'GET', mode: 'no-cors', redirect: 'follow', signal: controller.signal });
+		await fetch(String(url), { method: 'GET', mode: 'no-cors', redirect: 'error', signal: controller.signal });
 		return { ok: true };
 	} catch (error) {
 		return { ok: false, error: String(error) };
 	} finally {
 		clearTimeout(timer);
 	}
+}
+
+function normalizedResponseLimit(value, fallback) {
+	const requestedLimit = Number(value);
+	return Number.isFinite(requestedLimit) && requestedLimit >= 0
+		? Math.min(Math.floor(requestedLimit), Number.MAX_SAFE_INTEGER)
+		: fallback;
+}
+
+async function readResponseTextBounded(response, limit, controller) {
+	if (!response.body || typeof response.body.getReader !== 'function') {
+		const rawLength = String(response.headers.get('content-length') || '');
+		const contentEncoding = String(response.headers.get('content-encoding') || '').trim().toLowerCase();
+		const declaredLength = /^\d+$/.test(rawLength) ? Number(rawLength) : null;
+		if (!Number.isSafeInteger(declaredLength) || declaredLength > limit || (contentEncoding && contentEncoding !== 'identity')) {
+			controller.abort();
+			return { text: '', truncated: true };
+		}
+		const text = await response.text();
+		return {
+			text: text.length > limit ? text.slice(0, limit) : text,
+			truncated: text.length > limit
+		};
+	}
+
+	const reader = response.body.getReader();
+	const decoder = new TextDecoder();
+	let bytesRead = 0;
+	let text = '';
+	let truncated = false;
+	try {
+		while (true) {
+			const chunk = await reader.read();
+			if (chunk.done) {
+				text += decoder.decode();
+				break;
+			}
+			const bytes = chunk.value instanceof Uint8Array ? chunk.value : new Uint8Array(chunk.value || 0);
+			const remaining = limit - bytesRead;
+			if (bytes.byteLength > remaining) {
+				if (remaining > 0) text += decoder.decode(bytes.subarray(0, remaining), { stream: true });
+				truncated = true;
+				controller.abort();
+				try { await reader.cancel(); } catch { /* the bounded result remains usable */ }
+				break;
+			}
+			bytesRead += bytes.byteLength;
+			text += decoder.decode(bytes, { stream: true });
+		}
+	} finally {
+		try { reader.releaseLock(); } catch { /* already released or unavailable */ }
+	}
+	return { text, truncated };
 }
 
 export async function fetchTextCors(url, timeoutMs = 6500, maxChars = 220_000) {
@@ -810,18 +934,19 @@ export async function fetchTextCors(url, timeoutMs = 6500, maxChars = 220_000) {
 		const response = await fetch(String(url), {
 			method: 'GET',
 			mode: 'cors',
-			redirect: 'follow',
+			redirect: 'error',
 			signal: controller.signal,
 			headers: { accept: '*/*' }
 		});
 		const contentType = String(response.headers.get('content-type') || '');
-		const text = await response.text();
+		const limit = normalizedResponseLimit(maxChars, 220_000);
+		const { text, truncated } = await readResponseTextBounded(response, limit, controller);
 		return {
 			ok: response.ok,
 			status: response.status,
 			ct: contentType,
-			text: text.length > maxChars ? text.slice(0, maxChars) : text,
-			truncated: text.length > maxChars
+			text,
+			truncated
 		};
 	} catch (error) {
 		return { ok: false, error: String(error), corsBlocked: true };
@@ -834,7 +959,7 @@ export async function fetchHeadCors(url, timeoutMs = 4500) {
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
 	try {
-		const response = await fetch(String(url), { method: 'HEAD', mode: 'cors', redirect: 'follow', signal: controller.signal });
+		const response = await fetch(String(url), { method: 'HEAD', mode: 'cors', redirect: 'error', signal: controller.signal });
 		const contentType = String(response.headers.get('content-type') || '');
 		const rawLength = String(response.headers.get('content-length') || '');
 		const contentLength = rawLength && /^\d+$/.test(rawLength) ? Number(rawLength) : null;
@@ -883,7 +1008,9 @@ async function fetchJsonWithTimeout(url, timeoutMs = 6500, headers = {}) {
 	try {
 		const response = await fetch(url, { signal: controller.signal, headers });
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
-		return await response.json();
+		const { text, truncated } = await readResponseTextBounded(response, 1024 * 1024, controller);
+		if (truncated) throw new RangeError('RDAP response exceeds the 1 MiB limit');
+		return JSON.parse(text);
 	} finally {
 		clearTimeout(timer);
 	}

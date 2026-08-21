@@ -54,6 +54,16 @@ function analysesFrom(payload) {
 	return [];
 }
 
+function messageAnalysisFromDomain(analysis) {
+	const from = analysis && analysis.from;
+	const primary = domain(from && from.domain);
+	const declared = list(from && from.domains).map(domain).filter(Boolean);
+	if (!primary || declared.length !== 1 || declared[0] !== primary) {
+		throw new TypeError('Authentication graph inputs refer to different domains or lack a unique From domain');
+	}
+	return primary;
+}
+
 export function normalizeAuthenticationGraphInput(value) {
 	const payloads = Array.isArray(value) ? value : [value];
 	if (!payloads.length || payloads.length > MAX_GRAPH_INPUTS) throw new RangeError(`Authentication graph accepts 1 to ${MAX_GRAPH_INPUTS} inputs`);
@@ -63,8 +73,23 @@ export function normalizeAuthenticationGraphInput(value) {
 		const payload = raw.snapshot || raw;
 		const observations = raw.observations || {};
 		const ruaReports = reportsFrom(raw);
-		const firstReport = ruaReports[0] && (ruaReports[0].report || ruaReports[0]);
-		const candidateDomain = domain(raw.domain || payload.domain || raw.from && raw.from.domain || firstReport && firstReport.policy && firstReport.policy.domain);
+		const messageAnalyses = analysesFrom(raw);
+		const messageAnalysisDomains = messageAnalyses.map(messageAnalysisFromDomain);
+		const messageDomains = [...new Set(messageAnalysisDomains)];
+		if (messageDomains.length > 1) throw new TypeError('Authentication graph inputs refer to different domains');
+		const normalizedReportDomains = ruaReports
+			.map((item) => item && item.report ? item.report : item)
+			.map((report) => domain(report && report.policy && report.policy.domain));
+		if (normalizedReportDomains.some((reportDomain) => !reportDomain)) throw new TypeError('Authentication graph RUA reports require a policy domain');
+		const reportDomains = [...new Set(normalizedReportDomains)];
+		if (reportDomains.length > 1) throw new TypeError('Authentication graph RUA reports refer to different policy domains');
+		const candidateDomain = domain(raw.domain || payload.domain || raw.from && raw.from.domain || reportDomains[0] || messageDomains[0]);
+		if (candidateDomain && reportDomains[0] && candidateDomain !== reportDomains[0]) {
+			throw new TypeError('Authentication graph RUA policy domain does not match the input domain');
+		}
+		if (candidateDomain && messageDomains[0] && candidateDomain !== messageDomains[0]) {
+			throw new TypeError('Authentication graph inputs refer to different domains');
+		}
 		if (candidateDomain) {
 			if (normalized.domain && normalized.domain !== candidateDomain) throw new TypeError('Authentication graph inputs refer to different domains');
 			normalized.domain = candidateDomain;
@@ -80,7 +105,7 @@ export function normalizeAuthenticationGraphInput(value) {
 			}
 		}
 		normalized.ruaReports.push(...ruaReports);
-		normalized.messageAnalyses.push(...analysesFrom(raw));
+		normalized.messageAnalyses.push(...messageAnalyses);
 	}
 	if (!normalized.domain) throw new TypeError('An authentication graph requires a root domain');
 	if (normalized.spfRecords.length > MAX_GRAPH_SPF_RECORDS) throw new RangeError('Authentication graph exceeds the SPF record limit');

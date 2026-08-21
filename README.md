@@ -1,6 +1,6 @@
 # Toppy's DMARC4all (DNS / Email Auth Quick Check)
 
-Browser-only tool to quickly inspect a domain’s email authentication posture (DMARC/SPF/DKIM, plus related checks) using **public DNS only**.
+Browser-only tool to quickly inspect a domain’s email authentication posture (DMARC/SPF/DKIM, plus related checks). The default diagnosis uses **public DNS only**; public RDAP and HTTPS reference checks require an explicit opt-in.
 
 This repo is a static site (HTML/CSS/JS). You can open it locally or publish it via GitHub Pages.
 
@@ -10,7 +10,7 @@ It also includes a DMARC RUA service description page and an operational workflo
 
 - Public repo: `main` is the only production branch.
 - GitHub Pages deploys from `main` via `.github/workflows/pages.yml`.
-- Releases are cut from `main` using annotated tags (for example: `v0.1.0`).
+- Releases are cut from `main` using annotated tags (for example: `v0.1.0`); pushing a version tag starts the Release workflow.
 - Keep non-public or experimental work in a separate private remote/repo instead of a public `develop` branch.
 
 ## Features
@@ -23,8 +23,8 @@ It also includes a DMARC RUA service description page and an operational workflo
 - CLI and composite GitHub Action for checks, local evidence analysis, snapshots, and regression detection
 - SPF/DKIM authentication supply-chain graph with declared, observed, and unresolved evidence separated
 - Optional: DNSBL sender-IP quick check (best-effort)
-- Optional: BIMI lookup (`_bimi.<domain>`), parses `l=` (logo URL) and `a=`
-- MTA-STS / TLS-RPT, MX, CAA, DNSSEC indicators, lightweight HTTPS probes
+- Optional: BIMI lookup (`_bimi.<domain>`), parses `l=` (logo URL) and `a=`; retrieving those HTTPS resources requires public-build opt-in
+- MTA-STS / TLS-RPT, MX, CAA, DNSSEC indicators, plus opt-in lightweight HTTPS reference probes in the public build
 - Installable PWA shell for repeat use on desktop/mobile
 - Multi-language UI (language selector)
 
@@ -35,27 +35,28 @@ It also includes a DMARC RUA service description page and an operational workflo
 - Header Analyzer results distinguish reported receiver evidence from independent verification. It does not cryptographically revalidate DKIM signatures.
 - RUA reports are parsed locally with 10 MiB compressed, 50 MiB expanded, 20-file, and 100,000-record limits. DTDs, entities, and unsafe archives are rejected.
 - Duplicate RUA report identities are counted once, conflicting duplicates are rejected, and readiness correlation requires the report policy domain to match the diagnosis policy source.
-- It queries **public DNS** via DNS-over-HTTPS (DoH) endpoints.
+- The default diagnosis queries **public DNS only** via the selected DNS-over-HTTPS (DoH) endpoint.
+- In the public build, a separate unchecked option can enable public RDAP and HTTPS reference checks for that diagnosis.
 - No server-side component: input is processed in your browser.
 - Network requests go to:
-  - DoH endpoints (selected in the UI; default: Cloudflare)
-  - `rdap.org` (registrar lookup, public build only)
-  - The checked domain itself for lightweight HTTPS reachability probes
-  - (Optional) BIMI logo URL (only if it is `https://`)
+  - The DoH endpoint selected in the UI (default: Cloudflare)
+  - With explicit public-build opt-in: `rdap.org` and the registry RDAP service to which it redirects, the checked domain and its `www` / `mta-sts` hosts, and HTTPS BIMI `l=` / `a=` URLs
+- Checked-domain and BIMI probes do not follow redirects. The `rdap.org` bootstrap request follows its registry-RDAP redirect so that the lookup can complete.
+- The enterprise/offline entry point disables the optional RDAP and HTTPS requests; its diagnosis traffic is limited to the selected DoH endpoint.
 
 ## Standards & operational guidance
 
 - Standards and privacy position: https://dmarc4all.toppymicros.com/standards_privacy.html
 - DNS provider setup notes: https://dmarc4all.toppymicros.com/dns_provider_guides.html
 - IETF DMARC watch: track DMARCbis, DMARC Aggregate Reporting, and DMARC Failure Reporting; separate standards guidance from provider-specific behavior when they differ.
-- IETF/WG sharing position: this is a public-DNS-only implementation aid, not a replacement for the specifications or a receiver-side conformance test. Feedback is especially useful on wording accuracy, RUA/RUF privacy guidance, and enforcement-readiness criteria.
+- IETF/WG sharing position: the default diagnosis is a public-DNS-only implementation aid, with separately opted-in public reference checks; it is not a replacement for the specifications or a receiver-side conformance test. Feedback is especially useful on wording accuracy, RUA/RUF privacy guidance, and enforcement-readiness criteria.
 
 ## AI and machine access
 
 - Curated LLM index: https://dmarc4all.toppymicros.com/llms.txt
 - Detailed machine context: https://dmarc4all.toppymicros.com/llms-full.txt
 - AI usage and safety guidance: https://dmarc4all.toppymicros.com/ai_usage.html
-- Portable diagnosis schema 1.2.0: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json
+- Portable diagnosis schema 1.3.0: https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json
 - Compatibility schema index: https://dmarc4all.toppymicros.com/schemas/diagnosis-result.schema.json
 - Example diagnosis report: https://dmarc4all.toppymicros.com/examples/diagnosis-result.example.json
 - Example RFC 9990 RUA report: `examples/rua-report.example.xml`
@@ -97,21 +98,23 @@ Current public site: https://dmarc4all.toppymicros.com/
 
 - The public site can be installed as a PWA from supported browsers.
 - The service worker caches the local app shell and translation assets for faster repeat visits.
-- If the shell is opened without connectivity, it falls back to `offline.html` and explains that live DNS/RDAP checks still need network access.
+- If the shell is opened without connectivity, it falls back to `offline.html` and explains that live DNS and explicitly enabled RDAP/HTTPS checks still need network access.
 - When a new shell is available, the app shows an in-page reload prompt instead of silently staying on an old cache.
-- DNS lookups, RDAP lookups, and other live diagnostics still require network access and are not served from cache.
+- DNS lookups and any explicitly enabled RDAP/HTTPS checks still require network access and are not served from cache.
 
 ### Release
 
-Create releases from `main` only. Replace `<tag>` with the next reviewed version.
+Create releases from `main` only. Replace `<tag>` with the next reviewed version. Pushing the annotated tag starts `.github/workflows/release.yml`, which verifies the tag and creates the GitHub Release with generated notes. The manual workflow dispatch is only for creating a release from an existing tag.
 
 ```bash
 git checkout main
 git pull --ff-only origin main
 git tag -a <tag> -m "<tag>"
-git push origin main --follow-tags
-gh release create <tag> --generate-notes
+git push origin main
+git push origin <tag>
 ```
+
+Wait for the Release workflow to finish, then verify the published release. If curated notes are required, update the workflow-created release with `gh release edit <tag> --notes-file <notes-file>`; do not run a second `gh release create`.
 
 ### Test
 
@@ -147,10 +150,10 @@ Exit codes are `0` for a completed command without a configured failure, `1` for
 
 ### GitHub Action
 
-The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`, `fail-on`, optional comma-separated `selectors`, and an optional DNS-over-HTTPS `resolver`. In this repository it can be used as follows:
+The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`, `fail-on`, optional comma-separated `selectors`, and an optional DNS-over-HTTPS `resolver`. Public workflows should pin a reviewed release tag rather than `main`:
 
 ```yaml
-- uses: ./.github/actions/dmarc4all
+- uses: ToppyMicroServices/DMARC4all/.github/actions/dmarc4all@v0.4.2
   with:
     domain: example.com
     fail-on: high
@@ -228,13 +231,13 @@ Apache License 2.0 (Apache-2.0). See `LICENSE`.
 
 ## Privacy notes (DoH)
 
-This tool sends DNS queries for the entered domain to the selected DNS-over-HTTPS (DoH) provider. That provider may log and/or aggregate queries according to its policy. If you want to minimize third-party visibility, select a DoH endpoint you control in the UI, or modify the DoH provider list in `app.js`.
+This tool sends DNS queries for the entered domain to the selected DNS-over-HTTPS (DoH) provider. That provider may log and/or aggregate queries according to its policy. If you want to minimize third-party visibility, select a DoH endpoint you control in the UI, or modify the DoH provider list in `app.js`. The public build sends RDAP or HTTPS reference requests only after the separate option is explicitly enabled for a diagnosis. An opted-in `rdap.org` request can redirect to the responsible registry's public RDAP service.
 
 ### Enterprise/offline build
 
 - Entry points: `index_enterprise.html`, `rua_service_enterprise.html`
 - External requests are limited to the selected DoH endpoint (no CDN/Google Fonts).
-- RDAP lookups and external BIMI logo fetches are disabled to reduce third-party traffic.
+- RDAP, checked-domain HTTPS probes, and external BIMI `l=` / `a=` fetches are disabled.
 
 ## Code Layout
 

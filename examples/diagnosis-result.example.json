@@ -1,13 +1,17 @@
 {
-  "$schema": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.2.0.schema.json",
+  "$schema": "https://dmarc4all.toppymicros.com/schemas/diagnosis-result-1.3.0.schema.json",
   "format": "dmarc4all-diagnosis",
-  "schemaVersion": "1.2.0",
+  "schemaVersion": "1.3.0",
   "generatedAt": "2026-07-30T00:00:00.000Z",
   "domain": "example.com",
   "locale": "en",
   "scope": {
     "basis": "public_dns",
     "resolver": "Cloudflare",
+    "externalReferenceChecks": {
+      "enabled": false,
+      "attemptedSources": []
+    },
     "limitations": [
       "no_email_sent_or_received",
       "no_mailbox_or_server_access",
@@ -98,6 +102,8 @@
         }
       }
     },
+    "enforcementReadinessApplicable": true,
+    "mailProfile": "mail_capable",
     "mailProvider": {
       "id": "m365",
       "name": "Microsoft 365",

@@ -22,6 +22,8 @@
     'Unusable DKIM key record detected',
     'An empty p= marks the key as revoked, while a missing p= makes the key record invalid. Neither can validate DKIM signatures. Confirm the sender no longer uses this selector, and publish a new key if needed.',
     'External logo fetch is disabled in enterprise mode.',
+    'Local or private-network logo URLs are not fetched automatically',
+    'Local or private-network certificate URLs are not fetched automatically',
 
     'Safe first step: publish DMARC',
     'Start with monitoring-only p=none and make sure aggregate reports can be received.',
@@ -125,6 +127,8 @@
       'Nicht verwendbarer DKIM-Schlüsseleintrag erkannt',
       'Ein leeres p= kennzeichnet den Schlüssel als widerrufen; fehlt p=, ist der Schlüsseleintrag ungültig. In beiden Fällen können keine DKIM-Signaturen geprüft werden. Prüfe, ob der Sender diesen Selektor nicht mehr verwendet, und veröffentliche bei Bedarf einen neuen Schlüssel.',
       'Der Abruf externer Logos ist im Unternehmensmodus deaktiviert.',
+      'Logo-URLs in lokalen oder privaten Netzwerken werden nicht automatisch abgerufen.',
+      'Zertifikat-URLs in lokalen oder privaten Netzwerken werden nicht automatisch abgerufen.',
 
       'Sicherer erster Schritt: DMARC veröffentlichen',
       'Starte mit p=none zur reinen Überwachung und stelle sicher, dass Aggregatberichte empfangen werden können.',
@@ -227,6 +231,8 @@
       'Se detectó un registro de clave DKIM no utilizable',
       'Un p= vacío indica que la clave está revocada; si falta p=, el registro de clave no es válido. En ninguno de los dos casos se pueden validar firmas DKIM. Confirma que el proveedor de envío ya no utilice ese selector y publica una clave nueva si es necesario.',
       'La obtención de logotipos externos está desactivada en el modo empresarial.',
+      'Las URL de logotipos de redes locales o privadas no se obtienen automáticamente.',
+      'Las URL de certificados de redes locales o privadas no se obtienen automáticamente.',
 
       'Primer paso seguro: publicar DMARC',
       'Empieza con p=none, solo para supervisión, y comprueba que puedes recibir informes agregados.',
@@ -329,6 +335,8 @@
       '사용할 수 없는 DKIM 키 레코드가 감지되었습니다',
       'p= 값이 비어 있으면 키가 폐기된 것이며, p= 자체가 없으면 유효하지 않은 키 레코드입니다. 두 경우 모두 DKIM 서명을 검증할 수 없습니다. 발신 서비스에서 해당 셀렉터를 더 이상 사용하지 않는지 확인하고, 필요하면 새 키를 게시하세요.',
       '엔터프라이즈 모드에서는 외부 로고를 가져오지 않습니다.',
+      '로컬 또는 사설 네트워크의 로고 URL은 자동으로 가져오지 않습니다.',
+      '로컬 또는 사설 네트워크의 인증서 URL은 자동으로 가져오지 않습니다.',
 
       '안전한 첫 단계: DMARC 게시',
       '모니터링 전용 p=none으로 시작하고 집계 보고서를 받을 수 있는지 확인하세요.',
@@ -431,6 +439,8 @@
       '检测到无法使用的 DKIM 密钥记录',
       'p= 为空表示密钥已撤销；缺少 p= 则表示密钥记录无效。这两种记录都无法验证 DKIM 签名。请确认发信服务已不再使用该选择器，并在需要时发布新密钥。',
       '企业模式下已停用外部徽标获取。',
+      '不会自动获取指向本地或专用网络的徽标 URL。',
+      '不会自动获取指向本地或专用网络的证书 URL。',
 
       '安全的第一步：发布 DMARC',
       '先使用仅监控的 p=none，并确认能够接收汇总报告。',
@@ -533,6 +543,8 @@
       'Phát hiện bản ghi khóa DKIM không thể sử dụng',
       'p= trống cho biết khóa đã bị thu hồi; nếu thiếu p= thì bản ghi khóa không hợp lệ. Cả hai trường hợp đều không thể xác minh chữ ký DKIM. Hãy xác nhận dịch vụ gửi không còn dùng selector này và công bố khóa mới nếu cần.',
       'Chế độ doanh nghiệp không tải logo từ bên ngoài.',
+      'Không tự động tải URL logo trỏ tới mạng cục bộ hoặc mạng riêng.',
+      'Không tự động tải URL chứng chỉ trỏ tới mạng cục bộ hoặc mạng riêng.',
 
       'Bước đầu an toàn: công bố DMARC',
       'Bắt đầu với p=none chỉ để giám sát và bảo đảm có thể nhận báo cáo tổng hợp.',
@@ -635,6 +647,8 @@
       'Terdeteksi record kunci DKIM yang tidak dapat digunakan',
       'p= yang kosong menandakan kunci telah dicabut, sedangkan p= yang tidak ada membuat record kunci tidak valid. Keduanya tidak dapat memverifikasi tanda tangan DKIM. Pastikan layanan pengirim tidak lagi memakai selector ini dan terbitkan kunci baru jika diperlukan.',
       'Pengambilan logo eksternal dinonaktifkan dalam mode perusahaan.',
+      'URL logo di jaringan lokal atau privat tidak diambil secara otomatis.',
+      'URL sertifikat di jaringan lokal atau privat tidak diambil secara otomatis.',
 
       'Langkah awal yang aman: terbitkan DMARC',
       'Mulai dengan p=none untuk pemantauan saja dan pastikan laporan agregat dapat diterima.',
@@ -737,6 +751,8 @@
       'Обнаружена непригодная запись ключа DKIM',
       'Пустое значение p= означает, что ключ отозван, а отсутствие p= делает запись ключа недействительной. Ни один из вариантов не позволяет проверять подписи DKIM. Убедитесь, что сервис отправки больше не использует этот селектор, и при необходимости опубликуйте новый ключ.',
       'В корпоративном режиме загрузка внешнего логотипа отключена.',
+      'URL логотипов в локальных или частных сетях не загружаются автоматически.',
+      'URL сертификатов в локальных или частных сетях не загружаются автоматически.',
 
       'Безопасный первый шаг: опубликовать DMARC',
       'Начните с p=none только для мониторинга и убедитесь, что агрегированные отчёты можно получать.',
@@ -839,6 +855,8 @@
       'Tuvastati kasutuskõlbmatu DKIM-i võtmekirje',
       'Tühi p= tähendab, et võti on tühistatud; p= puudumine muudab võtmekirje kehtetuks. Kumbki ei võimalda DKIM-i allkirju kontrollida. Veendu, et saatmisteenus seda selektorit enam ei kasuta, ja avalda vajaduse korral uus võti.',
       'Ettevõtterežiimis on välise logo laadimine välja lülitatud.',
+      'Kohaliku või privaatvõrgu logo-URL-e ei laadita automaatselt.',
+      'Kohaliku või privaatvõrgu sertifikaadi-URL-e ei laadita automaatselt.',
 
       'Turvaline esimene samm: avalda DMARC',
       'Alusta ainult jälgimiseks mõeldud p=none poliitikaga ja veendu, et koondaruandeid saab vastu võtta.',
@@ -941,6 +959,8 @@
       'ตรวจพบระเบียนคีย์ DKIM ที่ใช้งานไม่ได้',
       'p= ที่ว่างหมายถึงคีย์ถูกเพิกถอน ส่วนการไม่มี p= ทำให้ระเบียนคีย์ไม่ถูกต้อง ทั้งสองกรณีไม่สามารถตรวจสอบลายเซ็น DKIM ได้ โปรดยืนยันว่าบริการส่งอีเมลเลิกใช้ selector นี้แล้ว และเผยแพร่คีย์ใหม่หากจำเป็น',
       'โหมดองค์กรปิดการดึงโลโก้จากภายนอก',
+      'ระบบจะไม่ดึง URL โลโก้ที่ชี้ไปยังเครือข่ายภายในหรือเครือข่ายส่วนตัวโดยอัตโนมัติ',
+      'ระบบจะไม่ดึง URL ใบรับรองที่ชี้ไปยังเครือข่ายภายในหรือเครือข่ายส่วนตัวโดยอัตโนมัติ',
 
       'ขั้นตอนแรกที่ปลอดภัย: เผยแพร่ DMARC',
       'เริ่มด้วย p=none สำหรับการเฝ้าดูเท่านั้น และตรวจสอบว่าสามารถรับรายงานสรุปได้',
@@ -1043,6 +1063,8 @@
       'បានរកឃើញកំណត់ត្រាសោ DKIM ដែលមិនអាចប្រើបាន',
       'p= ទទេមានន័យថាសោត្រូវបានដកហូត ហើយការខ្វះ p= ធ្វើឱ្យកំណត់ត្រាសោមិនត្រឹមត្រូវ។ ទាំងពីរមិនអាចផ្ទៀងផ្ទាត់ហត្ថលេខា DKIM បានទេ។ សូមបញ្ជាក់ថាសេវាផ្ញើលែងប្រើ selector នេះ ហើយបោះពុម្ពសោថ្មីប្រសិនបើចាំបាច់។',
       'ការទាញយកឡូហ្គោពីខាងក្រៅត្រូវបានបិទក្នុងម៉ូដសហគ្រាស។',
+      'URL ឡូហ្គោដែលចង្អុលទៅបណ្ដាញមូលដ្ឋាន ឬឯកជន មិនត្រូវបានទាញយកដោយស្វ័យប្រវត្តិទេ។',
+      'URL វិញ្ញាបនបត្រដែលចង្អុលទៅបណ្ដាញមូលដ្ឋាន ឬឯកជន មិនត្រូវបានទាញយកដោយស្វ័យប្រវត្តិទេ។',
 
       'ជំហានដំបូងដែលមានសុវត្ថិភាព៖ បោះពុម្ព DMARC',
       'ចាប់ផ្តើមជាមួយ p=none សម្រាប់តាមដានប៉ុណ្ណោះ ហើយបញ្ជាក់ថាអាចទទួលរបាយការណ៍សរុបបាន។',
@@ -1145,6 +1167,8 @@
       'အသုံးမပြုနိုင်သော DKIM သော့မှတ်တမ်းကို တွေ့ရှိသည်',
       'p= တန်ဖိုးအလွတ်သည် သော့ကို ပြန်လည်ရုပ်သိမ်းထားကြောင်း ဆိုလိုပြီး p= မပါလျှင် သော့မှတ်တမ်း မမှန်ကန်ပါ။ နှစ်မျိုးစလုံးဖြင့် DKIM လက်မှတ်ကို အတည်မပြုနိုင်ပါ။ ပို့ဆောင်ရေးဝန်ဆောင်မှုက ဤ selector ကို မသုံးတော့ကြောင်း စစ်ဆေးပြီး လိုအပ်ပါက သော့အသစ်ကို ထုတ်ပြန်ပါ။',
       'လုပ်ငန်းသုံးမုဒ်တွင် ပြင်ပလိုဂိုကို ရယူခြင်း ပိတ်ထားသည်။',
+      'Local သို့မဟုတ် private network ကိုညွှန်သော လိုဂို URL များကို အလိုအလျောက် မရယူပါ။',
+      'Local သို့မဟုတ် private network ကိုညွှန်သော certificate URL များကို အလိုအလျောက် မရယူပါ။',
 
       'အန္တရာယ်နည်းသော ပထမအဆင့်: DMARC ထုတ်ပြန်ရန်',
       'စောင့်ကြည့်ရန်သာ p=none ဖြင့် စတင်ပြီး စုစည်းအစီရင်ခံစာများကို လက်ခံနိုင်ကြောင်း စစ်ဆေးပါ။',

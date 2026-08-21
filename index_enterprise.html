@@ -86,6 +86,7 @@
         </a>
       </div>
     </div>
+    <main>
     <section class="hero">
       <div class="hero-grid z-1">
         <div class="hero-copy">
@@ -101,7 +102,7 @@
           </div>
           <div class="hero-proof-grid">
             <article class="proof-card">
-              <p class="proof-copy" data-i18n="form.note">公開DNSのみを参照し,メール送受信やサーバーアクセスは行いません.</p>
+              <p class="proof-copy" data-i18n="form.enterpriseNote">公開DNSのみを選択したDoH経由で参照し、メール送受信やサーバー内部設定へのアクセスは行いません。</p>
             </article>
             <article class="proof-card">
               <p class="proof-copy" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
@@ -163,8 +164,8 @@
               </div>
               <details class="form-notes">
                 <summary data-i18n="form.moreInfo">Usage notes & privacy</summary>
-                <p class="tiny mt-8" data-i18n="form.note">※公開DNSのみを参照し,メール送受信やサーバーアクセスは行いません.</p>
-                <p class="tiny" data-i18n="form.privacy">※個人情報は収集しません.DNS照会は選択したDoHリゾルバ（既定: Cloudflare）に送信され,提供者側でログ/統計利用される可能性があります（各社ポリシー参照）.</p>
+                <p class="tiny mt-8" data-i18n="form.enterpriseNote">公開DNSのみを選択したDoH経由で参照し、メール送受信やサーバー内部設定へのアクセスは行いません。</p>
+                <p class="tiny" data-i18n="form.enterprisePrivacy">入力したドメインは選択したDoHリゾルバにのみ送信されます。</p>
                 <p class="tiny muted" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
                 <p class="tiny muted" id="resolver-note"></p>
                 <p class="tiny muted" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
@@ -190,6 +191,7 @@ rua=mailto:example.com@dmarc4all.toppymicros.com</pre>
     <section class="results-shell">
       <div id="report" class="report report-root" aria-live="polite"></div>
     </section>
+    </main>
   </div>
 </body>
 </html>

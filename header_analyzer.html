@@ -5,8 +5,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https: data:; connect-src 'self' https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d1b2a">
-  <title>Header Analyzer | DMARC4all</title>
+  <title data-tool-i18n="page.documentTitle">Header Analyzer | DMARC4all</title>
   <meta name="description" content="Browser-local message header and EML authentication evidence analyzer.">
+  <link rel="canonical" href="https://dmarc4all.toppymicros.com/header_analyzer.html">
   <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
@@ -20,35 +21,52 @@
         <img src="apple-touch-icon.png" alt="ToppyMicroServices">
         <span class="brand-name">ToppyMicroServices</span>
       </a>
-      <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      <div class="brand-actions">
+        <nav class="lang-switch" aria-label="Language" data-tool-i18n-aria-label="lang.label">
+          <button type="button" class="lang-btn" data-lang-choice="ja" title="日本語" aria-label="日本語" aria-pressed="false">JA</button>
+          <button type="button" class="lang-btn" data-lang-choice="en" title="English" aria-label="English" aria-pressed="false">EN</button>
+          <button type="button" class="lang-btn" data-lang-choice="es" title="Español" aria-label="Español" aria-pressed="false">ES</button>
+          <button type="button" class="lang-btn" data-lang-choice="de" title="Deutsch" aria-label="Deutsch" aria-pressed="false">DE</button>
+          <button type="button" class="lang-btn" data-lang-choice="ko" title="한국어" aria-label="한국어" aria-pressed="false">KO</button>
+          <button type="button" class="lang-btn" data-lang-choice="vi" title="Tiếng Việt" aria-label="Tiếng Việt" aria-pressed="false">VI</button>
+          <button type="button" class="lang-btn" data-lang-choice="th" title="ไทย" aria-label="ไทย" aria-pressed="false">TH</button>
+          <button type="button" class="lang-btn" data-lang-choice="km" title="ភាសាខ្មែរ" aria-label="ភាសាខ្មែរ" aria-pressed="false">KM</button>
+          <button type="button" class="lang-btn" data-lang-choice="my" title="မြန်မာ" aria-label="မြန်မာ" aria-pressed="false">MY</button>
+          <button type="button" class="lang-btn" data-lang-choice="id" title="Bahasa Indonesia" aria-label="Bahasa Indonesia" aria-pressed="false">ID</button>
+          <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti" aria-pressed="false">ET</button>
+          <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文" aria-pressed="false">ZH</button>
+          <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский" aria-pressed="false">RU</button>
+        </nav>
+        <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      </div>
     </div>
 
     <main class="header-analyzer-shell">
       <header class="header-analyzer-heading">
-        <p class="pill">Browser-local</p>
-        <h1>Header Analyzer</h1>
-        <p>Paste message headers or load an <code>.eml</code> file. No message content is uploaded.</p>
+        <p class="pill" data-tool-i18n="page.pill">Browser-local</p>
+        <h1 data-tool-i18n="page.title">Header Analyzer</h1>
+        <p><span data-tool-i18n="page.introBefore">Paste message headers or load an</span> <code>.eml</code> <span data-tool-i18n="page.introAfter">file. No message content is uploaded.</span></p>
       </header>
 
-      <section class="header-analyzer-workspace" aria-label="Message header analyzer">
+      <section class="header-analyzer-workspace" aria-label="Message header analyzer" data-tool-i18n-aria-label="page.workspaceAria">
         <form id="header-analysis-form" class="header-analysis-input">
-          <label for="header-analysis-input">Headers or EML source</label>
-          <textarea id="header-analysis-input" rows="18" maxlength="1048576" spellcheck="false" placeholder="From: sender@example.com&#10;Authentication-Results: ..."></textarea>
+          <label for="header-analysis-input" data-tool-i18n="page.inputLabel">Headers or EML source</label>
+          <textarea id="header-analysis-input" rows="18" maxlength="1048576" spellcheck="false" placeholder="From: sender@example.com&#10;Authentication-Results: ..." data-tool-i18n-placeholder="page.placeholder"></textarea>
           <div class="header-analysis-actions">
-			<label class="file-control" for="header-analysis-file">Load .eml<input id="header-analysis-file" type="file" accept=".eml,message/rfc822,text/plain"></label>
+			<label class="file-control" for="header-analysis-file"><span data-tool-i18n="page.load">Load .eml</span><input id="header-analysis-file" type="file" accept=".eml,message/rfc822,text/plain"></label>
 			<span id="header-analysis-file-name" class="tiny muted" aria-live="polite"></span>
-			<button type="submit" class="btn-gradient">Analyze</button>
-			<button type="button" id="header-analysis-export" class="btn-secondary" disabled>Download graph JSON</button>
+			<button type="submit" class="btn-gradient" data-tool-i18n="page.analyze">Analyze</button>
+			<button type="button" id="header-analysis-export" class="btn-secondary" disabled data-tool-i18n="page.export">Download graph JSON</button>
           </div>
-          <p class="tiny muted m-0">Authentication-Results and DKIM-Signature are parsed as reported evidence. DKIM signatures are not independently verified.</p>
+          <p class="tiny muted m-0" data-tool-i18n="page.hint">Authentication-Results and DKIM-Signature are parsed as reported evidence. DKIM signatures are not independently verified.</p>
         </form>
 
-        <section id="header-analysis-result" class="header-analysis-result" aria-live="polite" aria-label="Analysis result">
-          <p class="muted">Waiting for message headers.</p>
+        <section id="header-analysis-result" class="header-analysis-result" aria-live="polite" aria-label="Analysis result" data-tool-i18n-aria-label="page.resultAria">
+          <p class="muted" data-tool-i18n="page.waiting">Waiting for message headers.</p>
         </section>
       </section>
 
-      <p class="tiny muted header-analyzer-back"><a href="index.html">Back to DNS diagnosis</a></p>
+      <p class="tiny muted header-analyzer-back"><a href="index.html" data-tool-i18n="page.back">Back to DNS diagnosis</a></p>
     </main>
   </div>
 </body>
