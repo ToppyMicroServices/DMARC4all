@@ -41,7 +41,7 @@ test('service worker waits after install and skips waiting only on an explicit m
 					async put() {}
 				};
 			},
-			async keys() { return ['dmarc4all-shell-v18', 'dmarc4all-shell-v19', 'unrelated-cache']; },
+			async keys() { return ['dmarc4all-shell-v19', 'dmarc4all-shell-v20', 'unrelated-cache']; },
 			async delete(key) { deletedCaches.push(key); return true; }
 		},
 		fetch: async () => new Response('ok'),
@@ -81,7 +81,7 @@ test('service worker waits after install and skips waiting only on an explicit m
 	let activatePromise;
 	listeners.activate({ waitUntil(promise) { activatePromise = promise; } });
 	await activatePromise;
-	assert.deepEqual(deletedCaches, ['dmarc4all-shell-v18', 'dmarc4all-shell-v19']);
+	assert.deepEqual(deletedCaches, ['dmarc4all-shell-v19', 'dmarc4all-shell-v20']);
 	assert.equal(claimCalls, 1, 'first install and explicit updates must still claim clients on activation');
 });
 
@@ -202,7 +202,7 @@ test('Reload requests activation and refreshes only after controllerchange', asy
 test('PWA update prompt covers every supported UI language', () => {
 	assert.deepEqual(
 		Object.keys(PWA_MESSAGES).sort(),
-		['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'].sort()
+		['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'bn'].sort()
 	);
 	for (const messages of Object.values(PWA_MESSAGES)) {
 		assert.ok(messages.updateTitle && messages.updateBody && messages.updateAction && messages.updateDismiss);
@@ -224,7 +224,7 @@ test('manifest provides installable PNG icons and the service worker precaches t
 		assert.equal(png.readUInt32BE(20), expectedSize);
 	}
 
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v20';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v21';/);
 });
 
 test('release assets bypass an older shell cache before diagnostics are enabled', async () => {
@@ -236,17 +236,17 @@ test('release assets bypass an older shell cache before diagnostics are enabled'
 
 	assert.match(index, /href="manifest\.webmanifest\?v=2"/);
 	assert.match(index, /href="styles\.css\?v=13"/);
-	assert.match(index, /src="app\.js\?v=20"/);
+	assert.match(index, /src="app\.js\?v=21"/);
 	assert.match(index, /id="external-probes"[^>]*disabled/);
 	assert.match(index, /id="go-deep-btn"[^>]*disabled/);
-	assert.match(enterprise, /src="app\.js\?v=20"/);
+	assert.match(enterprise, /src="app\.js\?v=21"/);
 	assert.match(enterprise, /id="go-deep-btn"[^>]*disabled/);
 	assert.doesNotMatch(index, /src="i18n\/[^"?]+\.js"/);
-	assert.match(app, /from '\.\/src\/pwa\.js\?v=20'/);
-	assert.match(app, /import '\.\/src\/core\.js\?v=20'/);
+	assert.match(app, /from '\.\/src\/pwa\.js\?v=21'/);
+	assert.match(app, /import '\.\/src\/core\.js\?v=21'/);
 	assert.match(core, /externalProbes\.disabled = false/);
 	assert.match(core, /goDeepBtn\.disabled = diagnosisInProgress/);
-	assert.match(serviceWorker, /'\/app\.js\?v=20'/);
+	assert.match(serviceWorker, /'\/app\.js\?v=21'/);
 	assert.match(serviceWorker, /'\/styles\.css\?v=13'/);
 });
 
@@ -300,7 +300,7 @@ test('all versioned page assets and module imports match the release cache gener
 	for (const file of moduleFiles) {
 		const source = await readText(file);
 		for (const match of source.matchAll(/(?:from\s+|import\s+)['"](\.[^'"]+\.js(?:\?[^'"]*)?)['"]/g)) {
-			assert.match(match[1], /\?v=20$/, `${file} import ${match[1]} must bypass an older worker cache`);
+			assert.match(match[1], /\?v=21$/, `${file} import ${match[1]} must bypass an older worker cache`);
 		}
 	}
 });
@@ -371,7 +371,7 @@ test('a cached runtime response keeps its background refresh alive', async () =>
 	let responsePromise;
 	let refreshPromise;
 	listeners.fetch({
-		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=20' },
+		request: { method: 'GET', mode: 'cors', url: 'https://dmarc4all.toppymicros.com/app.js?v=21' },
 		respondWith(value) { responsePromise = value; },
 		waitUntil(value) { refreshPromise = value; }
 	});
@@ -486,8 +486,8 @@ test('offline page uses the exact versioned stylesheet path in the shell cache',
 
 	assert.ok(stylesheet, 'offline stylesheet must use the root-relative versioned path');
 	assert.ok(serviceWorker.includes(`'${stylesheet[1]}'`));
-	assert.match(offlinePage, /src="\.\/src\/offline-i18n\.js\?v=20"/);
-	assert.match(serviceWorker, /'\/src\/offline-i18n\.js\?v=20'/);
+	assert.match(offlinePage, /src="\.\/src\/offline-i18n\.js\?v=21"/);
+	assert.match(serviceWorker, /'\/src\/offline-i18n\.js\?v=21'/);
 	for (const lang of ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru']) {
 		assert.match(offlineI18n, new RegExp(`\\n\\t${lang}: \\[`));
 	}

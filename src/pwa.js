@@ -96,6 +96,12 @@ export const PWA_MESSAGES = {
 		updateBody: 'Перезагрузите страницу, чтобы открыть последнюю версию приложения.',
 		updateAction: 'Перезагрузить',
 		updateDismiss: 'Позже'
+	},
+	bn: {
+		updateTitle: 'নতুন সংস্করণ প্রস্তুত',
+		updateBody: 'সর্বশেষ app ব্যবহার করতে page reload করুন।',
+		updateAction: 'Reload',
+		updateDismiss: 'পরে'
 	}
 };
 

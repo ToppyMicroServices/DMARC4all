@@ -78,17 +78,23 @@ export function sanitizePublicHttpsUrl(rawUrl) {
 
 function sanitizeHtml(html) {
 	const s = String(html ?? '');
-	if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
-		return window.DOMPurify.sanitize(s, {
-			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'img', 'button', 'code'],
+	const purifier = globalThis.window && globalThis.window.DOMPurify;
+	if (purifier && typeof purifier.sanitize === 'function') {
+		return purifier.sanitize(s, {
+			ALLOWED_TAGS: ['div', 'span', 'strong', 'p', 'br', 'ul', 'li', 'a', 'h1', 'h2', 'h3', 'section', 'details', 'summary', 'img', 'button', 'code'],
 			ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel', 'aria-label', 'aria-live', 'src', 'alt', 'loading', 'referrerpolicy', 'type', 'value'],
 			ALLOW_DATA_ATTR: false
 		});
 	}
-	return s;
+	return null;
 }
 
 export function setSafeInnerHTML(el, html) {
 	if (!el) return;
-	el.innerHTML = sanitizeHtml(html);
+	const sanitized = sanitizeHtml(html);
+	if (sanitized === null) {
+		el.textContent = String(html ?? '');
+		return;
+	}
+	el.innerHTML = sanitized;
 }

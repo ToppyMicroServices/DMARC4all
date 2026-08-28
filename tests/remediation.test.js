@@ -496,4 +496,7 @@ test('createRenderer outputs provider, trust, diff, and guide sections', () => {
 	assert.match(report.innerHTML, /SPF fix path/);
 	assert.match(report.innerHTML, /MX: protection\.outlook\.com/);
 	assert.match(report.innerHTML, /Copy DNS line/);
+	assert.doesNotMatch(report.innerHTML, /Configured<\/strong>/);
+	assert.match(report.innerHTML, /<details class="card p-16 summary-card repro-details">/);
+	assert.ok(report.innerHTML.indexOf('report-grid') < report.innerHTML.indexOf('repro-details'));
 });

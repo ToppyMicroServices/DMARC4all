@@ -452,9 +452,19 @@ export function summarizeRuaReports(items) {
 	const reportEnds = reports.map((report) => Number(report.timeRange && report.timeRange.end)).filter(Number.isFinite);
 	const firstObservedAt = reportBegins.length ? Math.min(...reportBegins) : null;
 	const lastObservedAt = reportEnds.length ? Math.max(...reportEnds) : null;
-	const observationDays = firstObservedAt !== null && lastObservedAt !== null && lastObservedAt >= firstObservedAt
-		? Math.max(1, Math.ceil((lastObservedAt - firstObservedAt + 1) / 86400))
-		: 0;
+	const dayRanges = reports.map((report) => {
+		const begin = Number(report.timeRange && report.timeRange.begin);
+		const end = Number(report.timeRange && report.timeRange.end);
+		if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) return null;
+		return [Math.floor(begin / 86400), Math.floor(end / 86400)];
+	}).filter(Boolean).sort((left, right) => left[0] - right[0] || left[1] - right[1]);
+	const mergedDayRanges = [];
+	for (const range of dayRanges) {
+		const previous = mergedDayRanges[mergedDayRanges.length - 1];
+		if (previous && range[0] <= previous[1] + 1) previous[1] = Math.max(previous[1], range[1]);
+		else mergedDayRanges.push([...range]);
+	}
+	const observationDays = safeSum(mergedDayRanges.map(([begin, end]) => end - begin + 1), 'RUA observation-day total');
 	const pathMessages = (state) => safeSum(records.filter((record) => pathState(record) === state).map((record) => record.count), `RUA ${state} total`);
 
 	return {

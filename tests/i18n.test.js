@@ -5,16 +5,16 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
-import { createI18n } from '../src/i18n.js';
+import { createI18n, SUPPORTED_LANGS } from '../src/i18n.js';
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LOCALE_FILES = [
 	'ja.js', 'en.js', 'es.js', 'de.js', 'ko.js', 'vi.js', 'th.js',
-	'km.js', 'my.js', 'id.js', 'et.js', 'zh.js', 'ru.js',
+	'km.js', 'my.js', 'id.js', 'et.js', 'zh.js', 'ru.js', 'bn.js',
 	'vi_extra.js', 'th_extra.js', 'km_extra.js', 'id_extra.js',
 	'et_extra.js', 'zh_extra.js', 'ru_extra.js', 'es_extra.js',
 	'de_extra.js', 'extra_tr_my.js', 'extra_tr_ko.js',
-	'rua_page.js', 'ui_extra.js', 'document_pages.js'
+	'rua_page.js', 'rua_bn.js', 'ui_extra.js', 'bn_extra.js', 'document_pages.js'
 ];
 
 function loadBrowserLocales() {
@@ -107,11 +107,48 @@ test('initialLang falls back to the document language when no query is present',
 	});
 });
 
+test('landing copy keeps result caveats concise and non-duplicated in every language', () => {
+	const { window } = loadBrowserLocales();
+	const expectedDisclaimers = {
+		ja: '結果は目安です。必要に応じてメールヘッダで確認してください。',
+		en: 'Results are indicative. Check email headers when needed.',
+		es: 'Los resultados son orientativos. Revisa los encabezados de correo cuando sea necesario.',
+		de: 'Die Ergebnisse sind Anhaltspunkte. Prüfe bei Bedarf die E-Mail-Header.',
+		ko: '결과는 참고용입니다. 필요하면 메일 헤더로 확인하세요.',
+		vi: 'Kết quả chỉ mang tính tham khảo. Hãy kiểm tra tiêu đề email khi cần.',
+		th: 'ผลลัพธ์ใช้เป็นแนวทาง โปรดตรวจสอบส่วนหัวอีเมลเมื่อจำเป็น',
+		km: 'លទ្ធផលគ្រាន់តែជាគោលការណ៍ណែនាំ។ ពិនិត្យ header អ៊ីមែលនៅពេលចាំបាច់។',
+		my: 'ရလဒ်သည် လမ်းညွှန်အဖြစ်သာ ဖြစ်သည်။ လိုအပ်ပါက အီးမေးလ် header ဖြင့် အတည်ပြုပါ။',
+		id: 'Hasil bersifat indikatif. Periksa header email bila perlu.',
+		et: 'Tulemus on hinnanguline. Vajaduse korral kontrolli e-kirja päiseid.',
+		zh: '结果仅供参考。必要时请查看邮件头。',
+		ru: 'Результаты ориентировочные. При необходимости проверьте заголовки письма.',
+		bn: 'ফলাফল নির্দেশনামূলক। প্রয়োজনে ইমেইল header পরীক্ষা করুন।'
+	};
+	for (const [lang, disclaimer] of Object.entries(expectedDisclaimers)) {
+		assert.equal(window.I18N[lang]['form.disclaimer'], disclaimer);
+		assert.ok([...window.I18N[lang]['hero.title']].length <= 65, `${lang}.hero.title is too long`);
+		assert.ok(window.I18N[lang]['hero.tagline'].length < 90, `${lang}.hero.tagline is too long`);
+	}
+
+	for (const file of ['index.html', 'index_enterprise.html']) {
+		const html = fs.readFileSync(path.join(PROJECT_ROOT, file), 'utf8');
+		assert.equal((html.match(/data-i18n="form\.disclaimer"/g) || []).length, 1, `${file} repeats the disclaimer`);
+		assert.equal((html.match(/data-i18n="form\.privacyFirst"/g) || []).length, 1, `${file} repeats the privacy-first note`);
+		assert.doesNotMatch(html, /data-i18n="hero\.tagline"/, `${file} repeats the hero description`);
+		assert.doesNotMatch(html, /class="form-card-copy"/, `${file} repeats the score explanation before results`);
+	}
+	const publicHtml = fs.readFileSync(path.join(PROJECT_ROOT, 'index.html'), 'utf8');
+	const enterpriseHtml = fs.readFileSync(path.join(PROJECT_ROOT, 'index_enterprise.html'), 'utf8');
+	assert.equal((publicHtml.match(/data-i18n="form\.note"/g) || []).length, 1, 'index.html repeats the scope note');
+	assert.equal((enterpriseHtml.match(/data-i18n="form\.enterpriseNote"/g) || []).length, 1, 'index_enterprise.html repeats the scope note');
+});
+
 test('all locale files provide the complete English key set with matching placeholders', () => {
 	const { errors, window } = loadBrowserLocales();
 	assert.deepEqual(errors, []);
 	const english = window.I18N.en;
-	const langs = ['ja', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'];
+	const langs = SUPPORTED_LANGS.filter((lang) => lang !== 'en');
 
 	for (const lang of langs) {
 		const locale = window.I18N[lang];
@@ -135,10 +172,11 @@ test('all dynamic diagnosis strings are translated with matching placeholders', 
 		for (const match of source.matchAll(callPattern)) dynamicKeys.add(match[1].replace(/\\'/g, "'"));
 	}
 
-	for (const lang of ['de', 'es', 'et', 'id', 'km', 'ko', 'my', 'ru', 'th', 'vi', 'zh']) {
+	for (const lang of SUPPORTED_LANGS.filter((language) => !['ja', 'en'].includes(language))) {
 		const locale = window.EXTRA_TR[lang] || window.I18N[`${lang}_extra`] || {};
 		for (const english of dynamicKeys) {
 			assert.ok(locale[english], `${lang} is missing dynamic translation: ${english}`);
+			if (lang === 'bn') assert.notEqual(locale[english], english, `bn keeps an English dynamic fallback: ${english}`);
 			assert.deepEqual(
 				placeholders(locale[english]),
 				placeholders(english),
@@ -148,10 +186,29 @@ test('all dynamic diagnosis strings are translated with matching placeholders', 
 	}
 });
 
+test('every localized public page exposes Bangla and preserves its entry point', () => {
+	const pages = [
+		'index.html', 'index_enterprise.html', 'rua_service.html', 'rua_service_enterprise.html',
+		'header_analyzer.html', 'rua_analyzer.html', 'authentication_graph.html',
+		'standards_privacy.html', 'dns_provider_guides.html', 'ai_usage.html'
+	];
+	for (const page of pages) {
+		const html = fs.readFileSync(path.join(PROJECT_ROOT, page), 'utf8');
+		const choices = [...html.matchAll(/data-lang-choice="([a-z]{2})"/g)].map((match) => match[1]).sort();
+		assert.deepEqual(choices, [...SUPPORTED_LANGS].sort(), `${page} language choices`);
+		assert.match(html, /data-lang-choice="bn"[^>]+title="বাংলা"/, `${page} Bangla label`);
+	}
+
+	const sitemap = fs.readFileSync(path.join(PROJECT_ROOT, 'sitemap.xml'), 'utf8');
+	for (const route of ['/', '/standards_privacy.html', '/dns_provider_guides.html', '/ai_usage.html', '/header_analyzer.html', '/rua_analyzer.html', '/authentication_graph.html', '/rua_service.html']) {
+		assert.ok(sitemap.includes(`https://dmarc4all.toppymicros.com${route}?lang=bn`), `${route} Bangla sitemap entry`);
+	}
+});
+
 test('all document pages provide complete translations for every supported language', () => {
 	const { errors, window } = loadBrowserLocales();
 	assert.deepEqual(errors, []);
-	const supported = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'];
+	const supported = SUPPORTED_LANGS;
 
 	for (const [pageId, translations] of Object.entries(window.DOCUMENT_I18N)) {
 		assert.deepEqual(Object.keys(translations).sort(), [...supported].sort(), `${pageId} has incomplete language coverage`);
@@ -182,7 +239,7 @@ test('localized RUA copy does not expose English example controls', () => {
 	const { window } = loadBrowserLocales();
 	const englishControls = /\b(?:Keep enabled|Stop now|days left|Quick Check)\b/;
 
-	for (const lang of ['ja', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru']) {
+	for (const lang of SUPPORTED_LANGS.filter((language) => language !== 'en')) {
 		for (const [key, value] of Object.entries(window.I18N[lang])) {
 			if (!key.startsWith('rua.')) continue;
 			assert.doesNotMatch(String(value), englishControls, `${lang}.${key} contains an English example control`);
@@ -203,7 +260,7 @@ test('standards page identifies the published DMARC RFCs', () => {
 
 test('localized network boundaries and Null MX guidance remain semantically complete', () => {
 	const { window } = loadBrowserLocales();
-	const languages = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'];
+	const languages = SUPPORTED_LANGS;
 	const nullMxKeys = [
 		'mx.null.title', 'mx.null.detail', 'mx.nullConflict.title', 'mx.nullConflict.detail',
 		'mx.notApplicable', 'mx.noMailProfile.title', 'mx.noMailProfile.detail',
@@ -223,7 +280,8 @@ test('localized network boundaries and Null MX guidance remain semantically comp
 		id: /RDAP registri/i,
 		et: /registri RDAP/i,
 		zh: /注册局 RDAP/,
-		ru: /RDAP реестра/i
+		ru: /RDAP реестра/i,
+		bn: /registry RDAP/i
 	};
 
 	for (const lang of languages) {
@@ -327,7 +385,8 @@ test('locales do not contain characters from unrelated writing systems', () => {
 		id: /[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}\p{Script=Cyrillic}]/u,
 		et: /[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}\p{Script=Cyrillic}]/u,
 		zh: /[\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}\p{Script=Cyrillic}]/u,
-		ru: /[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}]/u
+		ru: /[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}\p{Script=Bengali}]/u,
+		bn: /[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Thai}\p{Script=Cyrillic}]/u
 	};
 
 	for (const [lang, pattern] of Object.entries(forbidden)) {

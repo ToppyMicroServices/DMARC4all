@@ -162,9 +162,11 @@ The composite action at `.github/actions/dmarc4all/action.yml` accepts `domain`,
 
 The action emits annotations for DMARC, SPF lookup-limit, and requested DKIM-selector findings. It returns the generated JSON path as the `report` output even when a configured finding threshold exits with code 2. The default resolver is Cloudflare's public DNS-over-HTTPS JSON endpoint; no secrets are required.
 
+The SPF lookup-limit annotation is an early warning based on DNS-querying terms in the published record itself. It does not recursively expand `include` or `redirect`, count void lookups, or evaluate macro, `a`, `mx`, and `ptr` expansion costs. Use a full SPF evaluator before changing a production record.
+
 ### Readiness decisions
 
-The readiness model returns `READY`, `CONDITIONALLY_READY`, `NOT_READY`, or `INSUFFICIENT_EVIDENCE`, with evidence references for each reason. Its default gates—100 observed messages, seven observation days, 98% aligned traffic, at most 5% unknown traffic, and at most 20% SPF-only aligned traffic—are configurable product heuristics, not RFC requirements. Review the retained evidence and organizational risk before changing a DMARC policy.
+The readiness model returns `READY`, `CONDITIONALLY_READY`, `NOT_READY`, or `INSUFFICIENT_EVIDENCE`, with evidence references for each reason. Its default gates—100 observed messages, seven covered report days (gaps are not counted), 98% aligned traffic, at most 5% unknown traffic, and at most 20% SPF-only aligned traffic—are configurable product heuristics, not RFC requirements. `READY` additionally requires an explicit inventory of sending subdomains; a small DNS scan or the traffic present in RUA reports is not treated as exhaustive coverage. Review the retained evidence and organizational risk before changing a DMARC policy.
 
 ### Authentication graph
 

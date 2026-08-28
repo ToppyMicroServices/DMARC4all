@@ -1,4 +1,4 @@
-import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './i18n.js?v=20';
+import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './i18n.js?v=21';
 
 const MESSAGES = {
 	ja: ['DMARC4all オフライン', 'オフライン', 'ライブ診断には接続が必要です', 'アプリ画面はオフラインでも開けますが、DNS照会と、明示的に有効化したRDAP／HTTPS参照チェックにはネットワーク接続が必要です。', 'クイック診断を開く', 'RUAガイドを開く'],
@@ -13,7 +13,8 @@ const MESSAGES = {
 	id: ['DMARC4all luring', 'Luring', 'Koneksi diperlukan untuk pemeriksaan langsung', 'Antarmuka aplikasi tersedia saat luring, tetapi kueri DNS dan pemeriksaan referensi RDAP/HTTPS yang diaktifkan secara eksplisit memerlukan jaringan.', 'Buka pemeriksaan cepat', 'Buka panduan RUA'],
 	et: ['DMARC4all võrguühenduseta', 'Võrguühenduseta', 'Reaalajas kontroll vajab ühendust', 'Rakenduse kest avaneb võrguühenduseta, kuid DNS-päringud ja sõnaselgelt lubatud RDAP-/HTTPS-viitekontrollid vajavad võrguühendust.', 'Ava kiirkontroll', 'Ava RUA juhend'],
 	zh: ['DMARC4all 离线', '离线', '实时检查需要网络连接', '应用界面可离线打开，但DNS查询以及明确启用的RDAP/HTTPS参考检查需要网络连接。', '打开快速检查', '打开RUA指南'],
-	ru: ['DMARC4all без сети', 'Нет сети', 'Для проверки в реальном времени требуется подключение', 'Интерфейс приложения доступен без сети, но для DNS-запросов и явно включённых справочных проверок RDAP/HTTPS требуется подключение.', 'Открыть быструю проверку', 'Открыть руководство RUA']
+	ru: ['DMARC4all без сети', 'Нет сети', 'Для проверки в реальном времени требуется подключение', 'Интерфейс приложения доступен без сети, но для DNS-запросов и явно включённых справочных проверок RDAP/HTTPS требуется подключение.', 'Открыть быструю проверку', 'Открыть руководство RUA'],
+	bn: ['DMARC4all offline', 'Offline', 'Live পরীক্ষার জন্য connection দরকার', 'App offline-এ খোলে, কিন্তু DNS query এবং স্পষ্টভাবে চালু করা RDAP/HTTPS reference check-এর জন্য network দরকার।', 'দ্রুত পরীক্ষা খুলুন', 'RUA guide খুলুন']
 };
 
 const KEYS = ['documentTitle', 'eyebrow', 'title', 'body', 'quickCheck', 'ruaGuide'];

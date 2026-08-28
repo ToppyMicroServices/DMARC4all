@@ -18,7 +18,7 @@
   'use strict';
 
   const LANG_KEY = 'toppy-lang';
-  const SUPPORTED_LANGS = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru'];
+  const SUPPORTED_LANGS = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'bn'];
   const LANGUAGE_LABELS = {
     ja: '言語',
     en: 'Language',
@@ -32,7 +32,8 @@
     id: 'Bahasa',
     et: 'Keel',
     zh: '语言',
-    ru: 'Язык'
+    ru: 'Язык',
+    bn: 'ভাষা'
   };
 
   const root = document.documentElement;

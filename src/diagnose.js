@@ -53,9 +53,9 @@ import {
 	spfEstimateLookupRisk,
 	spfHasAllQualifier,
 	spfIsIpOnly
-} from './diagnostics.js?v=20';
-import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js?v=20';
-import { esc, sanitizePublicHttpsUrl } from './safe-html.js?v=20';
+} from './diagnostics.js?v=21';
+import { analyzeDomain, buildDmarcTreeWalk } from './authentication-core.js?v=21';
+import { esc, sanitizePublicHttpsUrl } from './safe-html.js?v=21';
 
 export function createDiagnosisRunner(deps) {
 	const {
@@ -172,7 +172,7 @@ export function createDiagnosisRunner(deps) {
 					mkFinding(
 						x.registrar ? 'low' : 'med',
 						x.registrar ? tr('レジストラを取得', 'Registrar found') : tr('レジストラ情報が不明', 'Registrar unknown'),
-						tr('RDAP（HTTPS）で取得.環境によってはCORS/ネットワーク制限で失敗する場合がある', 'Fetched via RDAP (HTTPS). May fail due to CORS or network restrictions.'),
+						tr('RDAP（HTTPS）で取得。環境によってはCORS/ネットワーク制限で失敗する場合がある', 'Fetched via RDAP (HTTPS). May fail due to CORS or network restrictions.'),
 						lines.join('\n') + `\n\nRDAP: ${url}`
 					)
 				);
@@ -182,7 +182,7 @@ export function createDiagnosisRunner(deps) {
 					mkFinding(
 						'med',
 						tr('レジストラ（WHOIS/RDAP）の取得に失敗', 'Failed to retrieve registrar (WHOIS/RDAP)'),
-						tr('RDAP(HTTPS)の照会がブロック/失敗した可能性.ローカルで whois を実行して確認する', 'RDAP (HTTPS) lookup may be blocked/failed. Verify with local whois.'),
+						tr('RDAP(HTTPS)の照会がブロック/失敗した可能性。ローカルで whois を実行して確認する', 'RDAP (HTTPS) lookup may be blocked/failed. Verify with local whois.'),
 						`whois ${domain} | egrep -i 'Registrar|Sponsoring Registrar|Registrar URL|Registrar IANA|Name Server'`
 					)
 				);
@@ -192,7 +192,7 @@ export function createDiagnosisRunner(deps) {
 				mkFinding(
 					'low',
 					tr('レジストラ照会を省略', 'Registrar lookup skipped'),
-					tr('EnterpriseモードではRDAP照会を行わず,第三者通信を抑制', 'RDAP lookup is disabled in enterprise mode to reduce third-party requests.'),
+					tr('EnterpriseモードではRDAP照会を行わず、第三者通信を抑制', 'RDAP lookup is disabled in enterprise mode to reduce third-party requests.'),
 					''
 				)
 			);
@@ -215,7 +215,7 @@ export function createDiagnosisRunner(deps) {
 					mkFinding(
 						'med',
 						tr('DNSホスティング（権威DNS）の推定: 不明', 'DNS hosting (authoritative): Unknown'),
-						tr('NSレコードから一般的なDNSサービスを特定できない.レジストラ/管理画面でネームサーバの委任先を確認する', 'Could not identify a common DNS provider from NS. Check delegated name servers in your registrar/DNS console.'),
+						tr('NSレコードから一般的なDNSサービスを特定できない。レジストラ/管理画面でネームサーバの委任先を確認する', 'Could not identify a common DNS provider from NS. Check delegated name servers in your registrar/DNS console.'),
 						evidence
 					)
 				);
@@ -327,10 +327,10 @@ export function createDiagnosisRunner(deps) {
 						detailJaOr(
 							mkDetail(
 								'DMARC未設定',
-								'受信側に方針が伝わらず,なりすまし対策が弱い',
-								'p=none で開始し,段階的に強化する'
+								'受信側に方針が伝わらず、なりすまし対策が弱い',
+								'p=none で開始し、段階的に強化する'
 							),
-							tr('DMARCレコードが見つからない.まずは監視用(p=none)で開始し,段階的に強化する', 'No DMARC record found. Start with monitoring (p=none) and tighten gradually.')
+							tr('DMARCレコードが見つからない。まずは監視用(p=none)で開始し、段階的に強化する', 'No DMARC record found. Start with monitoring (p=none) and tighten gradually.')
 						),
 						`dig +short TXT _dmarc.${domain}`
 					)
@@ -343,9 +343,9 @@ export function createDiagnosisRunner(deps) {
 							mkDetail(
 								'導入の初手',
 								'誤判定を抑えながら強化できる',
-								'p=none で rua を受け取り,quarantine/reject へ段階移行'
+								'p=none で rua を受け取り、quarantine/reject へ段階移行'
 							),
-							tr('p=none で開始し,集計レポート(rua)を受け取れるメールボックスを用意してから quarantine/reject へ段階移行する', 'Start with p=none, set up a mailbox for aggregate reports (rua), then move to quarantine/reject in stages.')
+							tr('p=none で開始し、集計レポート(rua)を受け取れるメールボックスを用意してから quarantine/reject へ段階移行する', 'Start with p=none, set up a mailbox for aggregate reports (rua), then move to quarantine/reject in stages.')
 						),
 						isJa()
 							? `例:\n_dmarc.${domain}. 3600 IN TXT "v=DMARC1; p=none; rua=mailto:postmaster@${domain}"\n\n検証:\ndig +short TXT _dmarc.${domain}\n\n戻す:\n追加したTXTを削除`
@@ -365,12 +365,12 @@ export function createDiagnosisRunner(deps) {
 				const level = dmarcPolicy.posture.level;
 				const pLabel = p || tr('(不明)', '(unknown)');
 				let title = `DMARC: p=${pLabel}`;
-				let legacyDetail = tr('DMARCが設定されている.段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
+				let legacyDetail = tr('DMARCが設定されている。段階移行・例外の取り扱い・アラインメントを確認する', 'DMARC is configured. Review staged rollout, exceptions, and alignment.');
 				if (p === 'none') {
-					legacyDetail = tr('監視のみ(p=none).集計(rua)を確認しつつ quarantine/reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.');
+					legacyDetail = tr('監視のみ（p=none）。集計レポート（rua）を確認しながら quarantine、reject へ段階的に強化する', 'Monitoring only (p=none). Review rua reports and tighten to quarantine/reject in stages.');
 				}
 				if (p === 'quarantine') {
-					legacyDetail = tr('隔離(quarantine).運用影響を確認しつつ reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.');
+					legacyDetail = tr('隔離（quarantine）。運用への影響を確認しながら reject への段階移行を検討する', 'Quarantine. Review impact and consider moving to reject.');
 				}
 				if (p === 'reject') {
 					legacyDetail = tr('不整合のメールは拒否に指定されている。sp の明示的な指定を定義することを勧める', 'Reject. Review exceptions, forwarding, and subdomain (sp) policy.');
@@ -382,7 +382,7 @@ export function createDiagnosisRunner(deps) {
 				}
 				if (!rua) {
 					legacyDetail += isJa()
-						? '（rua が無い/空のため,運用上の可視化が弱い）'
+						? '（rua が無い/空のため、運用上の可視化が弱い）'
 						: ' (rua is missing/empty; operational visibility is limited)';
 				}
 				if (results.source.legacyTags.length) legacyDetail += `\n${t('label.note')}: ${results.source.legacyTags.join(', ')}`;
@@ -469,7 +469,7 @@ export function createDiagnosisRunner(deps) {
 								'送信元の制御ができない',
 								'送信元を棚卸ししてSPFを作成'
 							),
-							tr('SPFが無いと SPF 単体での送信元制御はできない.送信元（Microsoft 365/Google/各種SaaS）を洗い出してから安全に設計する', 'Without SPF you cannot control senders via SPF alone. Inventory your senders (Microsoft 365/Google/SaaS) and design safely.')
+							tr('SPFが無いと SPF 単体での送信元制御はできない。送信元（Microsoft 365/Google/各種SaaS）を洗い出してから安全に設計する', 'Without SPF you cannot control senders via SPF alone. Inventory your senders (Microsoft 365/Google/SaaS) and design safely.')
 						),
 						`dig +short TXT ${domain}`
 					)
@@ -502,7 +502,7 @@ export function createDiagnosisRunner(deps) {
 								'評価が不定になりやすい',
 								'1レコードに統合する'
 							),
-							tr('SPFは通常1レコードにまとめる必要がある.複数あると評価が不定になりやすい', 'SPF should usually be consolidated into a single record; multiple records can lead to ambiguous evaluation.')
+							tr('SPFは通常1レコードにまとめる必要がある。複数あると評価が不定になりやすい', 'SPF should usually be consolidated into a single record; multiple records can lead to ambiguous evaluation.')
 						),
 						spfRecords.join('\n')
 					)
@@ -524,7 +524,7 @@ export function createDiagnosisRunner(deps) {
 									'IP変更に弱く誤判定が起きやすい',
 									'include設計か変更管理を整備'
 								),
-								tr('IP直書きだけのSPFは,送信基盤のIP変更/追加に追随できないと正規メールがFailしやすい.複数SaaS（Microsoft 365/Google/配信サービス等）を使う場合は include/送信経路の棚卸しを推奨.固定IP運用なら,変更管理（追加/廃止時の手順）と段階導入（~all→-all）をセットで運用する', 'IP-only SPF is brittle: if sender IPs change and SPF is not updated, legitimate mail may fail. If you use multiple SaaS senders, prefer include-based design and a sender inventory. If you truly have fixed IPs, pair it with change-management and staged rollout (~all → -all).')
+								tr('IP直書きだけのSPFは、送信基盤のIP変更/追加に追随できないと正規メールがFailしやすい。複数SaaS（Microsoft 365/Google/配信サービス等）を使う場合は include/送信経路の棚卸しを推奨。固定IP運用なら、変更管理（追加/廃止時の手順）と段階導入（~all→-all）をセットで運用する', 'IP-only SPF is brittle: if sender IPs change and SPF is not updated, legitimate mail may fail. If you use multiple SaaS senders, prefer include-based design and a sender inventory. If you truly have fixed IPs, pair it with change-management and staged rollout (~all → -all).')
 							),
 							spf
 						)
@@ -600,7 +600,7 @@ export function createDiagnosisRunner(deps) {
 							tr('SPF: ptr を使用', 'SPF: uses ptr'),
 							detailJaOr(
 								mkDetail('ptr使用', '不安定/誤判定の原因になりやすい', '削除/代替を検討'),
-								tr('ptr は推奨されないことが多い（不安定/コスト/誤判定の原因）.可能なら削除/代替を検討', 'ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.')
+								tr('ptr は推奨されません（不安定さ、コスト、誤判定の原因になります）。可能なら削除または代替を検討してください', 'ptr is often discouraged (unstable/costly/false positives). Consider removing or replacing it.')
 							),
 							spf
 						)
@@ -613,7 +613,7 @@ export function createDiagnosisRunner(deps) {
 							tr('SPF: exists を使用', 'SPF: uses exists'),
 							detailJaOr(
 								mkDetail('exists使用', '複雑化しやすい', '必要性を確認しlookup上限に注意'),
-								tr('exists は複雑化しやすい.意図を明確にし,lookup上限に注意する', 'exists can add complexity. Make intent explicit and watch the lookup limit.')
+								tr('exists は複雑化しやすい。意図を明確にし、lookup上限に注意する', 'exists can add complexity. Make intent explicit and watch the lookup limit.')
 							),
 							spf
 						)
@@ -626,7 +626,7 @@ export function createDiagnosisRunner(deps) {
 							tr('SPF: redirect を使用', 'SPF: uses redirect'),
 							detailJaOr(
 								mkDetail('redirect使用', 'lookup上限に影響する', '上限(10)に注意'),
-								tr('一元管理に便利だが,lookup上限(10)に注意する', 'Useful for centralized management, but mind the lookup limit (10).')
+								tr('一元管理に便利だが、lookup上限(10)に注意する', 'Useful for centralized management, but mind the lookup limit (10).')
 							),
 							spf
 						)
@@ -653,7 +653,7 @@ export function createDiagnosisRunner(deps) {
 							tr('SPF: 文字列が長い', 'SPF: record is long'),
 							detailJaOr(
 								mkDetail('SPFが長い', 'TXT分割で誤結合の恐れ', '分割仕様を確認'),
-								tr('TXTは分割されることがある.DNS応答の結合や設定画面の分割仕様に注意', 'TXT records may be split. Ensure your tooling/UI correctly joins segments.')
+								tr('TXTは分割されることがある。DNS応答の結合や設定画面の分割仕様に注意', 'TXT records may be split. Ensure your tooling/UI correctly joins segments.')
 							),
 							`maxSegmentLen≈${maxSeg}\n${spf}`
 						)
@@ -813,7 +813,7 @@ export function createDiagnosisRunner(deps) {
 									'署名の検証ができない',
 									'送信基盤でselectorを確認し公開'
 								),
-								tr('一般的な selector（selector1/selector2/default/google）の TXT/CNAME では v=DKIM1 を確認できなかった.DKIM は <selector>._domainkey.<your-domain> 配下に公開し,apex の TXT/SPF に DKIM が出ないのは仕様.Microsoft 365 は selector1/selector2 の CNAME が多く,Google Workspace は google._domainkey の TXT が一般的.送信基盤の設定で実際の selector を確認.※DKIM selector は DNS から列挙できないため,カスタム selector だと本ツールでは検出できず FN の可能性がある', 'No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.')
+								tr('一般的な selector（selector1/selector2/default/google）の TXT/CNAME では v=DKIM1 を確認できなかった。DKIM は <selector>._domainkey.<your-domain> 配下に公開し、apex の TXT/SPF に DKIM が出ないのは仕様。Microsoft 365 は selector1/selector2 の CNAME が多く、Google Workspace は google._domainkey の TXT が一般的。送信基盤の設定で実際の selector を確認。※DKIM selector は DNS から列挙できないため、カスタム selector だと本ツールでは検出できず FN の可能性がある', 'No v=DKIM1 found on common selectors (selector1/selector2/default/google) via TXT/CNAME. DKIM is published under <selector>._domainkey.<your-domain> and does not appear in apex TXT/SPF by design. Microsoft 365 often uses CNAMEs (selector1/selector2) and Google Workspace often uses TXT (e.g. google._domainkey). Confirm the actual selector in your sender settings. Note: DKIM selectors are not enumerable via DNS, so custom selectors may cause false negatives in this tool.')
 							),
 							dkimLookupHints(domain)
 						)
@@ -942,7 +942,7 @@ export function createDiagnosisRunner(deps) {
 					mkFinding(
 						'low',
 						tr('BIMI なし（任意）', 'BIMI missing (optional)'),
-						tr('BIMIはメールクライアントのロゴ表示（ブランド表示）に関係する仕組み.必須ではないが,導入すると受信者の視認性が上がる場合がある', 'BIMI is used by some mail clients to display a brand logo. It is optional, but can improve recognition for recipients.'),
+						tr('BIMIはメールクライアントのロゴ表示（ブランド表示）に関係する仕組み。必須ではないが、導入すると受信者の視認性が上がる場合がある', 'BIMI is used by some mail clients to display a brand logo. It is optional, but can improve recognition for recipients.'),
 						`dig +short TXT default._bimi.${domain}\n(did not find v=BIMI1; also checked _bimi.${domain})`
 					)
 				);
@@ -1092,7 +1092,7 @@ export function createDiagnosisRunner(deps) {
 					: '';
 				const note = problems.length
 					? `<div class="mt-8">${esc(t('label.note'))}: ${esc(problems.join(' / '))}</div>${checksBlock}`
-					: `<div class="mt-8">${esc(tr('BIMIレコードを検出しました.', 'BIMI record detected.'))}</div>${checksBlock}`;
+					: `<div class="mt-8">${esc(tr('BIMIレコードを検出しました。', 'BIMI record detected.'))}</div>${checksBlock}`;
 				results.bimi.findings.push(
 					mkFindingRich(
 						level,
@@ -1104,7 +1104,7 @@ export function createDiagnosisRunner(deps) {
 			}
 		} catch (error) {
 			results.errors.push(`BIMI 取得に失敗: ${String(error)}`);
-			results.bimi.findings.push(mkFinding('low', tr('BIMIの取得に失敗（任意）', 'Failed to retrieve BIMI (optional)'), tr('公開DNS照会が失敗した可能性（BIMIは任意）.ネットワーク制限の可能性もある', 'Public DNS lookup may have failed (BIMI is optional). Network restrictions may apply.'), `dig +short TXT default._bimi.${domain}\ndig +short TXT _bimi.${domain}`));
+			results.bimi.findings.push(mkFinding('low', tr('BIMIの取得に失敗（任意）', 'Failed to retrieve BIMI (optional)'), tr('公開DNS照会に失敗した可能性があります（BIMIは任意です）。ネットワーク制限も確認してください', 'Public DNS lookup may have failed (BIMI is optional). Network restrictions may apply.'), `dig +short TXT default._bimi.${domain}\ndig +short TXT _bimi.${domain}`));
 		}
 
 		try {
@@ -1114,13 +1114,13 @@ export function createDiagnosisRunner(deps) {
 			results.mx.isNullMx = mxClassification.isNullMx;
 			results.mx.nullMxConflict = mxClassification.hasNullMxConflict;
 			if (!mx.length) {
-				results.mx.findings.push(mkFinding('med', tr('MX が見つからない', 'MX not found'), tr('業務メール用ドメインでMXが無い場合,受信が別ドメイン/別経路の可能性.設計を確認する', 'If this is a mail domain and MX is missing, inbound mail may use another domain/path. Review the design.'), `dig +short MX ${domain}`));
+				results.mx.findings.push(mkFinding('med', tr('MX が見つからない', 'MX not found'), tr('業務メール用ドメインでMXが無い場合、受信が別ドメイン/別経路の可能性。設計を確認する', 'If this is a mail domain and MX is missing, inbound mail may use another domain/path. Review the design.'), `dig +short MX ${domain}`));
 			} else if (mxClassification.isNullMx) {
 				results.mx.findings.push(mkFinding('low', t('mx.null.title'), t('mx.null.detail'), mx.join('\n')));
 			} else if (mxClassification.hasNullMxConflict) {
 				results.mx.findings.push(mkFinding('high', t('mx.nullConflict.title'), t('mx.nullConflict.detail'), mx.join('\n')));
 			} else {
-				results.mx.findings.push(mkFinding('low', tr('MX を確認', 'Check MX'), tr('MXは受信先（メールサーバ）を示す.利用SaaS（Microsoft 365/Google等）と整合するか確認する', 'MX indicates inbound mail servers. Confirm it matches your provider (Microsoft 365/Google/etc.).'), mx.join('\n')));
+				results.mx.findings.push(mkFinding('low', tr('MX を確認', 'Check MX'), tr('MXは受信先（メールサーバ）を示す。利用SaaS（Microsoft 365/Google等）と整合するか確認する', 'MX indicates inbound mail servers. Confirm it matches your provider (Microsoft 365/Google/etc.).'), mx.join('\n')));
 			}
 			explicitlyNoMailProfile = isExplicitNoMailProfile(results);
 			if (explicitlyNoMailProfile) {
@@ -1162,9 +1162,9 @@ export function createDiagnosisRunner(deps) {
 		if (results.mx.isNullMx) {
 			results.mta_sts.findings.push(mkFinding('low', t('mx.transportNotApplicable.title'), t('mx.transportNotApplicable.detail'), 'MX 0 .'));
 		} else if (!results.mta_sts.record) {
-			results.mta_sts.findings.push(mkFinding('med', tr('MTA-STS なし（TLS強制の仕組みなし）', 'MTA-STS missing (no TLS enforcement)'), tr('受信側のTLSを強制したい場合に有効.まずはTLS-RPTと併せて段階導入を検討', 'Useful if you want to enforce TLS for inbound mail. Consider staged rollout alongside TLS-RPT.'), `dig +short TXT _mta-sts.${domain}`));
+			results.mta_sts.findings.push(mkFinding('med', tr('MTA-STS なし（TLS強制の仕組みなし）', 'MTA-STS missing (no TLS enforcement)'), tr('受信側のTLSを強制したい場合に有効。まずはTLS-RPTと併せて段階導入を検討', 'Useful if you want to enforce TLS for inbound mail. Consider staged rollout alongside TLS-RPT.'), `dig +short TXT _mta-sts.${domain}`));
 		} else {
-			results.mta_sts.findings.push(mkFinding('low', tr('MTA-STS: TXTあり', 'MTA-STS: TXT present'), tr('TXT（id）設定を確認.別途 https://mta-sts.<domain>/.well-known/mta-sts.txt の公開が必要', 'Confirm the TXT (id). You also need to host https://mta-sts.<domain>/.well-known/mta-sts.txt'), `TXT _mta-sts.${domain}\n${results.mta_sts.record}`));
+			results.mta_sts.findings.push(mkFinding('low', tr('MTA-STS: TXTあり', 'MTA-STS: TXT present'), tr('TXT（id）設定を確認。別途 https://mta-sts.<domain>/.well-known/mta-sts.txt の公開が必要', 'Confirm the TXT (id). You also need to host https://mta-sts.<domain>/.well-known/mta-sts.txt'), `TXT _mta-sts.${domain}\n${results.mta_sts.record}`));
 		}
 
 		if (!results.mx.isNullMx && !results.mta_sts.tlsrpt) {
@@ -1177,7 +1177,7 @@ export function createDiagnosisRunner(deps) {
 			const caa = extractCAA(await dohQuery(domain, 'CAA'));
 			results.caa.records = caa;
 			if (!caa.length) {
-				results.caa.findings.push(mkFinding('low', tr('CAA なし（任意/ガバナンス）', 'CAA missing (optional/governance)'), tr('発行を許可するCAを制限したい場合に有効.成熟度に応じて導入を検討', 'Useful if you want to restrict which CAs may issue certificates. Consider adoption based on maturity.'), `dig +short CAA ${domain}`));
+				results.caa.findings.push(mkFinding('low', tr('CAA なし（任意/ガバナンス）', 'CAA missing (optional/governance)'), tr('発行を許可するCAを制限したい場合に有効。成熟度に応じて導入を検討', 'Useful if you want to restrict which CAs may issue certificates. Consider adoption based on maturity.'), `dig +short CAA ${domain}`));
 			} else {
 				const analysis = analyzeCaaRecords(caa);
 				const yes = tr('あり', 'yes');
@@ -1195,7 +1195,7 @@ export function createDiagnosisRunner(deps) {
 			}
 		} catch {
 			results.caa.records = [];
-			results.caa.findings.push(mkFinding('low', tr('CAA 未確認（応答なし）', 'CAA unverified (no response)'), tr('CAAは任意.DNS応答の都合で取得できない場合がある', 'CAA is optional. It may be unavailable due to DNS response issues.'), `dig +short CAA ${domain}`));
+			results.caa.findings.push(mkFinding('low', tr('CAA 未確認（応答なし）', 'CAA unverified (no response)'), tr('CAAは任意。DNS応答の都合で取得できない場合がある', 'CAA is optional. It may be unavailable due to DNS response issues.'), `dig +short CAA ${domain}`));
 		}
 
 		try {
@@ -1210,9 +1210,9 @@ export function createDiagnosisRunner(deps) {
 		}
 
 		if (results.dnssec.ds && results.dnssec.ds.length) {
-			results.dnssec.findings.push(mkFinding('low', tr('DNSSEC: DSあり', 'DNSSEC: DS present'), tr('DNSSECが有効の可能性.運用・更新（KSK/ZSK）手順を確認する', 'DNSSEC may be enabled. Ensure you have procedures for operation and key rollover (KSK/ZSK).'), results.dnssec.ds.slice(0, 3).join('\n')));
+			results.dnssec.findings.push(mkFinding('low', tr('DNSSEC: DSあり', 'DNSSEC: DS present'), tr('DNSSECが有効の可能性。運用・更新（KSK/ZSK）手順を確認する', 'DNSSEC may be enabled. Ensure you have procedures for operation and key rollover (KSK/ZSK).'), results.dnssec.ds.slice(0, 3).join('\n')));
 		} else {
-			results.dnssec.findings.push(mkFinding('low', tr('DNSSEC: DSなし（任意/方針次第）', 'DNSSEC: DS missing (optional/policy)'), tr('ポリシーや要件により導入判断.メール認証（SPF/DKIM/DMARC）とは別軸', 'Adoption depends on policy/requirements. Separate concern from email auth (SPF/DKIM/DMARC).'), `dig +short DS ${domain}`));
+			results.dnssec.findings.push(mkFinding('low', tr('DNSSEC: DSなし（任意/方針次第）', 'DNSSEC: DS missing (optional/policy)'), tr('ポリシーや要件により導入判断。メール認証（SPF/DKIM/DMARC）とは別軸', 'Adoption depends on policy/requirements. Separate concern from email auth (SPF/DKIM/DMARC).'), `dig +short DS ${domain}`));
 		}
 
 		if (allowExternalProbes) {
@@ -1274,7 +1274,7 @@ export function createDiagnosisRunner(deps) {
 						if (item.aaaa && item.aaaa.length) lines.push(`AAAA ${item.aaaa.slice(0, 2).join(', ')}`);
 						return `${item.name}\n  ${lines.join('\n  ')}`;
 					}).join('\n\n');
-					results.subdomains.findings.push(mkFinding('low', tr('サブドメイン探索（小規模）', 'Subdomain check (small)'), tr('代表的な候補だけを確認した.管理下ドメイン,または許可を得た範囲でのみ使用する', 'Checked only a small set of common names. Use only on domains you manage or have permission to test.'), evidence));
+					results.subdomains.findings.push(mkFinding('low', tr('サブドメイン探索（小規模）', 'Subdomain check (small)'), tr('代表的な候補だけを確認した。管理下ドメイン、または許可を得た範囲でのみ使用する', 'Checked only a small set of common names. Use only on domains you manage or have permission to test.'), evidence));
 				}
 			} catch (error) {
 				results.errors.push(`サブドメイン探索に失敗: ${String(error)}`);
@@ -1293,7 +1293,7 @@ export function createDiagnosisRunner(deps) {
 				results.priority.push({
 					level: 'high',
 					title: tr('DMARC が未設定', 'DMARC missing'),
-					action: tr('まず p=none で開始し,rua を受け取れる状態にしてから段階的に強化', 'Start with p=none, set up rua reporting, then tighten in stages')
+					action: tr('まず p=none で開始し、rua を受け取れる状態にしてから段階的に強化', 'Start with p=none, set up rua reporting, then tighten in stages')
 				});
 				const dmarcValue = `v=DMARC1; p=none; rua=mailto:postmaster@${domain}`;
 				pushFixup({

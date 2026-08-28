@@ -905,6 +905,26 @@ button:disabled:hover {
   gap: 10px;
 }
 
+.advanced-options {
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.025);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.advanced-options > summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.advanced-options-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .resolver-panel {
   padding: 14px;
   border-radius: 18px;
@@ -990,6 +1010,45 @@ html[data-resolver-mode="auto"] #resolver-error {
 .rua-code-block {
   white-space: pre-wrap;
   margin-top: 6px;
+}
+
+.rua-status-card {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin-top: 18px;
+}
+
+.rua-status-card h2 {
+  margin: 0 0 8px;
+}
+
+.rua-status-action {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.rua-technical-details {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rua-technical-details > summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
 }
 
 .results-shell {
@@ -1612,14 +1671,46 @@ html[data-resolver-mode="auto"] #resolver-error {
   }
 
   .brand-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
     width: 100%;
     max-width: 100%;
     margin-left: 0;
-    justify-content: space-between;
+  }
+
+  .brand-tool-link {
+    min-width: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .brand-actions .brand-tool-link:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .brand-actions .brand-tool-link:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .lang-switch {
-    max-width: calc(100% - 80px);
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
+  .brand-github {
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .hero {

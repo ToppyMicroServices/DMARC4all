@@ -1,4 +1,4 @@
-import { evaluateAlignment } from './authentication-core.js?v=20';
+import { evaluateAlignment } from './authentication-core.js?v=21';
 
 export const MAX_MESSAGE_INPUT_BYTES = 1024 * 1024;
 export const MAX_HEADER_BYTES = 256 * 1024;
@@ -37,13 +37,14 @@ function parseTagList(value) {
 
 function parseAuthenticationResults(value) {
 	const output = { raw: String(value || ''), dmarc: [], spf: [], dkim: [] };
-	for (const method of ['dmarc', 'spf', 'dkim']) {
-		const resultMatch = new RegExp(`\\b${method}=([a-z0-9_-]+)`, 'ig').exec(value);
+	for (const segment of String(value || '').split(';')) {
+		const resultMatch = /\b(dmarc|spf|dkim)(?:\/\d+)?\s*=\s*([a-z0-9_-]+)/i.exec(segment);
 		if (!resultMatch) continue;
+		const method = resultMatch[1].toLowerCase();
 		const domainPattern = method === 'spf' ? /\bsmtp\.mailfrom=([^\s;]+)/i : new RegExp(`\\bheader\\.${method === 'dkim' ? 'd' : 'from'}=([^\\s;]+)`, 'i');
-		const domainMatch = domainPattern.exec(value);
+		const domainMatch = domainPattern.exec(segment);
 		output[method].push({
-			result: resultMatch[1].toLowerCase(),
+			result: resultMatch[2].toLowerCase(),
 			domain: canonicalDomain(domainMatch && domainMatch[1]) || null
 		});
 	}

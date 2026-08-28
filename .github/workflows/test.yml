@@ -42,6 +42,12 @@ jobs:
       - name: Run regression tests
         run: npm test
 
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser and responsive tests
+        run: npm run test:browser
+
   action-smoke:
     needs: test
     runs-on: ubuntu-latest

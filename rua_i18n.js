@@ -18,7 +18,7 @@
 	'use strict';
 
 	const LANG_KEY = 'toppy-lang';
-	const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko'];
+	const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko', 'bn'];
 
 	let currentLang = 'ja';
 

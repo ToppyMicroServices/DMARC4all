@@ -1985,4 +1985,106 @@
     'rua.p2.li3': 'အစီရင်ခံအီးမေးလ်၏ DKIM သို့မဟုတ် SPF ရလဒ်ကဲ့သို့ ယုံကြည်ရမှုဆိုင်ရာ အချက်များကို လိုအပ်သလို ပြပြီး သိရှိထားသော အစီရင်ခံအဖွဲ့နှင့် မသိရသေးသော အဖွဲ့ကို ခွဲခြားပါ။',
 
   });
+
+  const statusCopy = {
+    ja: {
+      'rua.status.title': '現在利用できる機能',
+      'rua.tagline': '設計目標：無料トライアルは30日で自動停止し、継続には明示的な同意を求めます。以下は現在の提供状況ではなく、サービスの技術・運用設計です。',
+      'rua.status.body': 'このページは RUA サービスの設計資料です。このページからサービスの申込みや利用開始はできません。手元の RUA レポートは、ブラウザ内で RUA Analyzer を使って解析できます。',
+      'rua.status.action': 'RUA Analyzer を開く',
+      'rua.technical.summary': '技術仕様・運用設計を表示'
+    },
+    en: {
+      'rua.status.title': 'Available now',
+      'rua.tagline': 'Design target: a free trial stops after 30 days unless the user explicitly continues. The details below describe the technical and operational design, not current service availability.',
+      'rua.status.body': 'This page documents the RUA service design. It does not provide enrollment or activation. You can analyze RUA reports you already have with the browser-local RUA Analyzer.',
+      'rua.status.action': 'Open RUA Analyzer',
+      'rua.technical.summary': 'Show technical and operational design'
+    },
+    es: {
+      'rua.status.title': 'Disponible ahora',
+      'rua.tagline': 'Objetivo de diseño: la prueba gratuita se detiene a los 30 días salvo continuación explícita. Los detalles siguientes describen el diseño técnico y operativo, no la disponibilidad actual del servicio.',
+      'rua.status.body': 'Esta página documenta el diseño del servicio RUA. No permite registrarse ni activarlo. Puedes analizar los informes RUA que ya tengas con RUA Analyzer, que funciona en el navegador.',
+      'rua.status.action': 'Abrir RUA Analyzer',
+      'rua.technical.summary': 'Mostrar el diseño técnico y operativo'
+    },
+    de: {
+      'rua.status.title': 'Derzeit verfügbar',
+      'rua.tagline': 'Entwurfsziel: Der kostenlose Test endet nach 30 Tagen, sofern er nicht ausdrücklich fortgesetzt wird. Die folgenden Angaben beschreiben den technischen und betrieblichen Entwurf, nicht die aktuelle Verfügbarkeit.',
+      'rua.status.body': 'Diese Seite dokumentiert den Entwurf des RUA-Dienstes. Eine Anmeldung oder Aktivierung ist hier nicht möglich. Vorhandene RUA-Berichte kannst du mit dem lokal im Browser laufenden RUA Analyzer auswerten.',
+      'rua.status.action': 'RUA Analyzer öffnen',
+      'rua.technical.summary': 'Technischen und betrieblichen Entwurf anzeigen'
+    },
+    ko: {
+      'rua.status.title': '현재 사용할 수 있는 기능',
+      'rua.tagline': '설계 목표: 사용자가 명시적으로 계속하지 않으면 무료 체험은 30일 후 종료됩니다. 아래 내용은 현재 서비스 제공 상태가 아니라 기술 및 운영 설계를 설명합니다.',
+      'rua.status.body': '이 페이지는 RUA 서비스 설계 문서입니다. 여기에서 서비스 신청이나 활성화는 할 수 없습니다. 이미 가지고 있는 RUA 보고서는 브라우저에서 실행되는 RUA Analyzer로 분석할 수 있습니다.',
+      'rua.status.action': 'RUA Analyzer 열기',
+      'rua.technical.summary': '기술 및 운영 설계 보기'
+    },
+    vi: {
+      'rua.status.title': 'Hiện có thể sử dụng',
+      'rua.tagline': 'Mục tiêu thiết kế: bản dùng thử miễn phí dừng sau 30 ngày nếu người dùng không chủ động tiếp tục. Nội dung dưới đây mô tả thiết kế kỹ thuật và vận hành, không phải tình trạng cung cấp hiện tại.',
+      'rua.status.body': 'Trang này mô tả thiết kế dịch vụ RUA, không cung cấp đăng ký hoặc kích hoạt. Bạn có thể phân tích báo cáo RUA đang có bằng RUA Analyzer chạy cục bộ trong trình duyệt.',
+      'rua.status.action': 'Mở RUA Analyzer',
+      'rua.technical.summary': 'Hiện thiết kế kỹ thuật và vận hành'
+    },
+    th: {
+      'rua.status.title': 'ใช้งานได้ในขณะนี้',
+      'rua.tagline': 'เป้าหมายการออกแบบ: ช่วงทดลองใช้ฟรีจะหยุดหลัง 30 วัน เว้นแต่ผู้ใช้ยืนยันให้ทำงานต่อ รายละเอียดด้านล่างเป็นการออกแบบทางเทคนิคและการดำเนินงาน ไม่ใช่สถานะการเปิดให้บริการในปัจจุบัน',
+      'rua.status.body': 'หน้านี้เป็นเอกสารการออกแบบบริการ RUA และไม่สามารถสมัครหรือเปิดใช้บริการได้ที่นี่ คุณสามารถวิเคราะห์รายงาน RUA ที่มีอยู่ด้วย RUA Analyzer ซึ่งทำงานภายในเบราว์เซอร์',
+      'rua.status.action': 'เปิด RUA Analyzer',
+      'rua.technical.summary': 'แสดงการออกแบบด้านเทคนิคและการดำเนินงาน'
+    },
+    km: {
+      'rua.status.title': 'អ្វីដែលអាចប្រើបានឥឡូវនេះ',
+      'rua.tagline': 'គោលដៅរចនា៖ ការសាកល្បងឥតគិតថ្លៃឈប់បន្ទាប់ពី 30 ថ្ងៃ លុះត្រាតែអ្នកប្រើបញ្ជាក់បន្ត។ ព័ត៌មានខាងក្រោមពិពណ៌នាអំពីការរចនាបច្ចេកទេស និងប្រតិបត្តិការ មិនមែនស្ថានភាពផ្តល់សេវាបច្ចុប្បន្នទេ។',
+      'rua.status.body': 'ទំព័រនេះពិពណ៌នាអំពីការរចនាសេវា RUA ប៉ុណ្ណោះ ហើយមិនអាចចុះឈ្មោះ ឬបើកសេវាបានទេ។ អ្នកអាចវិភាគរបាយការណ៍ RUA ដែលមានរួចដោយ RUA Analyzer ដែលដំណើរការក្នុងកម្មវិធីរុករក។',
+      'rua.status.action': 'បើក RUA Analyzer',
+      'rua.technical.summary': 'បង្ហាញការរចនាបច្ចេកទេស និងប្រតិបត្តិការ'
+    },
+    my: {
+      'rua.status.title': 'ယခုအသုံးပြုနိုင်သည့် လုပ်ဆောင်ချက်',
+      'rua.tagline': 'ဒီဇိုင်းရည်မှန်းချက်အရ အသုံးပြုသူက ဆက်လုပ်ရန် အတိအလင်းမရွေးလျှင် အခမဲ့ trial ကို 30 ရက်အကြာ ရပ်မည်။ အောက်ပါအချက်များသည် လက်ရှိဝန်ဆောင်မှုပေးနေမှုမဟုတ်ဘဲ နည်းပညာနှင့် လည်ပတ်မှုဒီဇိုင်းကို ဖော်ပြသည်။',
+      'rua.status.body': 'ဤစာမျက်နှာသည် RUA ဝန်ဆောင်မှုဒီဇိုင်းကို ရှင်းပြထားခြင်းသာ ဖြစ်ပြီး ဝန်ဆောင်မှုစာရင်းသွင်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း မပြုနိုင်ပါ။ ရှိပြီးသား RUA report များကို browser အတွင်း အလုပ်လုပ်သော RUA Analyzer ဖြင့် စစ်ဆေးနိုင်သည်။',
+      'rua.status.action': 'RUA Analyzer ဖွင့်ရန်',
+      'rua.technical.summary': 'နည်းပညာနှင့် လည်ပတ်မှုဒီဇိုင်းကို ပြရန်'
+    },
+    id: {
+      'rua.status.title': 'Tersedia sekarang',
+      'rua.tagline': 'Target desain: uji coba gratis berhenti setelah 30 hari kecuali pengguna secara tegas melanjutkannya. Rincian berikut menjelaskan desain teknis dan operasional, bukan ketersediaan layanan saat ini.',
+      'rua.status.body': 'Halaman ini mendokumentasikan desain layanan RUA. Pendaftaran atau aktivasi tidak tersedia di sini. Laporan RUA yang sudah Anda miliki dapat dianalisis dengan RUA Analyzer yang berjalan lokal di browser.',
+      'rua.status.action': 'Buka RUA Analyzer',
+      'rua.technical.summary': 'Tampilkan desain teknis dan operasional'
+    },
+    et: {
+      'rua.status.title': 'Praegu kasutatav',
+      'rua.tagline': 'Kavandi eesmärk: tasuta prooviperiood lõpeb 30 päeva pärast, kui kasutaja seda selgelt ei jätka. Allolev kirjeldab tehnilist ja töökorralduslikku kavandit, mitte teenuse praegust saadavust.',
+      'rua.status.body': 'See leht kirjeldab RUA teenuse kavandit. Siin ei saa teenusega liituda ega seda aktiveerida. Olemasolevaid RUA aruandeid saab analüüsida brauseris lokaalselt töötava RUA Analyzeriga.',
+      'rua.status.action': 'Ava RUA Analyzer',
+      'rua.technical.summary': 'Näita tehnilist ja töökorralduslikku kavandit'
+    },
+    zh: {
+      'rua.status.title': '当前可用功能',
+      'rua.tagline': '设计目标：除非用户明确选择继续，否则免费试用在30天后停止。以下内容介绍技术和运营设计，并不表示服务当前已经开放。',
+      'rua.status.body': '本页介绍 RUA 服务的设计，不能在此申请或启用服务。你可以使用在浏览器本地运行的 RUA Analyzer 分析已有的 RUA 报告。',
+      'rua.status.action': '打开 RUA Analyzer',
+      'rua.technical.summary': '显示技术与运营设计'
+    },
+    ru: {
+      'rua.status.title': 'Доступно сейчас',
+      'rua.tagline': 'Цель проекта: бесплатный период прекращается через 30 дней без явного продления. Ниже описана техническая и эксплуатационная схема, а не текущая доступность службы.',
+      'rua.status.body': 'Эта страница описывает проект службы RUA. Зарегистрироваться или активировать службу здесь нельзя. Имеющиеся отчёты RUA можно проанализировать в RUA Analyzer, который работает локально в браузере.',
+      'rua.status.action': 'Открыть RUA Analyzer',
+      'rua.technical.summary': 'Показать техническую и эксплуатационную схему'
+    },
+    bn: {
+      'rua.status.title': 'এখন যা ব্যবহার করা যায়',
+      'rua.tagline': 'Design লক্ষ্য: user স্পষ্টভাবে চালিয়ে না গেলে free trial 30 দিন পর বন্ধ হবে। নিচের তথ্য বর্তমান service availability নয়; এটি technical ও operational design বর্ণনা করে।',
+      'rua.status.body': 'এই পৃষ্ঠায় RUA service-এর design বর্ণনা করা হয়েছে। এখান থেকে service-এ নিবন্ধন বা activation করা যায় না। আপনার কাছে থাকা RUA report browser-এর ভেতরে চলা RUA Analyzer দিয়ে বিশ্লেষণ করতে পারেন।',
+      'rua.status.action': 'RUA Analyzer খুলুন',
+      'rua.technical.summary': 'প্রযুক্তিগত ও পরিচালন design দেখুন'
+    }
+  };
+  for (const [lang, entries] of Object.entries(statusCopy)) add(lang, entries);
 })();

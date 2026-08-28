@@ -459,3 +459,29 @@ for (const [language, sections] of Object.entries(AUTHENTICATION_GRAPH_DISPLAY_M
 for (const [language, messages] of Object.entries(AUTHENTICATION_GRAPH_ERROR_MESSAGES)) {
 	Object.assign(AUTHENTICATION_GRAPH_MESSAGES[language], messages);
 }
+
+AUTHENTICATION_GRAPH_MESSAGES.bn = {
+	'page.documentTitle': 'Authentication Supply Chain | DMARC4all', 'page.pill': 'Evidence আলাদা করে দেখানো', 'page.title': 'SPF / DKIM Authentication Supply Chain',
+	'page.intro': 'DNS-এ ঘোষিত infrastructure-এর সঙ্গে স্থানীয় observation তুলনা করুন। নিশ্চিত না হওয়া reference unresolved হিসেবেই থাকে।',
+	'page.load': 'Export করা JSON load করুন', 'page.input': 'Graph input JSON', 'page.example': 'উদাহরণ load করুন', 'page.build': 'Graph তৈরি করুন',
+	'page.hint': 'Portable diagnosis, Header Analyzer, RUA Analyzer, CLI check, snapshot বা RUA JSON export এক বা একাধিক load করুন। সব input একই domain-এর হতে হবে এবং স্থানীয়ভাবে process হয়।',
+	'page.waiting': 'Evidence-এর অপেক্ষায়।', 'page.back': 'DNS বিশ্লেষণে ফিরুন', 'page.rua': 'RUA Analyzer',
+	'graph.aria': 'Authentication graph builder', 'graph.none': 'কোনো file নির্বাচিত নয়।', 'graph.svg': '{domain}-এর authentication supply chain',
+	'graph.tableTitle': 'Accessible evidence table', 'graph.tableCaption': '{domain}-এর authentication evidence', 'graph.type': 'ধরন', 'graph.value': 'মান',
+	'graph.state': 'অবস্থা', 'graph.confidence': 'নিশ্চয়তার মাত্রা', 'graph.evidence': 'Evidence', 'graph.notSupplied': 'দেওয়া হয়নি', 'graph.findings': 'Finding',
+	'graph.errorTitle': 'Graph তৈরি করা যায়নি', 'graph.selectLimit': 'সর্বোচ্চ {count}টি JSON file নির্বাচন করুন।', 'graph.byteLimit': 'Graph input মোট 2 MiB limit ছাড়িয়েছে।',
+	'graph.noInput': 'JSON paste করুন বা কমপক্ষে একটি JSON export নির্বাচন করুন।',
+	'page.description': 'ঘোষিত SPF ও DKIM infrastructure-এর পাশে স্থানীয় message ও RUA observation দেখুন।', 'page.language': 'ভাষা', 'page.building': 'Graph তৈরি হচ্ছে…',
+	'graph.resultAria': 'Authentication graph result', 'graph.relationshipsTitle': 'Relationship table', 'graph.relationshipsCaption': '{domain}-এর authentication relationship',
+	'graph.source': 'Source', 'graph.relation': 'সম্পর্ক', 'graph.target': 'Target', 'graph.invalidJson': '{source}-এর JSON syntax অবৈধ।',
+	'kind.domain': 'Domain', 'kind.ip-range': 'IP range', 'kind.dns-lookup': 'DNS lookup', 'kind.dkim-selector': 'DKIM selector', 'kind.sender-ip': 'Sender IP', 'kind.message-hop': 'Message hop',
+	'state.declared': 'ঘোষিত', 'state.observed': 'Observed', 'state.unresolved': 'Unresolved', 'state.inferred': 'অনুমান করা',
+	'confidence.high': 'উচ্চ', 'confidence.medium': 'মাঝারি', 'confidence.low': 'কম', 'severity.high': 'উচ্চ', 'severity.medium': 'মাঝারি', 'severity.low': 'কম', 'severity.info': 'তথ্য',
+	'relation.include': 'SPF include', 'relation.redirect': 'SPF redirect', 'relation.ip4': 'SPF IPv4', 'relation.ip6': 'SPF IPv6', 'relation.a': 'SPF A lookup', 'relation.mx': 'SPF MX lookup', 'relation.ptr': 'SPF PTR lookup', 'relation.exists': 'SPF exists lookup',
+	'relation.dkim-selector': 'DKIM selector', 'relation.observed-from': 'Observed sender', 'relation.dkim-observed': 'DKIM signing domain (RUA)', 'relation.spf-observed': 'SPF domain (RUA)',
+	'relation.header-path': 'Header message path', 'relation.dkim-signature-reported': 'Reported DKIM signature', 'relation.dkim-result-reported': 'Reported DKIM result', 'relation.spf-result-reported': 'Reported SPF result',
+	'legend.declared': 'প্রকাশিত বা দেওয়া DNS configuration', 'legend.observed': 'দেওয়া message বা aggregate-report evidence-এ দেখা গেছে', 'legend.unresolved': 'Reference আছে, কিন্তু evidence-এ নিশ্চিত নয়', 'legend.inferred': 'Derived relationship; সরাসরি protocol evidence নয়',
+	'graph.inputCount': '1 থেকে {count}টির মধ্যে graph input দিন।', 'graph.invalidObject': 'প্রতিটি graph input একটি JSON object হতে হবে।', 'graph.ruaDomainMissing': 'প্রতিটি RUA report-এ policy domain থাকতে হবে।',
+	'graph.ruaDomainMismatch': 'সব RUA report ও graph input-এ একই policy domain থাকতে হবে।', 'graph.domainMismatch': 'সব graph input একই domain-এর হতে হবে।', 'graph.rootMissing': 'Graph input-এ একটি root domain থাকতে হবে।',
+	'graph.safetyLimit': 'Graph input safety limit ছাড়িয়েছে।', 'graph.invalidNode': 'Graph input-এ invalid node value আছে।', 'graph.unexpected': 'Graph input যাচাই করা যায়নি।'
+};

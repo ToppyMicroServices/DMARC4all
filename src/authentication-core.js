@@ -1,4 +1,4 @@
-import { parseDmarcTags } from './diagnostics.js?v=20';
+import { parseDmarcTags } from './diagnostics.js?v=21';
 
 export const DIAGNOSIS_RESULT_SCHEMA_VERSION = '0.1.0';
 export const READINESS_RESULT_SCHEMA_VERSION = '1.0.0';
@@ -312,6 +312,12 @@ export function readinessEvidenceFromDiagnosis(diagnosis = {}, ruaSummary = null
 		.map((value) => String(value || '').toLowerCase())
 		.find((value) => DMARC_POLICIES.has(value)) || 'unknown';
 	const summary = ruaSummary && typeof ruaSummary === 'object' ? ruaSummary : null;
+	const knownSenderFailures = Array.isArray(summary && summary.failureContributors)
+		? summary.failureContributors.filter((item) => {
+			const reasons = stringArray(item && item.reasons);
+			return reasons.includes('spf-not-aligned') && reasons.includes('dkim-not-aligned');
+		}).length
+		: 0;
 	return {
 		dmarcRecord,
 		effectivePolicy: diagnosis && diagnosis.authentication
@@ -321,11 +327,11 @@ export function readinessEvidenceFromDiagnosis(diagnosis = {}, ruaSummary = null
 		confirmedDkimSelectors: observations.dkim && observations.dkim.confirmedSelectors,
 		dnsErrors: diagnosis && diagnosis.errors,
 		ruaSummary: summary,
-		knownProviderFailures: Array.isArray(summary && summary.failureContributors) ? summary.failureContributors.length : 0,
+		knownSenderFailures,
 		indirectMailFlowObserved: Array.isArray(summary && summary.failureContributors)
 			? summary.failureContributors.some((item) => Array.isArray(item.reasons) && item.reasons.some((reason) => String(reason).startsWith('override:')))
 			: false,
-		subdomainCoverage: summary && summary.totalMessages > 0 ? 'rua-observed' : 'unknown',
+		subdomainCoverage: 'unknown',
 		nonexistentDomainPolicy: fallbackNonexistentPolicy
 	};
 }
@@ -337,6 +343,7 @@ export function assessEnforcementReadiness({
 	confirmedDkimSelectors = [],
 	dnsErrors = [],
 	ruaSummary = null,
+	knownSenderFailures,
 	knownProviderFailures = 0,
 	indirectMailFlowObserved = false,
 	subdomainCoverage = 'unknown',
@@ -388,6 +395,9 @@ export function assessEnforcementReadiness({
 	const unknownRate = totalMessages ? unknownMessages / totalMessages : null;
 	const unalignedRate = totalMessages ? unalignedMessages / totalMessages : null;
 	const spfOnlyRate = totalMessages ? spfOnlyMessages / totalMessages : null;
+	const senderFailureCount = Number.isFinite(Number(knownSenderFailures))
+		? Math.max(0, Number(knownSenderFailures))
+		: Math.max(0, Number(knownProviderFailures) || 0);
 	const reasons = [];
 	const decisionBlockers = [];
 	const decisionWarnings = [];
@@ -410,14 +420,14 @@ export function assessEnforcementReadiness({
 	if (unalignedRate !== null && unalignedRate > 1 - normalizedThresholds.minimumAlignedRate) {
 		add(decisionBlockers, 'RUA_UNALIGNED_RATE_HIGH', 'blocker', 'rua', 'rua.alignment', `Known unaligned rate is ${(unalignedRate * 100).toFixed(2)}%.`);
 	}
-	if (Number(knownProviderFailures) > 0) add(decisionBlockers, 'KNOWN_SENDER_FAILURES', 'blocker', 'providers', 'rua.failureContributors', 'Known sending sources still contribute authentication failures.');
+	if (senderFailureCount > 0) add(decisionBlockers, 'KNOWN_SENDER_FAILURES', 'blocker', 'senders', 'rua.failureContributors', 'Known sending sources still contribute both SPF and DKIM alignment failures.');
 	if (!hasAggregateReporting) add(decisionWarnings, 'AGGREGATE_REPORTING_MISSING', 'warning', 'dmarc', 'dns.dmarc', 'Ongoing aggregate-report visibility is not configured in the observed record.');
 	if (!spfUsable) add(decisionWarnings, 'SPF_PATH_UNCONFIRMED', 'warning', 'spf', 'dns.spf', 'A usable SPF path was not confirmed.');
 	if (!dkimConfirmed) add(decisionWarnings, 'DKIM_PATH_UNCONFIRMED', 'warning', 'dkim', 'dns.dkim', 'A DKIM selector was not independently confirmed by this evidence set.');
 	if (unknownRate !== null && unknownRate > normalizedThresholds.maximumUnknownRate) add(decisionWarnings, 'RUA_UNKNOWN_RATE_HIGH', 'warning', 'rua', 'rua.alignment', `Unknown alignment rate is ${(unknownRate * 100).toFixed(2)}%.`);
 	if (spfOnlyRate !== null && spfOnlyRate > normalizedThresholds.maximumSpfOnlyRate) add(decisionWarnings, 'SPF_ONLY_DEPENDENCY_HIGH', 'warning', 'rua', 'rua.authenticationPaths', `SPF-only aligned traffic is ${(spfOnlyRate * 100).toFixed(2)}%.`);
 	if (indirectMailFlowObserved) add(decisionWarnings, 'INDIRECT_MAIL_FLOW_OBSERVED', 'warning', 'rua', 'rua.failureContributors', 'Forwarding or mailing-list evidence needs review before tightening policy.');
-	if (subdomainCoverage === 'unknown') add(decisionWarnings, 'SUBDOMAIN_COVERAGE_UNKNOWN', 'warning', 'subdomains', 'dns.subdomains', 'Subdomain sending coverage was not supplied.');
+	if (subdomainCoverage !== 'explicit') add(decisionWarnings, 'SUBDOMAIN_COVERAGE_UNKNOWN', 'warning', 'subdomains', 'dns.subdomains', 'An explicit inventory of sending subdomains was not supplied; DNS scans and observed RUA traffic are not exhaustive coverage.');
 	if (nonexistentDomainPolicy === 'unknown') add(decisionWarnings, 'NONEXISTENT_DOMAIN_POLICY_UNKNOWN', 'warning', 'dmarc', 'dns.dmarc', 'Nonexistent-domain handling was not supplied.');
 
 	reasons.push(...decisionBlockers, ...insufficient, ...decisionWarnings);

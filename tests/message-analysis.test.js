@@ -62,6 +62,32 @@ test('analyzeMessageInput uses Received-SPF when Authentication-Results omits SP
 	assert.equal(result.alignment.dmarc.inferredResult, 'pass');
 });
 
+test('analyzeMessageInput retains every result from one Authentication-Results field', () => {
+	const input = [
+		'From: Sender <sender@example.com>',
+		'Authentication-Results: mx.receiver.test; dkim=fail header.d=bad.example; dkim=pass header.d=example.com; spf=fail smtp.mailfrom=bad.example; spf=pass smtp.mailfrom=example.com; dmarc=pass header.from=example.com',
+		''
+	].join('\r\n');
+	const result = analyzeMessageInput(input, {
+		organizationalDomains: {
+			'example.com': 'example.com',
+			'bad.example': 'bad.example'
+		}
+	});
+
+	assert.deepEqual(result.authenticationResults[0].dkim, [
+		{ result: 'fail', domain: 'bad.example' },
+		{ result: 'pass', domain: 'example.com' }
+	]);
+	assert.deepEqual(result.authenticationResults[0].spf, [
+		{ result: 'fail', domain: 'bad.example' },
+		{ result: 'pass', domain: 'example.com' }
+	]);
+	assert.equal(result.alignment.dkim[1].aligned, true);
+	assert.equal(result.alignment.spf[1].aligned, true);
+	assert.equal(result.alignment.dmarc.inferredResult, 'pass');
+});
+
 test('parseMessageHeaders rejects malformed or oversized header input', () => {
 	assert.throws(() => parseMessageHeaders(' bad continuation'), /continuation/);
 	assert.throws(() => parseMessageHeaders('From: sender@example.com\u0000'), /NUL/);

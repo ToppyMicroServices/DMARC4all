@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js?v=20';
-import { isExplicitNoMailProfile } from './diagnostics.js?v=20';
+import { assessEnforcementReadiness, buildPortableReport } from './portable-report.js?v=21';
+import { isExplicitNoMailProfile } from './diagnostics.js?v=21';
 
 export function createRenderer(deps) {
 	const {
@@ -110,7 +110,7 @@ export function createRenderer(deps) {
 	}
 
 	function prependOkFinding(bodyHtml, ok) {
-		if (!ok) return bodyHtml;
+		if (!ok || String(bodyHtml || '').trim()) return bodyHtml;
 		const okTitle = tr('設定OK', 'Configured');
 		const okDetail = mkDetail(
 			tr('必要な設定を確認済み', 'Required setup confirmed'),
@@ -118,6 +118,26 @@ export function createRenderer(deps) {
 			tr('現在は適切に設定されています。', 'It is currently configured appropriately.')
 		);
 		return mkFinding('low', okTitle, okDetail, '') + bodyHtml;
+	}
+
+	function localizeScoreChip(chip) {
+		const value = String(chip || '');
+		if (value === 'SPF: missing') return `SPF: ${statusText('missing')}`;
+		if (value === 'SPF: multiple') return 'SPF ×2+';
+		if (value === 'no all') return `all: ${statusText('missing')}`;
+		if (value === 'ip-only') return 'SPF: ip4/ip6';
+		if (value === 'Inbound mail: Null MX conflict') return t('mx.nullConflict.title');
+		if (value === 'Inbound mail: Null MX') return t('mx.null.title');
+		if (value === 'DMARC: missing') return `DMARC: ${statusText('missing')}`;
+		if (value === 'DMARC: rua missing') return `DMARC: rua ${statusText('missing')}`;
+		if (value === 'DMARC: sp missing') return `DMARC: sp ${statusText('missing')}`;
+		if (value === 'MTA-STS/TLS-RPT: missing') return `MTA-STS/TLS-RPT: ${statusText('missing')}`;
+		if (value === 'MTA-STS: ok') return `MTA-STS: ${statusText('ok')}`;
+		if (value === 'TLS-RPT: ok') return `TLS-RPT: ${statusText('ok')}`;
+		if (value === 'DKIM: not applicable') return `DKIM: ${t('mx.notApplicable')}`;
+		if (value === 'DKIM: missing') return `DKIM: ${statusText('missing')}`;
+		if (value === 'DKIM: ok') return `DKIM: ${statusText('ok')}`;
+		return value;
 	}
 
 	function formatTtl(ttl) {
@@ -694,7 +714,7 @@ export function createRenderer(deps) {
 		const overall = (results.score && typeof results.score.overall === 'number') ? results.score.overall : 0;
 		const scoreCls = classifyScore(overall);
 		const chips = (results.score && Array.isArray(results.score.chips)) ? results.score.chips : [];
-		const chipHtml = chips.slice(0, 10).map((chip) => `<span class="score-chip">${esc(chip)}</span>`).join('');
+		const chipHtml = chips.slice(0, 10).map((chip) => `<span class="score-chip">${esc(localizeScoreChip(chip))}</span>`).join('');
 
 		const top = (results.priority && Array.isArray(results.priority)) ? results.priority : [];
 		const topSorted = top
@@ -731,8 +751,9 @@ export function createRenderer(deps) {
 			? `<div class="mono tiny">${esc(recordLines.join('\n\n'))}</div>`
 			: `<div class="muted">${esc(t('report.repro.none'))}</div>`;
 		const reproHtml = `
-			<section class="card p-16 summary-card">
-				<div class="mini-title m-0">${esc(t('report.repro.title'))}</div>
+			<details class="card p-16 summary-card repro-details">
+				<summary class="mini-title m-0">${esc(t('report.repro.title'))}</summary>
+				<div class="mt-12">
 				<div class="muted">${esc(t('report.repro.time'))}: <span class="mono mono-inline">${esc(metaTimestamp || t('label.noneParen'))}</span></div>
 				<div class="muted">${esc(t('report.repro.resolver'))}: <span class="mono mono-inline">${esc(metaResolver || t('label.noneParen'))}</span></div>
 				<div class="mini-title mt-10">${esc(t('report.repro.records'))}</div>
@@ -742,7 +763,8 @@ export function createRenderer(deps) {
 					<button type="button" class="btn-ghost export-md">${esc(t('report.export.md'))}</button>
 				</div>
 				<div class="tiny muted">${esc(t('report.export.note'))}</div>
-			</section>
+				</div>
+			</details>
 		`;
 
 		setSafeInnerHTML(report, `
@@ -765,7 +787,6 @@ export function createRenderer(deps) {
 			<div class="summary-stack">
 				${topHtml}
 				${err}
-				${reproHtml}
 			</div>
 			<div class="grid two mt-12 report-grid">
 				${mkSection('DMARC', results.dmarc && results.dmarc.record ? statusText('configured') : statusText('missing'), dmarcBody)}
@@ -789,6 +810,7 @@ export function createRenderer(deps) {
 				${mkSection(t('section.httpsReference'), externalProbesEnabled ? statusText('lightcheck') : statusText('disabled'), webBody)}
 				${mkSection(t('section.subdomainOptional'), (results.subdomains && results.subdomains.enabled) ? statusText('enabled') : statusText('disabled'), subBody)}
 			</div>
+			${reproHtml}
 			<p class="footnote">${esc(t('report.publicDnsOnlyFootnote'))}</p>
 		`);
 

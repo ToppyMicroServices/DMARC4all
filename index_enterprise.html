@@ -31,32 +31,34 @@
   <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="styles.css?v=13">
   <script defer src="vendor/dompurify.min.js"></script>
-  <script defer src="i18n/ja.js?v=20"></script>
-  <script defer src="i18n/en.js?v=20"></script>
-  <script defer src="i18n/es.js?v=20"></script>
-  <script defer src="i18n/de.js?v=20"></script>
-  <script defer src="i18n/ko.js?v=20"></script>
-  <script defer src="i18n/vi.js?v=20"></script>
-  <script defer src="i18n/th.js?v=20"></script>
-  <script defer src="i18n/km.js?v=20"></script>
-  <script defer src="i18n/my.js?v=20"></script>
-  <script defer src="i18n/id.js?v=20"></script>
-  <script defer src="i18n/et.js?v=20"></script>
-  <script defer src="i18n/zh.js?v=20"></script>
-  <script defer src="i18n/ru.js?v=20"></script>
-  <script defer src="i18n/vi_extra.js?v=20"></script>
-  <script defer src="i18n/th_extra.js?v=20"></script>
-  <script defer src="i18n/km_extra.js?v=20"></script>
-  <script defer src="i18n/id_extra.js?v=20"></script>
-  <script defer src="i18n/et_extra.js?v=20"></script>
-  <script defer src="i18n/zh_extra.js?v=20"></script>
-  <script defer src="i18n/ru_extra.js?v=20"></script>
-  <script defer src="i18n/es_extra.js?v=20"></script>
-  <script defer src="i18n/de_extra.js?v=20"></script>
-  <script defer src="i18n/extra_tr_my.js?v=20"></script>
-  <script defer src="i18n/extra_tr_ko.js?v=20"></script>
-  <script defer src="i18n/ui_extra.js?v=20"></script>
-  <script type="module" src="app.js?v=20"></script>
+  <script defer src="i18n/ja.js?v=21"></script>
+  <script defer src="i18n/en.js?v=21"></script>
+  <script defer src="i18n/es.js?v=21"></script>
+  <script defer src="i18n/de.js?v=21"></script>
+  <script defer src="i18n/ko.js?v=21"></script>
+  <script defer src="i18n/vi.js?v=21"></script>
+  <script defer src="i18n/th.js?v=21"></script>
+  <script defer src="i18n/km.js?v=21"></script>
+  <script defer src="i18n/my.js?v=21"></script>
+  <script defer src="i18n/id.js?v=21"></script>
+  <script defer src="i18n/et.js?v=21"></script>
+  <script defer src="i18n/zh.js?v=21"></script>
+  <script defer src="i18n/ru.js?v=21"></script>
+  <script defer src="i18n/bn.js?v=21"></script>
+  <script defer src="i18n/vi_extra.js?v=21"></script>
+  <script defer src="i18n/th_extra.js?v=21"></script>
+  <script defer src="i18n/km_extra.js?v=21"></script>
+  <script defer src="i18n/id_extra.js?v=21"></script>
+  <script defer src="i18n/et_extra.js?v=21"></script>
+  <script defer src="i18n/zh_extra.js?v=21"></script>
+  <script defer src="i18n/ru_extra.js?v=21"></script>
+  <script defer src="i18n/es_extra.js?v=21"></script>
+  <script defer src="i18n/de_extra.js?v=21"></script>
+  <script defer src="i18n/extra_tr_my.js?v=21"></script>
+  <script defer src="i18n/extra_tr_ko.js?v=21"></script>
+  <script defer src="i18n/ui_extra.js?v=21"></script>
+  <script defer src="i18n/bn_extra.js?v=1"></script>
+  <script type="module" src="app.js?v=21"></script>
 </head>
 <body>
   <div class="shell">
@@ -78,6 +80,7 @@
           <button type="button" class="lang-btn" data-lang-choice="et" title="Eesti" aria-label="Eesti">ET</button>
           <button type="button" class="lang-btn" data-lang-choice="zh" title="中文" aria-label="中文">ZH</button>
           <button type="button" class="lang-btn" data-lang-choice="ru" title="Русский" aria-label="Русский">RU</button>
+          <button type="button" class="lang-btn" data-lang-choice="bn" title="বাংলা" aria-label="বাংলা">BN</button>
         </nav>
         <a class="brand-github" href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener" aria-label="GitHub">
           <svg class="brand-github-icon" viewBox="0 0 16 16" aria-hidden="true">
@@ -90,10 +93,9 @@
     <section class="hero">
       <div class="hero-grid z-1">
         <div class="hero-copy">
-          <p class="pill" data-i18n="hero.pill">DNS Quick 診断（公開DNSのみ）</p>
+          <p class="pill" data-i18n="hero.pill">DNSクイック診断</p>
           <div class="hero-heading">
-            <h1 data-i18n="hero.title">業務用メールのなりすまし対策を,公開DNS情報から簡易チェック</h1>
-            <p class="tagline" data-i18n="hero.tagline">公開DNSに設定されたSPF / DKIM / DMARC 情報をもとに,なりすまし対策の有無を推定評価します</p>
+            <h1 data-i18n="hero.title">公開DNSでメール対策を診断</h1>
           </div>
           <div class="hero-badges">
             <span class="hero-badge" data-i18n="hero.free">完全無料（登録不要）</span>
@@ -108,7 +110,7 @@
               <p class="proof-copy" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
             </article>
             <article class="proof-card">
-              <p class="proof-copy" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
+              <p class="proof-copy" data-i18n="form.disclaimer">結果は目安です。必要に応じてメールヘッダで確認してください。</p>
             </article>
           </div>
           <p class="hero-prs tiny muted mt-10" data-i18n-html="hero.prs.html">PRs for typos are welcome on <a href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener">GitHub</a>.</p>
@@ -118,7 +120,6 @@
             <div class="form-card-header">
               <div>
                 <h2 class="m-0-0-6" data-i18n="form.title">Quick 診断</h2>
-                <p class="form-card-copy" data-i18n="report.scoreSub">公開DNSベースの簡易スコア（高いほど良い）</p>
               </div>
             </div>
             <form id="quick-check-form">
@@ -130,14 +131,19 @@
                 <label class="flex-label">
                   <input type="checkbox" id="consent" required checked class="w-auto"> <span data-i18n="form.consent">公開DNS（誰でも閲覧可能な範囲）の確認に同意する</span>
                 </label>
+              </div>
+              <details class="advanced-options">
+                <summary data-i18n="form.advancedSettings">詳細設定</summary>
+                <div class="advanced-options-body">
+                  <div class="form-option-group">
                 <label class="flex-label">
                   <input type="checkbox" id="subdomain-scan" class="w-auto"> <span data-i18n="form.subdomain">サブドメイン探索も実行する（任意）</span>
                 </label>
                 <label class="flex-label">
                   <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
                 </label>
-              </div>
-              <div class="resolver-panel">
+                  </div>
+                  <div class="resolver-panel">
                 <div class="resolver-panel-head">
                   <label for="resolver-select" data-i18n="form.resolver">Resolver (DoH)</label>
                   <span class="resolver-mode-badge">DoH</span>
@@ -158,17 +164,16 @@
                   </div>
                 </div>
                 <p class="tiny text-warn" id="resolver-error"></p>
-              </div>
+                  </div>
+                </div>
+              </details>
               <div class="grid">
                 <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep" disabled>診断を実行</button>
               </div>
               <details class="form-notes">
                 <summary data-i18n="form.moreInfo">Usage notes & privacy</summary>
-                <p class="tiny mt-8" data-i18n="form.enterpriseNote">公開DNSのみを選択したDoH経由で参照し、メール送受信やサーバー内部設定へのアクセスは行いません。</p>
                 <p class="tiny" data-i18n="form.enterprisePrivacy">入力したドメインは選択したDoHリゾルバにのみ送信されます。</p>
-                <p class="tiny muted" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
                 <p class="tiny muted" id="resolver-note"></p>
-                <p class="tiny muted" data-i18n="form.disclaimer">※結果は目安で,最終判断にはメールヘッダ等の一次情報が必要になる場合があります.</p>
                 <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示許可のある範囲でのみ使用してください．</p>
               </details>
               <div class="rua-callout mt-10">

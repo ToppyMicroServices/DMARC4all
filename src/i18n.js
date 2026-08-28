@@ -15,7 +15,7 @@
  */
 
 export const LANG_STORAGE_KEY = 'toppy-lang';
-export const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko'];
+export const SUPPORTED_LANGS = ['ja', 'en', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'es', 'de', 'ko', 'bn'];
 
 export function createI18n(options = {}) {
 	const browserWindow = options.window || (typeof window !== 'undefined' ? window : globalThis.window);

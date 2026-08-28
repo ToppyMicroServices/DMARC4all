@@ -1,10 +1,10 @@
-import { Gunzip, unzipSync } from './vendor/fflate.browser.js?v=20';
-import { assessEnforcementReadiness, readinessEvidenceFromDiagnosis } from './src/authentication-core.js?v=20';
-import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './src/i18n.js?v=20';
-import { downloadJson } from './src/local-export.js?v=20';
-import { registerPwa } from './src/pwa.js?v=20';
-import { RUA_ANALYZER_MESSAGES } from './src/rua-analyzer-i18n.js?v=20';
-import { createToolI18n } from './src/tool-i18n.js?v=20';
+import { Gunzip, unzipSync } from './vendor/fflate.browser.js?v=21';
+import { assessEnforcementReadiness, readinessEvidenceFromDiagnosis } from './src/authentication-core.js?v=21';
+import { LANG_STORAGE_KEY, SUPPORTED_LANGS } from './src/i18n.js?v=21';
+import { downloadJson } from './src/local-export.js?v=21';
+import { registerPwa } from './src/pwa.js?v=21';
+import { RUA_ANALYZER_MESSAGES } from './src/rua-analyzer-i18n.js?v=21';
+import { createToolI18n } from './src/tool-i18n.js?v=21';
 import {
 	MAX_RUA_FILES,
 	MAX_RUA_TOTAL_INPUT_BYTES,
@@ -12,7 +12,7 @@ import {
 	parseRuaInputs,
 	rankRuaFailureContributors,
 	summarizeRuaReports
-} from './src/rua-analysis.js?v=20';
+} from './src/rua-analysis.js?v=21';
 
 const form = document.getElementById('rua-analysis-form');
 const filesInput = document.getElementById('rua-analysis-files');

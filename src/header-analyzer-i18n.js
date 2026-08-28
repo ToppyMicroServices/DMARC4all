@@ -12,7 +12,7 @@ function messages(values) {
 	return Object.freeze({ ...COMMON, ...values });
 }
 
-export const HEADER_ANALYZER_MESSAGES = Object.freeze({
+export const HEADER_ANALYZER_MESSAGES = {
 	en: messages({
 		'lang.label': 'Language',
 		'page.documentTitle': 'Header Analyzer | DMARC4all',
@@ -229,4 +229,23 @@ export const HEADER_ANALYZER_MESSAGES = Object.freeze({
 		'error.title': 'Не удалось проанализировать ввод', 'error.fileTooLarge': 'Выбранный файл превышает ограничение 1 МиБ.', 'error.invalidInput': 'Заголовки имеют неверный формат или превышают допустимые ограничения.', 'error.fileRead': 'Не удалось прочитать выбранный файл.', 'error.unexpected': 'Непредвиденная ошибка помешала анализу.',
 		'status.pass': 'Успешно', 'status.fail': 'Ошибка', 'status.neutral': 'Нейтрально', 'status.softfail': 'Мягкая ошибка', 'status.none': 'Нет', 'status.temperror': 'Временная ошибка', 'status.permerror': 'Постоянная ошибка', 'status.unknown': 'Неизвестно'
 	})
+};
+
+HEADER_ANALYZER_MESSAGES.bn = messages({
+	'page.placeholder': 'From: sender@example.com\nAuthentication-Results: ...',
+	'analysis.from': 'From', 'analysis.returnPath': 'Return-Path', 'analysis.receivedSpf': 'Received-SPF', 'analysis.spf': 'SPF', 'analysis.dkim': 'DKIM', 'analysis.messageId': 'Message-ID',
+	'lang.label': 'ভাষা', 'page.documentTitle': 'Header Analyzer | DMARC4all', 'page.description': 'Browser-এর ভেতরেই message header ও EML authentication evidence বিশ্লেষণ করুন।',
+	'page.pill': 'Browser-এর ভেতরে', 'page.title': 'Header Analyzer', 'page.introBefore': 'Message header paste করুন বা একটি', 'page.introAfter': 'file load করুন। Message content upload হয় না।',
+	'page.workspaceAria': 'Message header analyzer', 'page.inputLabel': 'Header বা EML source', 'page.load': '.eml load করুন', 'page.analyze': 'বিশ্লেষণ করুন', 'page.export': 'Graph JSON download করুন',
+	'page.hint': 'Authentication-Results ও DKIM-Signature reported evidence হিসেবে parse করা হয়। DKIM signature আলাদাভাবে যাচাই করা হয় না।',
+	'page.resultAria': 'বিশ্লেষণের ফল', 'page.waiting': 'Message header-এর অপেক্ষায়।', 'page.back': 'DNS বিশ্লেষণে ফিরুন',
+	'common.notAvailable': 'অনুপলব্ধ', 'common.notReported': 'Report করা হয়নি', 'common.unknown': 'অজানা', 'common.present': 'আছে', 'common.notPresent': 'নেই',
+	'analysis.evidence': 'Authentication evidence', 'analysis.invalidFrom': 'From domain অবৈধ বা একাধিক', 'analysis.reportedDmarc': 'Reported DMARC', 'analysis.reportedSpf': 'Reported SPF', 'analysis.reportedDkim': 'Reported DKIM',
+	'analysis.alignment': 'Alignment', 'analysis.aligned': 'Aligned', 'analysis.notAligned': 'Aligned নয়', 'analysis.noPassingSpf': 'Pass করা SPF evidence নেই', 'analysis.noPassingDkim': 'Pass করা DKIM evidence নেই',
+	'analysis.inference': 'Header evidence থেকে অনুমান', 'analysis.verification': 'যাচাই', 'analysis.reportedOnly': 'শুধু reported evidence; DKIM আলাদাভাবে যাচাই করা হয়নি', 'analysis.messagePath': 'Message path',
+	'analysis.dkimSignatures': 'DKIM signature', 'analysis.unknownDomain': 'অজানা domain', 'analysis.receivedHops': 'Received hop', 'analysis.arcResults': 'ARC result',
+	'error.title': 'Input বিশ্লেষণ করা যায়নি', 'error.fileTooLarge': 'নির্বাচিত file 1 MiB input limit ছাড়িয়েছে।', 'error.invalidInput': 'Message header অবৈধ বা অনুমোদিত limit ছাড়িয়েছে।', 'error.fileRead': 'নির্বাচিত file পড়া যায়নি।', 'error.unexpected': 'অপ্রত্যাশিত error-এর কারণে বিশ্লেষণ করা যায়নি।',
+	'status.pass': 'Pass', 'status.fail': 'Fail', 'status.neutral': 'Neutral', 'status.softfail': 'Soft fail', 'status.none': 'কিছু নেই', 'status.temperror': 'সাময়িক error', 'status.permerror': 'স্থায়ী error', 'status.unknown': 'অজানা'
 });
+
+Object.freeze(HEADER_ANALYZER_MESSAGES);

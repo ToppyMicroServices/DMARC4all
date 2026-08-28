@@ -121,6 +121,21 @@ test('parseRuaInputs and summarizeRuaReports identify unaligned sources', () => 
 	assert.equal(summary.failureContributors[0].sourceIp, '198.51.100.20');
 });
 
+test('summarizeRuaReports does not count gaps as observed days', () => {
+	const report = (begin, end) => ({
+		reporter: { organization: 'Receiver' },
+		timeRange: { begin, end },
+		records: []
+	});
+	const summary = summarizeRuaReports([
+		report(0, 86399),
+		report(9 * 86400, (10 * 86400) - 1)
+	]);
+	assert.equal(summary.firstObservedAt, 0);
+	assert.equal(summary.lastObservedAt, (10 * 86400) - 1);
+	assert.equal(summary.observationDays, 2);
+});
+
 test('summarizeRuaReports keeps unknown alignment distinct from unaligned', () => {
 	const summary = summarizeRuaReports([{
 		reporter: { organization: 'Receiver' },
@@ -227,7 +242,7 @@ test('RUA correlation binds policy domains and rejects conflicting report identi
 		spfRecords: ['v=spf1 -all'],
 		confirmedDkimSelectors: ['selector1'],
 		ruaSummary: summary,
-		subdomainCoverage: 'rua-observed',
+		subdomainCoverage: 'unknown',
 		nonexistentDomainPolicy: 'reject'
 	}).decision, 'INSUFFICIENT_EVIDENCE');
 });

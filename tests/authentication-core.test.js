@@ -253,7 +253,7 @@ test('readiness follows supplied effective policy instead of the raw p tag', () 
 	assert.notEqual(readiness.status, 'reject_enforced');
 });
 
-test('diagnosis and RUA evidence can reach READY through the normal correlation path', () => {
+test('diagnosis and RUA evidence keeps subdomain inventory coverage explicit', () => {
 	const evidence = readinessEvidenceFromDiagnosis({
 		domain: 'example.com',
 		authentication: { effectivePolicy: 'reject', source: { domain: 'example.com' } },
@@ -273,8 +273,23 @@ test('diagnosis and RUA evidence can reach READY through the normal correlation 
 		failureContributors: []
 	});
 	const readiness = assessEnforcementReadiness(evidence);
-	assert.equal(readiness.decision, 'READY');
+	assert.equal(evidence.subdomainCoverage, 'unknown');
+	assert.equal(readiness.decision, 'CONDITIONALLY_READY');
+	assert.ok(readiness.reasons.some((reason) => reason.code === 'SUBDOMAIN_COVERAGE_UNKNOWN'));
 	assert.equal(readiness.status, 'reject_enforced');
+});
+
+test('readiness distinguishes known sender failures from unknown contributors', () => {
+	const evidence = readinessEvidenceFromDiagnosis({ observations: {} }, {
+		totalMessages: 20,
+		failureContributors: [
+			{ reasons: ['spf-not-aligned', 'dkim-not-aligned'] },
+			{ reasons: ['spf-unknown', 'dkim-not-aligned'] },
+			{ reasons: ['override:forwarded', 'spf-not-aligned', 'dkim-unknown'] }
+		]
+	});
+	assert.equal(evidence.knownSenderFailures, 1);
+	assert.equal('knownProviderFailures' in evidence, false);
 });
 
 test('discoverDmarcPolicy classifies historic tags and converts IDNs to A-labels', () => {

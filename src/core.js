@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { dom } from './dom.js?v=20';
-import { esc, sanitizeUrl, setSafeInnerHTML } from './safe-html.js?v=20';
-import { createDiagnosisRunner } from './diagnose.js?v=20';
-import { normalizeDohUrl, normalizeDomain, dkimLookupHints, runDnsblQuick } from './diagnostics.js?v=20';
-import { createI18n, LANG_STORAGE_KEY } from './i18n.js?v=20';
-import { createRenderer } from './render.js?v=20';
+import { dom } from './dom.js?v=21';
+import { esc, sanitizeUrl, setSafeInnerHTML } from './safe-html.js?v=21';
+import { createDiagnosisRunner } from './diagnose.js?v=21';
+import { normalizeDohUrl, normalizeDomain, dkimLookupHints, runDnsblQuick } from './diagnostics.js?v=21';
+import { createI18n, LANG_STORAGE_KEY } from './i18n.js?v=21';
+import { createRenderer } from './render.js?v=21';
 
 const {
 	form,

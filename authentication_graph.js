@@ -1,8 +1,8 @@
-import { MAX_GRAPH_INPUTS, buildAuthenticationGraph } from './src/authentication-graph.js?v=20';
-import { AUTHENTICATION_GRAPH_MESSAGES, authenticationGraphErrorKey } from './src/authentication-graph-i18n.js?v=20';
-import { LANG_STORAGE_KEY } from './src/i18n.js?v=20';
-import { registerPwa } from './src/pwa.js?v=20';
-import { createToolI18n } from './src/tool-i18n.js?v=20';
+import { MAX_GRAPH_INPUTS, buildAuthenticationGraph } from './src/authentication-graph.js?v=21';
+import { AUTHENTICATION_GRAPH_MESSAGES, authenticationGraphErrorKey } from './src/authentication-graph-i18n.js?v=21';
+import { LANG_STORAGE_KEY } from './src/i18n.js?v=21';
+import { registerPwa } from './src/pwa.js?v=21';
+import { createToolI18n } from './src/tool-i18n.js?v=21';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const form = document.getElementById('authentication-graph-form');

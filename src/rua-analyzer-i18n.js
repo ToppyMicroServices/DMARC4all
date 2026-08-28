@@ -8,7 +8,7 @@ function messages(values) {
 	return Object.freeze({ ...COMMON, ...values });
 }
 
-export const RUA_ANALYZER_MESSAGES = Object.freeze({
+export const RUA_ANALYZER_MESSAGES = {
 	en: messages({
 		'lang.label': 'Language', 'page.documentTitle': 'RUA Analyzer | DMARC4all', 'page.description': 'Browser-local RFC 9990 DMARC aggregate report analyzer for XML, gzip, and ZIP files.',
 		'page.pill': 'Browser-local', 'page.title': 'RUA Analyzer', 'page.intro': 'Load RFC 9990 aggregate reports in XML, gzip, or ZIP form. Files remain in this browser.',
@@ -297,4 +297,30 @@ export const RUA_ANALYZER_MESSAGES = Object.freeze({
 		'value.aligned': 'Совпадает', 'value.unaligned': 'Не совпадает', 'value.unknown': 'Неизвестно', 'value.none': 'Нет', 'value.quarantine': 'Карантин', 'value.reject': 'Отклонить',
 		'failure.spf-not-aligned': 'SPF не совпадает', 'failure.spf-unknown': 'SPF неизвестен', 'failure.dkim-not-aligned': 'DKIM не совпадает', 'failure.dkim-unknown': 'DKIM неизвестен', 'failure.authentication-result-unavailable': 'Результат аутентификации недоступен', 'failure.override': 'исключение: {type}'
 	})
+};
+
+RUA_ANALYZER_MESSAGES.bn = messages({
+	'tables.sourceIp': 'Source IP', 'tables.dkimDomain': 'DKIM d=', 'tables.spfDomain': 'SPF domain',
+	'lang.label': 'ভাষা', 'page.documentTitle': 'RUA Analyzer | DMARC4all', 'page.description': 'Browser-এর ভেতরে XML, gzip ও ZIP file-এর RFC 9990 DMARC aggregate report বিশ্লেষণ করুন।',
+	'page.pill': 'Browser-এর ভেতরে', 'page.title': 'RUA Analyzer', 'page.intro': 'XML, gzip বা ZIP আকারের RFC 9990 aggregate report load করুন। File এই browser-এর মধ্যেই থাকে।',
+	'page.workspaceAria': 'RUA aggregate report analyzer', 'page.selectFiles': 'RUA file নির্বাচন করুন', 'page.noFiles': 'কোনো file নির্বাচিত নয়।', 'page.selectDiagnosis': 'ঐচ্ছিক DNS diagnosis JSON', 'page.noDiagnosis': 'কোনো diagnosis নির্বাচিত নয়।',
+	'page.analyze': 'Report বিশ্লেষণ করুন', 'page.analyzing': 'বিশ্লেষণ চলছে…', 'page.export': 'Graph JSON download করুন',
+	'page.hint': 'মোট compressed input 10 MiB এবং expanded input 50 MiB পর্যন্ত। DTD, entity, অতিরিক্ত গভীর XML, unsafe archive path, অতিরিক্ত expansion ও record প্রত্যাখ্যাত হয়। Report evidence-এর সঙ্গে reject-policy readiness যাচাই করতে DMARC4all diagnosis export যোগ করুন।',
+	'page.resultAria': 'RUA বিশ্লেষণের ফল', 'page.waiting': 'Aggregate report-এর অপেক্ষায়।', 'page.back': 'DNS বিশ্লেষণে ফিরুন', 'page.service': 'RUA service পরিচিতি',
+	'common.noRecords': 'মিল আছে এমন record নেই।', 'common.messages': 'Message', 'common.days': '{count} দিন', 'common.evidence': 'Evidence',
+	'metrics.total': 'মোট message', 'metrics.aligned': 'DMARC aligned', 'metrics.unaligned': 'Aligned নয়', 'metrics.unknown': 'অজানা', 'metrics.reports': 'Parse করা report',
+	'readiness.title': 'Reject-policy readiness', 'readiness.addDiagnosis': 'DNS configuration-এর সঙ্গে report মেলাতে DMARC4all diagnosis JSON export যোগ করুন।',
+	'readiness.decision': 'সিদ্ধান্ত', 'readiness.window': 'Evidence period', 'readiness.blockers': 'বাধা ও evidence gap', 'readiness.warnings': 'পর্যালোচনার warning', 'readiness.condition': 'Policy বদলানোর আগে এই শর্তটি পর্যালোচনা করুন।',
+	'tables.topSources': 'প্রধান sending source', 'tables.contributors': 'Unaligned ও unknown contributor', 'tables.disposition': 'Disposition', 'tables.alignment': 'Alignment', 'tables.reporters': 'Reporter',
+	'tables.fromDomains': 'From domain', 'tables.dkimDomains': 'DKIM signing domain', 'tables.spfDomains': 'SPF domain', 'tables.reportDates': 'Report date', 'tables.rowsShown': '{total}টি row-এর মধ্যে {shown}টি দেখানো হচ্ছে।',
+	'tables.sourceCause': 'Source / From / কারণ', 'tables.dispositionValue': 'Disposition', 'tables.alignmentValue': 'Alignment', 'tables.reporter': 'Reporter', 'tables.fromDomain': 'From domain', 'tables.date': 'তারিখ',
+	'error.title': 'Report বিশ্লেষণ করা যায়নি', 'error.selectOne': 'কমপক্ষে একটি XML, gzip বা ZIP report file নির্বাচন করুন।', 'error.selectLimit': 'সর্বোচ্চ {count}টি report file নির্বাচন করুন।',
+	'error.inputLimit': 'নির্বাচিত report মোট 10 MiB input limit ছাড়িয়েছে।', 'error.diagnosisLimit': 'Diagnosis JSON 2 MiB input limit ছাড়িয়েছে।', 'error.invalidDiagnosis': 'নির্বাচিত JSON DMARC4all diagnosis export নয়।',
+	'error.parser': 'RUA XML parser অনুপলব্ধ।', 'error.unsafe': 'Report-এ নিষিদ্ধ XML declaration বা unsafe archive path আছে।', 'error.malformed': 'Report malformed বা format সমর্থিত নয়।',
+	'error.limits': 'Report নিরাপদ processing limit ছাড়িয়েছে।', 'error.domainMismatch': 'Report policy domain ও diagnosis policy domain মেলে না।', 'error.unexpected': 'অপ্রত্যাশিত error-এর কারণে বিশ্লেষণ করা যায়নি।',
+	'decision.READY': 'প্রস্তুত', 'decision.CONDITIONALLY_READY': 'শর্তসাপেক্ষে প্রস্তুত', 'decision.NOT_READY': 'প্রস্তুত নয়', 'decision.INSUFFICIENT_EVIDENCE': 'Evidence যথেষ্ট নয়',
+	'value.aligned': 'Aligned', 'value.unaligned': 'Aligned নয়', 'value.unknown': 'অজানা', 'value.none': 'কিছু নেই', 'value.quarantine': 'Quarantine', 'value.reject': 'Reject',
+	'failure.spf-not-aligned': 'SPF aligned নয়', 'failure.spf-unknown': 'SPF অজানা', 'failure.dkim-not-aligned': 'DKIM aligned নয়', 'failure.dkim-unknown': 'DKIM অজানা', 'failure.authentication-result-unavailable': 'Authentication result অনুপলব্ধ', 'failure.override': 'Override: {type}'
 });
+
+Object.freeze(RUA_ANALYZER_MESSAGES);
