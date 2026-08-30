@@ -30,7 +30,7 @@
   "form.consent": "Setuju memeriksa DNS publik",
   "form.subdomain": "Pindai subdomain (opsional)",
   "form.dnsbl": "Jalankan cek DNSBL (opsional; mungkin lebih lama)",
-  "form.externalProbes": "Jalankan juga pemeriksaan RDAP/HTTPS publik (opsional: menghubungi rdap.org dan layanan RDAP registri tujuan pengalihan, host HTTPS apex / www / mta-sts dari domain yang diperiksa, dan URL BIMI)",
+  "form.externalProbes": "Periksa juga situs web dan informasi pendaftaran domain (opsional)",
   "form.submit": "Mulai cek",
   "form.deep": "Jalankan diagnosis",
   "form.advancedSettings": "Pengaturan lanjutan",

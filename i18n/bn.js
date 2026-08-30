@@ -29,7 +29,7 @@
     "form.consent": "পাবলিক DNS পরীক্ষা করতে সম্মত (সবার জন্য দৃশ্যমান তথ্য)",
     "form.subdomain": "সাবডোমেইনও পরীক্ষা করুন (ঐচ্ছিক)",
     "form.dnsbl": "DNSBL-ও পরীক্ষা করুন (ঐচ্ছিক; সময় লাগতে পারে)",
-    "form.externalProbes": "পাবলিক RDAP/HTTPS-ও পরীক্ষা করুন (ঐচ্ছিক: rdap.org ও তার রিডাইরেক্ট করা registry RDAP service, পরীক্ষাধীন ডোমেইনের apex / www / mta-sts HTTPS host এবং BIMI URL-এ সংযোগ হবে)",
+    "form.externalProbes": "ওয়েবসাইট ও ডোমেইন নিবন্ধনের তথ্যও পরীক্ষা করুন (ঐচ্ছিক)",
     "form.submit": "পরীক্ষা চালান",
     "form.deep": "বিশ্লেষণ চালান",
     "form.advancedSettings": "উন্নত সেটিংস",

@@ -30,7 +30,7 @@
   "form.consent": "Acepto comprobar solo el DNS público (datos visibles públicamente)",
   "form.subdomain": "Analizar también subdominios (opcional)",
   "form.dnsbl": "Ejecutar verificación DNSBL también (opcional; puede tardar)",
-  "form.externalProbes": "Comprobar también RDAP/HTTPS públicos (opcional: contacta con rdap.org y el servicio RDAP del registro al que redirige, los hosts HTTPS apex / www / mta-sts del dominio comprobado y las URL de BIMI)",
+  "form.externalProbes": "Comprobar también el sitio web y los datos de registro del dominio (opcional)",
   "form.submit": "Ejecutar verificación",
   "form.deep": "Ejecutar diagnóstico",
   "form.advancedSettings": "Opciones avanzadas",

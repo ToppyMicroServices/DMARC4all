@@ -30,7 +30,7 @@
   "form.consent": "Nõustun kontrollima avalikku DNS-i",
   "form.subdomain": "Skaneeri alamdomeene (valikuline)",
   "form.dnsbl": "Käivita ka DNSBL kontroll (valikuline; võib võtta aega)",
-  "form.externalProbes": "Käivita ka avalikud RDAP-/HTTPS-kontrollid (valikuline: ühendub rdap.org-i ja registri RDAP-teenusega, kuhu see edasi suunab, kontrollitava domeeni HTTPS-hostidega apex / www / mta-sts ja BIMI URL-idega)",
+  "form.externalProbes": "Kontrolli ka veebisaiti ja domeeni registreerimisandmeid (valikuline)",
   "form.submit": "Käivita kontroll",
   "form.deep": "Käivita diagnostika",
   "form.advancedSettings": "Täpsemad seaded",

@@ -30,7 +30,7 @@
   "form.consent": "Đồng ý kiểm tra DNS công khai (dữ liệu hiển thị công khai)",
   "form.subdomain": "Quét cả tên miền phụ (tùy chọn)",
   "form.dnsbl": "Chạy kiểm tra DNSBL (tùy chọn; có thể chậm)",
-  "form.externalProbes": "Chạy thêm kiểm tra RDAP/HTTPS công khai (tùy chọn: kết nối tới rdap.org và dịch vụ RDAP của cơ quan đăng ký mà dịch vụ này chuyển hướng tới, các máy chủ HTTPS apex / www / mta-sts của tên miền đang kiểm tra và URL BIMI)",
+  "form.externalProbes": "Kiểm tra thêm trang web và thông tin đăng ký tên miền (tùy chọn)",
   "form.submit": "Thực hiện kiểm tra",
   "form.deep": "Thực hiện chẩn đoán",
   "form.advancedSettings": "Cài đặt nâng cao",

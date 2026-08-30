@@ -30,7 +30,7 @@
   "form.consent": "公開DNSのみを確認することに同意する",
   "form.subdomain": "サブドメインも探索する（任意）",
   "form.dnsbl": "DNSBLも確認する（任意・時間がかかる場合があります）",
-  "form.externalProbes": "公開RDAP・HTTPSも確認する（任意：rdap.org と転送先のレジストリRDAP、確認対象ドメインの apex / www / mta-sts HTTPSホスト、BIMI URLへ接続）",
+  "form.externalProbes": "Webサイトとドメイン登録情報も確認する（任意）",
   "form.submit": "診断を開始",
   "form.deep": "詳しく診断する",
   "form.advancedSettings": "詳細設定",

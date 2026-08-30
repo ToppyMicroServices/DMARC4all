@@ -220,7 +220,7 @@ input[type="checkbox"] {
   position: relative;
   overflow: hidden;
   margin-top: 12px;
-  padding: 76px 32px 32px;
+  padding: 42px 32px 32px;
   border: 1px solid var(--line);
   border-radius: 0;
   color: var(--ink);
@@ -266,10 +266,10 @@ input[type="checkbox"] {
 
 .hero h1 {
   margin: 0;
-  max-width: 16ch;
-  font-size: clamp(42px, 5.3vw, 64px);
-  line-height: 1;
-  letter-spacing: -0.052em;
+  max-width: 24ch;
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   text-wrap: balance;
   color: var(--ink);
 }
@@ -328,70 +328,34 @@ input[type="checkbox"] {
   color: var(--muted);
 }
 
-.hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 22px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 8px 10px;
-  border-radius: 5px;
-  background: rgba(14, 27, 50, 0.56);
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.035em;
-}
-
-.hero-proof-grid {
+.hero-steps {
   display: grid;
   gap: 8px;
-  margin-top: 22px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: hero-step;
+  color: var(--muted);
 }
 
-.proof-card {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-top-color: var(--accent);
-  border-radius: 7px;
-  background: rgba(14, 27, 50, 0.7);
-}
-
-.proof-card:nth-child(2) {
-  border-top-color: var(--success);
-}
-
-.proof-card:nth-child(3) {
-  border-top-color: var(--warn);
-}
-
-.proof-label {
-  margin-bottom: 6px;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.proof-copy {
+.hero-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  min-height: 38px;
+  padding: 7px 10px;
+  border-left: 2px solid var(--accent);
+  background: rgba(14, 27, 50, 0.44);
+  color: var(--ink-soft);
   font-size: 13px;
-  line-height: 1.55;
-  color: var(--muted);
 }
 
-.hero-prs,
-.hero-prs a {
-  color: var(--muted);
+.hero-steps li::before {
+  counter-increment: hero-step;
+  content: counter(hero-step);
+  color: var(--accent);
   font-family: var(--mono);
+  font-size: 11px;
 }
 
 .card {
@@ -1761,14 +1725,9 @@ html[data-resolver-mode="auto"] #resolver-error {
 
 @media (min-width: 900px) {
   .hero-grid {
-    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 430px);
+    grid-template-columns: minmax(260px, 0.72fr) minmax(480px, 1.28fr);
     align-items: start;
   }
-
-  .hero-proof-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
 }
 
 @media (min-width: 720px) {
@@ -1787,16 +1746,6 @@ html[data-resolver-mode="auto"] #resolver-error {
   }
 }
 
-@media (min-width: 640px) and (max-width: 899px) {
-  .hero-proof-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero-proof-grid .proof-card:last-child {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (min-width: 1024px) {
   .grid.three {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1805,7 +1754,7 @@ html[data-resolver-mode="auto"] #resolver-error {
 
 @media (max-width: 920px) {
   .hero {
-    padding: 66px 24px 28px;
+    padding: 38px 24px 28px;
   }
 
   .hero h1 {
@@ -1917,7 +1866,7 @@ html[data-resolver-mode="auto"] #resolver-error {
   }
 
   .hero {
-    padding: 48px 18px 22px;
+    padding: 32px 18px 22px;
     border-radius: 0;
   }
 

@@ -107,7 +107,7 @@ test('initialLang falls back to the document language when no query is present',
 	});
 });
 
-test('landing copy keeps result caveats concise and non-duplicated in every language', () => {
+test('landing keeps the primary flow direct and caveats inside form notes', () => {
 	const { window } = loadBrowserLocales();
 	const expectedDisclaimers = {
 		ja: '結果は目安です。必要に応じてメールヘッダで確認してください。',
@@ -133,15 +133,16 @@ test('landing copy keeps result caveats concise and non-duplicated in every lang
 
 	for (const file of ['index.html', 'index_enterprise.html']) {
 		const html = fs.readFileSync(path.join(PROJECT_ROOT, file), 'utf8');
-		assert.equal((html.match(/data-i18n="form\.disclaimer"/g) || []).length, 1, `${file} repeats the disclaimer`);
-		assert.equal((html.match(/data-i18n="form\.privacyFirst"/g) || []).length, 1, `${file} repeats the privacy-first note`);
+		assert.doesNotMatch(html, /data-i18n="form\.(?:disclaimer|privacyFirst|note|enterpriseNote)"/, `${file} leads with a caveat`);
+		assert.doesNotMatch(html, /id="consent"/, `${file} repeats the diagnosis action as a consent checkbox`);
+		assert.match(html, /<details class="form-notes">/, `${file} must retain collapsed usage notes`);
 		assert.doesNotMatch(html, /data-i18n="hero\.tagline"/, `${file} repeats the hero description`);
 		assert.doesNotMatch(html, /class="form-card-copy"/, `${file} repeats the score explanation before results`);
 	}
 	const publicHtml = fs.readFileSync(path.join(PROJECT_ROOT, 'index.html'), 'utf8');
 	const enterpriseHtml = fs.readFileSync(path.join(PROJECT_ROOT, 'index_enterprise.html'), 'utf8');
-	assert.equal((publicHtml.match(/data-i18n="form\.note"/g) || []).length, 1, 'index.html repeats the scope note');
-	assert.equal((enterpriseHtml.match(/data-i18n="form\.enterpriseNote"/g) || []).length, 1, 'index_enterprise.html repeats the scope note');
+	assert.equal((publicHtml.match(/data-i18n="form\.privacy"/g) || []).length, 1, 'index.html must keep its network note collapsed');
+	assert.equal((enterpriseHtml.match(/data-i18n="form\.enterprisePrivacy"/g) || []).length, 1, 'index_enterprise.html must keep its network note collapsed');
 });
 
 test('all locale files provide the complete English key set with matching placeholders', () => {
@@ -286,20 +287,17 @@ test('localized network boundaries and Null MX guidance remain semantically comp
 
 	for (const lang of languages) {
 		const locale = window.I18N[lang];
-		for (const key of ['form.externalProbes', 'form.note', 'report.querying', 'report.publicDnsOnlyFootnote']) {
+		for (const key of ['form.note', 'report.querying', 'report.publicDnsOnlyFootnote']) {
 			assert.match(locale[key], /RDAP/i, `${lang}.${key} must disclose RDAP`);
 			assert.match(locale[key], /HTTPS/i, `${lang}.${key} must disclose HTTPS`);
 		}
-		assert.match(locale['form.externalProbes'], /rdap\.org/i, `${lang}.form.externalProbes must name rdap.org`);
-		assert.match(locale['form.externalProbes'], registryRdapPatterns[lang], `${lang}.form.externalProbes must disclose the registry RDAP redirect`);
-		assert.match(locale['form.externalProbes'], /BIMI/i, `${lang}.form.externalProbes must name BIMI URLs`);
+		assert.ok([...locale['form.externalProbes']].length <= 90, `${lang}.form.externalProbes must stay concise`);
+		assert.doesNotMatch(locale['form.externalProbes'], /RDAP|HTTPS|rdap\.org|apex|mta-sts|BIMI/i, `${lang}.form.externalProbes must use plain language`);
 		assert.match(locale['form.privacy'], /DoH/i, `${lang}.form.privacy must name the selected DoH resolver`);
 		assert.match(locale['form.privacy'], /rdap\.org/i, `${lang}.form.privacy must name rdap.org`);
 		assert.match(locale['form.privacy'], registryRdapPatterns[lang], `${lang}.form.privacy must disclose the registry RDAP redirect`);
 		assert.match(locale['form.privacy'], /BIMI/i, `${lang}.form.privacy must name BIMI URLs`);
-		for (const key of ['form.externalProbes', 'form.privacy']) {
-			assert.match(locale[key], /apex[\s\S]+www[\s\S]+mta-sts/i, `${lang}.${key} must enumerate the checked HTTPS hosts`);
-		}
+		assert.match(locale['form.privacy'], /apex[\s\S]+www[\s\S]+mta-sts/i, `${lang}.form.privacy must enumerate the checked HTTPS hosts`);
 		assert.match(locale['form.enterpriseNote'], /DoH/i, `${lang}.form.enterpriseNote must name the selected DoH resolver`);
 		assert.match(locale['form.enterprisePrivacy'], /DoH/i, `${lang}.form.enterprisePrivacy must name the selected DoH resolver`);
 		assert.doesNotMatch(locale['form.enterprisePrivacy'], /RDAP|rdap\.org|BIMI/i, `${lang}.form.enterprisePrivacy must remain DoH-only`);

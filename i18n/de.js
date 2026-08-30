@@ -30,7 +30,7 @@
   "form.consent": "Ich stimme der Prüfung öffentlicher DNS-Daten zu",
   "form.subdomain": "Auch Subdomains scannen (optional)",
   "form.dnsbl": "Auch DNSBL prüfen (optional; kann etwas dauern)",
-  "form.externalProbes": "Auch öffentliche RDAP-/HTTPS-Prüfungen ausführen (optional: kontaktiert rdap.org und den Registry-RDAP-Dienst, an den weitergeleitet wird, die HTTPS-Hosts apex / www / mta-sts der geprüften Domain und BIMI-URLs)",
+  "form.externalProbes": "Auch Website und Domain-Registrierungsdaten prüfen (optional)",
   "form.submit": "Prüfung starten",
   "form.deep": "Diagnose ausführen",
   "form.advancedSettings": "Erweiterte Einstellungen",

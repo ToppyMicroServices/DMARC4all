@@ -30,7 +30,7 @@
   "form.consent": "同意仅查询公共 DNS（公开可见的数据）",
   "form.subdomain": "也扫描子域（可选）",
   "form.dnsbl": "也执行DNSBL检查（可选；可能稍慢）",
-  "form.externalProbes": "同时运行公共 RDAP/HTTPS 检查（可选：连接 rdap.org 及其重定向到的注册局 RDAP 服务、待检查域名的 apex / www / mta-sts HTTPS 主机及 BIMI URL）",
+  "form.externalProbes": "同时检查网站和域名注册信息（可选）",
   "form.submit": "开始检查",
   "form.deep": "执行诊断",
   "form.advancedSettings": "高级设置",

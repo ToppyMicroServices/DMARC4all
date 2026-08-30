@@ -29,22 +29,22 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest?v=4">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=19">
   <script defer src="vendor/dompurify.min.js"></script>
-  <script defer src="i18n/ja.js?v=21"></script>
-  <script defer src="i18n/en.js?v=21"></script>
-  <script defer src="i18n/es.js?v=21"></script>
-  <script defer src="i18n/de.js?v=21"></script>
-  <script defer src="i18n/ko.js?v=21"></script>
-  <script defer src="i18n/vi.js?v=21"></script>
-  <script defer src="i18n/th.js?v=21"></script>
-  <script defer src="i18n/km.js?v=21"></script>
-  <script defer src="i18n/my.js?v=21"></script>
-  <script defer src="i18n/id.js?v=21"></script>
-  <script defer src="i18n/et.js?v=21"></script>
-  <script defer src="i18n/zh.js?v=21"></script>
-  <script defer src="i18n/ru.js?v=21"></script>
-  <script defer src="i18n/bn.js?v=21"></script>
+  <script defer src="i18n/ja.js?v=22"></script>
+  <script defer src="i18n/en.js?v=22"></script>
+  <script defer src="i18n/es.js?v=22"></script>
+  <script defer src="i18n/de.js?v=22"></script>
+  <script defer src="i18n/ko.js?v=22"></script>
+  <script defer src="i18n/vi.js?v=22"></script>
+  <script defer src="i18n/th.js?v=22"></script>
+  <script defer src="i18n/km.js?v=22"></script>
+  <script defer src="i18n/my.js?v=22"></script>
+  <script defer src="i18n/id.js?v=22"></script>
+  <script defer src="i18n/et.js?v=22"></script>
+  <script defer src="i18n/zh.js?v=22"></script>
+  <script defer src="i18n/ru.js?v=22"></script>
+  <script defer src="i18n/bn.js?v=22"></script>
   <script defer src="i18n/vi_extra.js?v=21"></script>
   <script defer src="i18n/th_extra.js?v=21"></script>
   <script defer src="i18n/km_extra.js?v=21"></script>
@@ -97,23 +97,11 @@
           <div class="hero-heading">
             <h1 data-i18n="hero.title">公開DNSでメール対策を診断</h1>
           </div>
-          <div class="hero-badges">
-            <span class="hero-badge" data-i18n="hero.free">完全無料（登録不要）</span>
-            <span class="hero-badge" data-i18n="hero.badge.auth">SPF / DKIM / DMARC / BIMI</span>
-            <span class="hero-badge" data-i18n="hero.badge.transport">DNSSEC / MTA-STS / TLS-RPT</span>
-          </div>
-          <div class="hero-proof-grid">
-            <article class="proof-card">
-              <p class="proof-copy" data-i18n="form.enterpriseNote">公開DNSのみを選択したDoH経由で参照し、メール送受信やサーバー内部設定へのアクセスは行いません。</p>
-            </article>
-            <article class="proof-card">
-              <p class="proof-copy" data-i18n="form.privacyFirst">※プライバシー優先: Resolver（DoH）のCustomで自前のDoH URLを指定できます.</p>
-            </article>
-            <article class="proof-card">
-              <p class="proof-copy" data-i18n="form.disclaimer">結果は目安です。必要に応じてメールヘッダで確認してください。</p>
-            </article>
-          </div>
-          <p class="hero-prs tiny muted mt-10" data-i18n-html="hero.prs.html">PRs for typos are welcome on <a href="https://github.com/ToppyMicroServices/DMARC4all" target="_blank" rel="noopener">GitHub</a>.</p>
+          <ol class="hero-steps" aria-label="クイック診断" data-i18n-aria-label="form.title">
+            <li><span data-i18n="form.domain">ドメイン</span></li>
+            <li><span data-i18n="form.deep">詳しく診断する</span></li>
+            <li><span data-i18n="report.resultsTitle">診断結果</span></li>
+          </ol>
         </div>
         <div class="hero-panel">
           <div class="card form-card">
@@ -126,11 +114,6 @@
               <div>
                 <label for="domain" data-i18n="form.domain">ドメイン</label>
                 <input id="domain" name="domain" placeholder="example.com" required>
-              </div>
-              <div class="form-option-group">
-                <label class="flex-label">
-                  <input type="checkbox" id="consent" required checked class="w-auto"> <span data-i18n="form.consent">公開DNS（誰でも閲覧可能な範囲）の確認に同意する</span>
-                </label>
               </div>
               <details class="advanced-options">
                 <summary data-i18n="form.advancedSettings">詳細設定</summary>

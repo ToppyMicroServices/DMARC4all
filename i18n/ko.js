@@ -41,7 +41,7 @@
   "form.consent": "공개 DNS만 확인하는 데 동의합니다 (공개 데이터)",
   "form.subdomain": "서브도메인도 스캔 (선택 사항)",
   "form.dnsbl": "DNSBL 검사도 실행 (선택 사항; 시간이 걸릴 수 있음)",
-  "form.externalProbes": "공개 RDAP/HTTPS 검사도 실행(선택 사항: rdap.org 및 여기서 리디렉션되는 레지스트리 RDAP 서비스, 검사 대상 도메인의 apex / www / mta-sts HTTPS 호스트, BIMI URL에 연결)",
+  "form.externalProbes": "웹사이트와 도메인 등록 정보도 확인(선택 사항)",
   "form.submit": "검사 실행",
   "form.deep": "진단 실행",
   "form.advancedSettings": "고급 설정",

@@ -30,7 +30,7 @@
   "form.consent": "I agree to check public DNS (publicly visible data)",
   "form.subdomain": "Also scan subdomains (optional)",
   "form.dnsbl": "Run DNSBL check too (optional; may take time)",
-  "form.externalProbes": "Also run public RDAP/HTTPS checks (optional: contacts rdap.org and the registry RDAP service it redirects to, the checked domain's apex / www / mta-sts HTTPS hosts, and BIMI URLs)",
+  "form.externalProbes": "Also check website and domain registration information (optional)",
   "form.submit": "Run check",
   "form.deep": "Run diagnosis",
   "form.advancedSettings": "Advanced settings",

@@ -27,7 +27,7 @@ test('all public pages keep the monitor shell within responsive viewports', asyn
 			}));
 			expect(state.background, `${path} background at ${width}px`).toBe('rgb(14, 27, 50)');
 			expect(state.overflow, `${path} overflow at ${width}px`).toBeLessThanOrEqual(1);
-			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=17');
+			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=19');
 		}
 	}
 });
@@ -62,14 +62,16 @@ test('mobile landing keeps tools and every language accessible', async ({ page }
 	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
-test('beginner form hides optional network and scan controls by default', async ({ page }) => {
+test('beginner flow is direct and hides optional network and scan controls by default', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto('/index.html?lang=en');
 
 	const advanced = page.locator('.advanced-options');
 	await expect(advanced).not.toHaveAttribute('open', '');
-	await expect(page.locator('#consent')).toBeVisible();
+	await expect(page.locator('#consent')).toHaveCount(0);
 	await expect(page.locator('#go-deep-btn')).toBeVisible();
+	await expect(page.locator('.hero-steps li')).toHaveCount(3);
+	await expect(page.locator('.hero-proof-grid, .hero-badges')).toHaveCount(0);
 	await expect(page.locator('#subdomain-scan')).not.toBeVisible();
 	await expect(page.locator('#external-probes')).not.toBeVisible();
 
@@ -105,6 +107,7 @@ test('technical monitor visual tokens render on the app and offline shell', asyn
 	const appDesign = await page.evaluate(() => {
 		const body = getComputedStyle(document.body);
 		const hero = getComputedStyle(document.querySelector('.hero'));
+		const title = getComputedStyle(document.querySelector('.hero h1'));
 		const orbit = getComputedStyle(document.querySelector('.hero'), '::before');
 		const card = getComputedStyle(document.querySelector('.form-card'));
 		const button = getComputedStyle(document.querySelector('#go-deep-btn'));
@@ -112,6 +115,9 @@ test('technical monitor visual tokens render on the app and offline shell', asyn
 		return {
 			bodyBackground: body.backgroundColor,
 			bodyColor: body.color,
+			titleFontSize: Number.parseFloat(title.fontSize),
+			stepCount: document.querySelectorAll('.hero-steps li').length,
+			caveatCardCount: document.querySelectorAll('.hero-proof-grid, .proof-card').length,
 			heroGrid: hero.backgroundImage,
 			orbitBorder: orbit.borderTopStyle,
 			cardBackground: card.backgroundColor,
@@ -123,9 +129,14 @@ test('technical monitor visual tokens render on the app and offline shell', asyn
 		};
 	});
 
-	expect(appDesign).toEqual({
+	const { titleFontSize, ...appTokens } = appDesign;
+	expect(titleFontSize).toBeGreaterThanOrEqual(24);
+	expect(titleFontSize).toBeLessThanOrEqual(32);
+	expect(appTokens).toEqual({
 		bodyBackground: 'rgb(14, 27, 50)',
 		bodyColor: 'rgb(247, 251, 255)',
+		stepCount: 3,
+		caveatCardCount: 0,
 		heroGrid: expect.stringContaining('linear-gradient'),
 		orbitBorder: 'dashed',
 		cardBackground: 'rgb(20, 38, 62)',

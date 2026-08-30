@@ -30,7 +30,7 @@
   "form.consent": "ยินยอมตรวจสอบ DNS สาธารณะ",
   "form.subdomain": "สแกนซับโดเมน (ตัวเลือก)",
   "form.dnsbl": "ตรวจ DNSBL ด้วย (ตัวเลือก; อาจช้า)",
-  "form.externalProbes": "ตรวจ RDAP/HTTPS สาธารณะด้วย (ตัวเลือก: เชื่อมต่อ rdap.org และบริการ RDAP ของรีจิสทรีที่ระบบเปลี่ยนเส้นทางไป, โฮสต์ HTTPS apex / www / mta-sts ของโดเมนที่ตรวจ และ URL ของ BIMI)",
+  "form.externalProbes": "ตรวจเว็บไซต์และข้อมูลการจดทะเบียนโดเมนด้วย (ตัวเลือก)",
   "form.submit": "เริ่มตรวจสอบ",
   "form.deep": "เรียกใช้การวินิจฉัย",
   "form.advancedSettings": "การตั้งค่าขั้นสูง",
