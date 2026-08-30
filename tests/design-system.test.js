@@ -32,14 +32,15 @@ test('public pages use the shared technical monitor design and brand asset', asy
 	assert.match(styles, /background-size: 40px 40px;/);
 	assert.match(styles, /\.hero::before\s*\{[^}]*border: 1px dashed rgba\(151, 202, 237, 0\.42\);/);
 	assert.match(styles, /\.hero h1\s*\{[^}]*font-size: clamp\(24px, 2\.4vw, 32px\);/);
+	assert.match(styles, /@media \(max-width: 420px\)[\s\S]*?\.hero h1\s*\{[^}]*font-size: clamp\(24px, 7vw, 28px\);/);
 	assert.match(styles, /\.hero-steps\s*\{/);
 	assert.match(styles, /\.card\s*\{[^}]*border-radius: 8px;[^}]*box-shadow: none;/);
 
 	for (const file of [...APP_PAGES, 'offline.html']) {
 		const html = await readText(file);
 		assert.match(html, /<meta name="theme-color" content="#0e1b32">/, `${file} must use the monitor theme color`);
-		assert.match(html, /styles\.css\?v=19/, `${file} must load the current design`);
-		assert.doesNotMatch(html, /styles\.css\?v=18/);
+		assert.match(html, /styles\.css\?v=20/, `${file} must load the current design`);
+		assert.doesNotMatch(html, /styles\.css\?v=19/);
 	}
 
 	for (const file of APP_PAGES) {
@@ -62,9 +63,9 @@ test('install metadata and offline cache use the monitor theme assets', async ()
 
 	assert.equal(manifest.background_color, '#0e1b32');
 	assert.equal(manifest.theme_color, '#0e1b32');
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v28';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v29';/);
 	assert.match(serviceWorker, /'\/manifest\.webmanifest\?v=4'/);
-	assert.match(serviceWorker, /'\/styles\.css\?v=19'/);
+	assert.match(serviceWorker, /'\/styles\.css\?v=20'/);
 	assert.match(serviceWorker, /'\/assets\/toppy-logo\.png'/);
 	assert.deepEqual([...logo.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 });

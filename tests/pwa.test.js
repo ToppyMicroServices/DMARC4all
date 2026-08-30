@@ -224,7 +224,7 @@ test('manifest provides installable PNG icons and the service worker precaches t
 		assert.equal(png.readUInt32BE(20), expectedSize);
 	}
 
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v28';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v29';/);
 });
 
 test('release assets bypass an older shell cache before diagnostics are enabled', async () => {
@@ -235,7 +235,7 @@ test('release assets bypass an older shell cache before diagnostics are enabled'
 	const serviceWorker = await readText('sw.js');
 
 	assert.match(index, /href="manifest\.webmanifest\?v=4"/);
-	assert.match(index, /href="styles\.css\?v=19"/);
+	assert.match(index, /href="styles\.css\?v=20"/);
 	assert.match(index, /src="app\.js\?v=21"/);
 	assert.match(index, /id="external-probes"[^>]*disabled/);
 	assert.match(index, /id="go-deep-btn"[^>]*disabled/);
@@ -247,7 +247,7 @@ test('release assets bypass an older shell cache before diagnostics are enabled'
 	assert.match(core, /externalProbes\.disabled = false/);
 	assert.match(core, /goDeepBtn\.disabled = diagnosisInProgress/);
 	assert.match(serviceWorker, /'\/app\.js\?v=21'/);
-	assert.match(serviceWorker, /'\/styles\.css\?v=19'/);
+	assert.match(serviceWorker, /'\/styles\.css\?v=20'/);
 });
 
 test('all versioned page assets and module imports match the release cache generation', async () => {

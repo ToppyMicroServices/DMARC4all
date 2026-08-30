@@ -27,7 +27,7 @@ test('all public pages keep the monitor shell within responsive viewports', asyn
 			}));
 			expect(state.background, `${path} background at ${width}px`).toBe('rgb(14, 27, 50)');
 			expect(state.overflow, `${path} overflow at ${width}px`).toBeLessThanOrEqual(1);
-			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=19');
+			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=20');
 		}
 	}
 });
@@ -51,6 +51,9 @@ test('mobile landing keeps tools and every language accessible', async ({ page }
 
 	const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 	expect(horizontalOverflow).toBeLessThanOrEqual(1);
+	const titleFontSize = await page.locator('.hero h1').evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+	expect(titleFontSize).toBeGreaterThanOrEqual(24);
+	expect(titleFontSize).toBeLessThanOrEqual(32);
 
 	await page.setViewportSize({ width: 700, height: 800 });
 	await page.reload();
