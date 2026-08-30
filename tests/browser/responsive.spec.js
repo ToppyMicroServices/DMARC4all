@@ -1,6 +1,36 @@
 import { expect, test } from '@playwright/test';
 
 const LANGUAGES = ['ja', 'en', 'es', 'de', 'ko', 'vi', 'th', 'km', 'my', 'id', 'et', 'zh', 'ru', 'bn'];
+const PUBLIC_PAGES = [
+	'index.html',
+	'index_enterprise.html',
+	'header_analyzer.html',
+	'rua_analyzer.html',
+	'authentication_graph.html',
+	'rua_service.html',
+	'rua_service_enterprise.html',
+	'ai_usage.html',
+	'standards_privacy.html',
+	'dns_provider_guides.html',
+	'offline.html'
+];
+
+test('all public pages keep the monitor shell within responsive viewports', async ({ page }) => {
+	for (const width of [1280, 700, 390]) {
+		await page.setViewportSize({ width, height: 844 });
+		for (const path of PUBLIC_PAGES) {
+			await page.goto(`/${path}?lang=en`);
+			const state = await page.evaluate(() => ({
+				background: getComputedStyle(document.body).backgroundColor,
+				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				stylesheet: document.querySelector('link[href*="styles.css"]')?.getAttribute('href') || ''
+			}));
+			expect(state.background, `${path} background at ${width}px`).toBe('rgb(14, 27, 50)');
+			expect(state.overflow, `${path} overflow at ${width}px`).toBeLessThanOrEqual(1);
+			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=17');
+		}
+	}
+});
 
 test('mobile landing keeps tools and every language accessible', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
@@ -21,6 +51,15 @@ test('mobile landing keeps tools and every language accessible', async ({ page }
 
 	const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 	expect(horizontalOverflow).toBeLessThanOrEqual(1);
+
+	await page.setViewportSize({ width: 700, height: 800 });
+	await page.reload();
+	expect(await page.locator('.brandbar').evaluate((element) => getComputedStyle(element).position)).toBe('static');
+	for (const link of await page.locator('.brand-tool-link').all()) {
+		const box = await link.boundingBox();
+		expect(box?.height || 0).toBeLessThan(48);
+	}
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
 test('beginner form hides optional network and scan controls by default', async ({ page }) => {
@@ -57,6 +96,107 @@ test('desktop page loads the pinned sanitizer and localized form', async ({ page
 	await expect(page.locator('html')).toHaveAttribute('lang', 'bn');
 	await expect(page.locator('.advanced-options > summary')).toHaveText('উন্নত সেটিংস');
 	expect(await page.evaluate(() => typeof window.DOMPurify?.sanitize)).toBe('function');
+});
+
+test('technical monitor visual tokens render on the app and offline shell', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await page.goto('/index.html?lang=en');
+
+	const appDesign = await page.evaluate(() => {
+		const body = getComputedStyle(document.body);
+		const hero = getComputedStyle(document.querySelector('.hero'));
+		const orbit = getComputedStyle(document.querySelector('.hero'), '::before');
+		const card = getComputedStyle(document.querySelector('.form-card'));
+		const button = getComputedStyle(document.querySelector('#go-deep-btn'));
+		const logo = document.querySelector('.brandbar img');
+		return {
+			bodyBackground: body.backgroundColor,
+			bodyColor: body.color,
+			heroGrid: hero.backgroundImage,
+			orbitBorder: orbit.borderTopStyle,
+			cardBackground: card.backgroundColor,
+			cardRadius: card.borderRadius,
+			buttonBackground: button.backgroundColor,
+			buttonHeight: button.minHeight,
+			logoPath: new URL(logo.src).pathname,
+			logoWidth: getComputedStyle(logo).width
+		};
+	});
+
+	expect(appDesign).toEqual({
+		bodyBackground: 'rgb(14, 27, 50)',
+		bodyColor: 'rgb(247, 251, 255)',
+		heroGrid: expect.stringContaining('linear-gradient'),
+		orbitBorder: 'dashed',
+		cardBackground: 'rgb(20, 38, 62)',
+		cardRadius: '8px',
+		buttonBackground: 'rgb(13, 113, 147)',
+		buttonHeight: '44px',
+		logoPath: '/assets/toppy-logo.png',
+		logoWidth: '30px'
+	});
+	await page.locator('#domain').focus();
+	expect(await page.locator('#domain').evaluate((element) => getComputedStyle(element).outlineColor)).toBe('rgb(151, 202, 237)');
+
+	await page.goto('/offline.html');
+	await expect(page.locator('.page-shell .hero')).toBeVisible();
+	await expect(page.locator('.hero-actions .btn')).toHaveCount(2);
+	const offlineCardBackground = await page.locator('.page-shell .hero').evaluate((element) => getComputedStyle(element).backgroundColor);
+	expect(offlineCardBackground).toBe('rgb(24, 43, 69)');
+});
+
+test('authentication graph fits the Toppy shell with visible relationships', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await page.goto('/authentication_graph.html?lang=en');
+	await page.locator('#authentication-graph-example').click();
+	const graphInput = JSON.parse(await page.locator('#authentication-graph-input').inputValue());
+	graphInput.ruaReports = [{
+		policy: { domain: 'example.com' },
+		records: [{
+			sourceIp: '198.51.100.10',
+			dkim: { results: [{ domain: 'mailer.example.net' }] },
+			spf: { results: [{ domain: 'bounce.example.net' }] }
+		}]
+	}];
+	await page.locator('#authentication-graph-input').fill(JSON.stringify(graphInput));
+	await page.locator('#authentication-graph-submit').click();
+	await expect(page.locator('.authentication-graph-svg')).toBeVisible();
+
+	const graphDesign = await page.evaluate(() => {
+		const result = document.querySelector('.graph-result');
+		const svg = document.querySelector('.authentication-graph-svg');
+		const style = getComputedStyle(result);
+		const contentWidth = result.clientWidth - Number.parseFloat(style.paddingLeft) - Number.parseFloat(style.paddingRight);
+		const parseRgb = (value) => (value.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+		const luminance = (value) => {
+			const channels = parseRgb(value).map((channel) => {
+				const normalized = channel / 255;
+				return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+			});
+			return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+		};
+		const contrast = (first, second) => {
+			const [lighter, darker] = [luminance(first), luminance(second)].sort((a, b) => b - a);
+			return (lighter + 0.05) / (darker + 0.05);
+		};
+		const background = style.backgroundColor;
+		const edges = ['declared', 'observed', 'unresolved'].map((state) => {
+			const edge = document.querySelector(`.graph-edge-${state}`);
+			return { state, contrast: edge ? contrast(getComputedStyle(edge).stroke, background) : 0 };
+		});
+		return {
+			contentWidth,
+			svgWidth: svg.getBoundingClientRect().width,
+			pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			edges
+		};
+	});
+
+	expect(graphDesign.svgWidth).toBeLessThanOrEqual(graphDesign.contentWidth + 1);
+	expect(graphDesign.pageOverflow).toBeLessThanOrEqual(1);
+	for (const edge of graphDesign.edges) {
+		expect(edge.contrast, `${edge.state} edge contrast`).toBeGreaterThanOrEqual(3);
+	}
 });
 
 test('diagnosis keeps conclusions before collapsed raw DNS evidence', async ({ page }) => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CACHE_VERSION = 'v21';
+const CACHE_VERSION = 'v25';
 const SHELL_CACHE = `dmarc4all-shell-${CACHE_VERSION}`;
 const OFFLINE_FALLBACK = '/offline.html';
 
@@ -46,13 +46,14 @@ const PRECACHE_PATHS = [
 	'/authentication_graph.js?v=21',
 	'/document_i18n.js?v=4',
 	'/site.js?v=21',
-	'/manifest.webmanifest?v=2',
-	'/styles.css?v=13',
+	'/manifest.webmanifest?v=4',
+	'/styles.css?v=17',
 	'/favicon.ico',
 	'/apple-touch-icon.png',
 	'/icon-192.png',
 	'/icon-512.png',
 	'/assets/favicon.ico',
+	'/assets/toppy-logo.png',
 	'/vendor/dompurify.min.js',
 	'/vendor/fflate.browser.js?v=21',
 	'/vendor/fast-xml-parser.min.js',

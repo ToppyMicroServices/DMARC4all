@@ -348,7 +348,7 @@ test('standards and AI pages disclose opt-in network checks and schema 1.3.0 in 
 
 test('RUA cards keep readable text inside the dark hero', () => {
 	const styles = fs.readFileSync(path.join(PROJECT_ROOT, 'styles.css'), 'utf8');
-	assert.match(styles, /\.hero \.card \.tiny,\s*\.hero \.card \.muted\s*\{\s*color: #475569;/);
+	assert.match(styles, /\.hero \.card \.tiny,\s*\.hero \.card \.muted\s*\{\s*color: var\(--muted\);/);
 });
 
 test('document page markup references existing translation keys and versioned scripts', () => {
