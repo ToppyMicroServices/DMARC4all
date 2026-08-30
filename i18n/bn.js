@@ -19,7 +19,7 @@
   window.I18N.bn = {
     "lang.label": "ভাষা",
     "hero.pill": "দ্রুত DNS পরীক্ষা",
-    "hero.title": "পাবলিক DNS দিয়ে ইমেইল নিরাপত্তা পরীক্ষা",
+    "hero.title": "ইমেইল সেটিংস পরীক্ষা করুন",
     "hero.tagline": "একটি ডোমেইনের পাবলিক SPF, DKIM ও DMARC সেটিং পরীক্ষা করুন।",
     "hero.free": "সম্পূর্ণ বিনামূল্যে (নিবন্ধন লাগবে না)",
     "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

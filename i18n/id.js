@@ -20,7 +20,7 @@
   window.I18N["id"] = {
   "lang.label": "Bahasa",
   "hero.pill": "Cek DNS cepat",
-  "hero.title": "Periksa keamanan email lewat DNS publik",
+  "hero.title": "Periksa pengaturan email",
   "hero.tagline": "Periksa SPF, DKIM, dan DMARC publik suatu domain.",
   "hero.free": "Sepenuhnya gratis (tanpa pendaftaran)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

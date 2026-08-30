@@ -20,7 +20,7 @@
   window.I18N["km"] = {
   "lang.label": "ភាសា",
   "hero.pill": "ការត្រួតពិនិត្យ DNS លឿន",
-  "hero.title": "ពិនិត្យសុវត្ថិភាពអ៊ីមែលតាម DNS សាធារណៈ",
+  "hero.title": "ពិនិត្យការកំណត់អ៊ីមែល",
   "hero.tagline": "ពិនិត្យ SPF, DKIM និង DMARC សាធារណៈរបស់ដូមែន។",
   "hero.free": "ឥតគិតថ្លៃទាំងស្រុង (មិនចាំបាច់ចុះឈ្មោះ)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

@@ -31,7 +31,7 @@
   "a= URL returned HTTP {code}": "a= URL에서 HTTP {code} 응답",
   "lang.label": "언어",
   "hero.pill": "DNS 빠른 검사",
-  "hero.title": "공개 DNS로 이메일 보안 점검",
+  "hero.title": "메일 설정 점검",
   "hero.tagline": "도메인의 공개 SPF·DKIM·DMARC 설정을 확인합니다.",
   "hero.free": "완전 무료(가입 불필요)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

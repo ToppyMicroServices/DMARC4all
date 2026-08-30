@@ -20,7 +20,7 @@
   window.I18N["zh"] = {
   "lang.label": "语言",
   "hero.pill": "DNS 快速检查",
-  "hero.title": "用公共 DNS 检查邮件安全",
+  "hero.title": "检查邮件设置",
   "hero.tagline": "检查域名的公共 SPF、DKIM 和 DMARC 配置。",
   "hero.free": "完全免费（无需注册）",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

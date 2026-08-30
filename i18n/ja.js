@@ -20,7 +20,7 @@
   window.I18N["ja"] = {
   "lang.label": "言語",
   "hero.pill": "DNSクイック診断",
-  "hero.title": "公開DNSでメール対策を診断",
+  "hero.title": "Mail設定を診断",
   "hero.tagline": "ドメインを入力すると、公開DNS上のSPF・DKIM・DMARCなどをもとに、なりすまし対策の状態を簡易評価します。",
   "hero.free": "完全無料（登録不要）",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

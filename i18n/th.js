@@ -20,7 +20,7 @@
   window.I18N["th"] = {
   "lang.label": "ภาษา",
   "hero.pill": "ตรวจ DNS แบบรวดเร็ว",
-  "hero.title": "ตรวจความปลอดภัยอีเมลผ่าน DNS สาธารณะ",
+  "hero.title": "ตรวจการตั้งค่าอีเมล",
   "hero.tagline": "ตรวจสอบ SPF, DKIM และ DMARC สาธารณะของโดเมน",
   "hero.free": "ฟรีทั้งหมด (ไม่ต้องสมัคร)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

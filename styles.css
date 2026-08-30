@@ -328,36 +328,6 @@ input[type="checkbox"] {
   color: var(--muted);
 }
 
-.hero-steps {
-  display: grid;
-  gap: 8px;
-  margin: 24px 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: hero-step;
-  color: var(--muted);
-}
-
-.hero-steps li {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  align-items: center;
-  min-height: 38px;
-  padding: 7px 10px;
-  border-left: 2px solid var(--accent);
-  background: rgba(14, 27, 50, 0.44);
-  color: var(--ink-soft);
-  font-size: 13px;
-}
-
-.hero-steps li::before {
-  counter-increment: hero-step;
-  content: counter(hero-step);
-  color: var(--accent);
-  font-family: var(--mono);
-  font-size: 11px;
-}
-
 .card {
   background: var(--surface-strong);
   border: 1px solid var(--line);

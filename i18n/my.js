@@ -20,7 +20,7 @@
   window.I18N["my"] = {
   "lang.label": "ဘာသာ",
   "hero.pill": "DNS လျင်မြန်စစ်ဆေးမှု",
-  "hero.title": "DNS ဖြင့် အီးမေးလ်လုံခြုံရေး စစ်ဆေးပါ",
+  "hero.title": "အီးမေးလ် ဆက်တင်များကို စစ်ဆေးပါ",
   "hero.tagline": "ဒိုမိန်း၏ အများသုံး SPF၊ DKIM နှင့် DMARC သတ်မှတ်ချက်များကို စစ်ဆေးပါ။",
   "hero.free": "အခမဲ့ ၁၀၀% (စာရင်းသွင်းရန်မလို)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

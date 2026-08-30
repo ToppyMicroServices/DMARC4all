@@ -20,7 +20,7 @@
   window.I18N["et"] = {
   "lang.label": "Keel",
   "hero.pill": "DNS kiirkontroll",
-  "hero.title": "Kontrolli e-posti turvet avaliku DNS-iga",
+  "hero.title": "Kontrolli e-posti seadeid",
   "hero.tagline": "Kontrolli domeeni avalikke SPF-, DKIM- ja DMARC-seadeid.",
   "hero.free": "Täiesti tasuta (registreerimine pole vajalik)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

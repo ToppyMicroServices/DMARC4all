@@ -27,7 +27,7 @@ test('all public pages keep the monitor shell within responsive viewports', asyn
 			}));
 			expect(state.background, `${path} background at ${width}px`).toBe('rgb(14, 27, 50)');
 			expect(state.overflow, `${path} overflow at ${width}px`).toBeLessThanOrEqual(1);
-			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=20');
+			expect(state.stylesheet, `${path} stylesheet at ${width}px`).toContain('styles.css?v=21');
 		}
 	}
 });
@@ -73,7 +73,7 @@ test('beginner flow is direct and hides optional network and scan controls by de
 	await expect(advanced).not.toHaveAttribute('open', '');
 	await expect(page.locator('#consent')).toHaveCount(0);
 	await expect(page.locator('#go-deep-btn')).toBeVisible();
-	await expect(page.locator('.hero-steps li')).toHaveCount(3);
+	await expect(page.locator('.hero-steps')).toHaveCount(0);
 	await expect(page.locator('.hero-proof-grid, .hero-badges')).toHaveCount(0);
 	await expect(page.locator('#subdomain-scan')).not.toBeVisible();
 	await expect(page.locator('#external-probes')).not.toBeVisible();
@@ -119,7 +119,7 @@ test('technical monitor visual tokens render on the app and offline shell', asyn
 			bodyBackground: body.backgroundColor,
 			bodyColor: body.color,
 			titleFontSize: Number.parseFloat(title.fontSize),
-			stepCount: document.querySelectorAll('.hero-steps li').length,
+			stepCount: document.querySelectorAll('.hero-steps').length,
 			caveatCardCount: document.querySelectorAll('.hero-proof-grid, .proof-card').length,
 			heroGrid: hero.backgroundImage,
 			orbitBorder: orbit.borderTopStyle,
@@ -138,7 +138,7 @@ test('technical monitor visual tokens render on the app and offline shell', asyn
 	expect(appTokens).toEqual({
 		bodyBackground: 'rgb(14, 27, 50)',
 		bodyColor: 'rgb(247, 251, 255)',
-		stepCount: 3,
+		stepCount: 0,
 		caveatCardCount: 0,
 		heroGrid: expect.stringContaining('linear-gradient'),
 		orbitBorder: 'dashed',

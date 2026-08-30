@@ -20,7 +20,7 @@
   window.I18N["es"] = {
   "lang.label": "Idioma",
   "hero.pill": "Verificación rápida de DNS",
-  "hero.title": "Comprueba el correo con DNS público",
+  "hero.title": "Comprueba la configuración del correo",
   "hero.tagline": "Revisa el SPF, DKIM y DMARC públicos de un dominio.",
   "hero.free": "Completamente gratis (sin registro)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

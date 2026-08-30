@@ -20,7 +20,7 @@
   window.I18N["vi"] = {
   "lang.label": "Ngôn ngữ",
   "hero.pill": "Kiểm tra DNS nhanh",
-  "hero.title": "Kiểm tra email qua DNS công khai",
+  "hero.title": "Kiểm tra cài đặt email",
   "hero.tagline": "Kiểm tra SPF, DKIM và DMARC công khai của một tên miền.",
   "hero.free": "Hoàn toàn miễn phí (không cần đăng ký)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",

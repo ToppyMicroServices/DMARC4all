@@ -20,7 +20,7 @@
   window.I18N["ru"] = {
   "lang.label": "Язык",
   "hero.pill": "Быстрая проверка DNS",
-  "hero.title": "Проверьте почту по публичному DNS",
+  "hero.title": "Проверьте настройки почты",
   "hero.tagline": "Проверьте публичные настройки SPF, DKIM и DMARC домена.",
   "hero.free": "Полностью бесплатно (без регистрации)",
   "hero.badge.auth": "SPF / DKIM / DMARC / BIMI",
