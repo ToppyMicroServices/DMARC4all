@@ -70,20 +70,20 @@
     }
   </script>
   <script defer src="vendor/dompurify.min.js"></script>
-  <script defer src="i18n/ja.js?v=23"></script>
-  <script defer src="i18n/en.js?v=23"></script>
-  <script defer src="i18n/es.js?v=23"></script>
-  <script defer src="i18n/de.js?v=23"></script>
-  <script defer src="i18n/ko.js?v=23"></script>
-  <script defer src="i18n/vi.js?v=23"></script>
-  <script defer src="i18n/th.js?v=23"></script>
-  <script defer src="i18n/km.js?v=23"></script>
-  <script defer src="i18n/my.js?v=23"></script>
-  <script defer src="i18n/id.js?v=23"></script>
-  <script defer src="i18n/et.js?v=23"></script>
-  <script defer src="i18n/zh.js?v=23"></script>
-  <script defer src="i18n/ru.js?v=23"></script>
-  <script defer src="i18n/bn.js?v=23"></script>
+  <script defer src="i18n/ja.js?v=24"></script>
+  <script defer src="i18n/en.js?v=24"></script>
+  <script defer src="i18n/es.js?v=24"></script>
+  <script defer src="i18n/de.js?v=24"></script>
+  <script defer src="i18n/ko.js?v=24"></script>
+  <script defer src="i18n/vi.js?v=24"></script>
+  <script defer src="i18n/th.js?v=24"></script>
+  <script defer src="i18n/km.js?v=24"></script>
+  <script defer src="i18n/my.js?v=24"></script>
+  <script defer src="i18n/id.js?v=24"></script>
+  <script defer src="i18n/et.js?v=24"></script>
+  <script defer src="i18n/zh.js?v=24"></script>
+  <script defer src="i18n/ru.js?v=24"></script>
+  <script defer src="i18n/bn.js?v=24"></script>
   <script defer src="i18n/vi_extra.js?v=21"></script>
   <script defer src="i18n/th_extra.js?v=21"></script>
   <script defer src="i18n/km_extra.js?v=21"></script>
@@ -134,7 +134,7 @@
     <section class="hero">
       <div class="hero-grid z-1">
         <div class="hero-copy">
-          <p class="pill" data-i18n="hero.pill">DNSクイック診断</p>
+          <p class="pill" data-i18n="hero.pill">メール設定チェック</p>
           <div class="hero-heading">
             <h1 data-i18n="hero.title">Mail設定を診断</h1>
           </div>
@@ -143,7 +143,7 @@
           <div class="card form-card">
             <div class="form-card-header">
               <div>
-                <h2 class="m-0-0-6" data-i18n="form.title">Quick 診断</h2>
+                <h2 class="m-0-0-6" data-i18n="form.title">ドメインを入力</h2>
               </div>
             </div>
             <form id="quick-check-form">
@@ -156,18 +156,18 @@
                 <div class="advanced-options-body">
                   <div class="form-option-group">
                 <label class="flex-label">
-                  <input type="checkbox" id="subdomain-scan" class="w-auto"> <span data-i18n="form.subdomain">サブドメイン探索も実行する（任意）</span>
+                  <input type="checkbox" id="subdomain-scan" class="w-auto"> <span data-i18n="form.subdomain">サブドメインも確認する（任意）</span>
                 </label>
                 <label class="flex-label">
-                  <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSBLチェックも実行する（任意: 時間がかかります）</span>
+                  <input type="checkbox" id="dnsbl-check" class="w-auto"> <span data-i18n="form.dnsbl">DNSブロックリストも確認する（任意・時間がかかる場合があります）</span>
                 </label>
                 <label class="flex-label">
-                  <input type="checkbox" id="external-probes" class="w-auto" disabled> <span data-i18n="form.externalProbes">Webサイトとドメイン登録情報も確認する（任意）</span>
+                  <input type="checkbox" id="external-probes" class="w-auto" disabled> <span data-i18n="form.externalProbes">ウェブサイトとドメイン登録情報も確認する（任意）</span>
                 </label>
                   </div>
                   <div class="resolver-panel">
                 <div class="resolver-panel-head">
-                  <label for="resolver-select" data-i18n="form.resolver">Resolver (DoH)</label>
+                  <label for="resolver-select" data-i18n="form.resolver">DNSリゾルバ（DoH）</label>
                   <span class="resolver-mode-badge">DoH</span>
                 </div>
                 <div class="resolver-controls">
@@ -176,11 +176,11 @@
                       <option value="cloudflare" data-i18n="form.resolver.cloudflare">Cloudflare</option>
                       <option value="quad9" data-i18n="form.resolver.quad9">Quad9</option>
                       <option value="google" data-i18n="form.resolver.google">Google</option>
-                      <option value="custom" data-i18n="form.resolver.custom">Custom (URL)</option>
+                      <option value="custom" data-i18n="form.resolver.custom">カスタム（URL）</option>
                     </select>
                   </div>
                   <div id="resolver-custom-wrap" class="hidden">
-                    <label for="resolver-custom" data-i18n="form.resolver.customLabel">Custom DoH URL</label>
+                    <label for="resolver-custom" data-i18n="form.resolver.customLabel">カスタムDoH URL</label>
                     <input id="resolver-custom" data-i18n-placeholder="form.resolver.customPlaceholder" placeholder="https://example.com/dns-query">
                     <p class="tiny muted mt-6" data-i18n="form.resolver.customHint">自前のDoH（HTTPS）を指定できます</p>
                   </div>
@@ -190,18 +190,18 @@
                 </div>
               </details>
               <div class="grid">
-                <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep" disabled>診断を実行</button>
+                <button type="submit" id="go-deep-btn" class="btn-gradient" data-i18n="form.deep" disabled>診断する</button>
               </div>
               <details class="form-notes">
-                <summary data-i18n="form.moreInfo">Usage notes & privacy</summary>
-                <p class="tiny" data-i18n="form.privacy">入力したドメイン名は選択したDoHリゾルバへ送信されます。任意の外部チェックを有効にした場合は、rdap.org と転送先のレジストリRDAP、確認対象ドメインの apex / www / mta-sts HTTPSホスト、BIMI URLにも接続します。個人情報は収集しません。</p>
+                <summary data-i18n="form.moreInfo">通信先とプライバシー</summary>
+                <p class="tiny" data-i18n="form.privacy">入力したドメイン名は、選択したDoHリゾルバに送信されます。外部チェックを有効にすると、rdap.orgと転送先のレジストリRDAP、対象ドメインのapex／www／mta-sts HTTPSホスト、BIMI URLにも接続します。個人情報は収集しません。</p>
                 <p class="tiny muted" id="resolver-note"></p>
-                <p class="tiny muted" data-i18n="form.subdomainNote">※サブドメイン探索(小規模)は管理下ドメイン, または明示許可のある範囲でのみ使用してください．</p>
+                <p class="tiny muted" data-i18n="form.subdomainNote">サブドメインの確認は小規模に限り、自身が管理するドメインまたは明示的な許可を得た範囲でのみ利用してください。</p>
               </details>
               <div class="rua-callout mt-10">
                 <p class="tiny muted">
-                  <strong data-i18n="rua.link.label">RUA集約レポート（DMARC）:</strong>
-                  <a href="rua_service.html" data-i18n="rua.link.spec">RUAサービス(無料)の紹介</a>
+                  <strong data-i18n="rua.link.label">DMARC集約レポート（RUA）：</strong>
+                  <a href="rua_service.html" data-i18n="rua.link.spec">無料RUAサービス</a>
                   <span aria-hidden="true"> / </span>
                   <a href="rua_analyzer.html" data-i18n="tools.ruaAnalyzer">RUA Analyzer</a>
                   <span aria-hidden="true"> / </span>

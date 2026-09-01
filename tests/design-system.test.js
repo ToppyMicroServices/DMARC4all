@@ -62,7 +62,7 @@ test('install metadata and offline cache use the monitor theme assets', async ()
 
 	assert.equal(manifest.background_color, '#0e1b32');
 	assert.equal(manifest.theme_color, '#0e1b32');
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v30';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v31';/);
 	assert.match(serviceWorker, /'\/manifest\.webmanifest\?v=4'/);
 	assert.match(serviceWorker, /'\/styles\.css\?v=21'/);
 	assert.match(serviceWorker, /'\/assets\/toppy-logo\.png'/);

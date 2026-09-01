@@ -65,6 +65,34 @@ test('mobile landing keeps tools and every language accessible', async ({ page }
 	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
 
+test('landing switches every locale without duplicated headings or overflow', async ({ page }) => {
+	for (const width of [1280, 390]) {
+		await page.setViewportSize({ width, height: 900 });
+		await page.goto('/index.html?lang=en');
+		await page.locator('.advanced-options > summary').click();
+		await page.locator('.form-notes > summary').click();
+
+		for (const lang of LANGUAGES) {
+			await page.locator(`[data-lang-choice="${lang}"]`).click();
+			await expect(page.locator('html')).toHaveAttribute('lang', lang);
+			const copy = await page.evaluate(() => ({
+				pill: document.querySelector('.hero .pill')?.textContent?.trim() || '',
+				title: document.querySelector('.hero h1')?.textContent?.trim() || '',
+				formTitle: document.querySelector('.form-card h2')?.textContent?.trim() || '',
+				action: document.querySelector('#go-deep-btn')?.textContent?.trim() || '',
+				overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+			}));
+
+			expect(copy.pill, `${lang} pill at ${width}px`).not.toMatch(/DNS/i);
+			expect(copy.pill, `${lang} pill at ${width}px`).not.toBe(copy.formTitle);
+			expect(copy.title, `${lang} title at ${width}px`).not.toBe('');
+			expect(copy.formTitle, `${lang} form title at ${width}px`).not.toBe('');
+			expect(copy.action, `${lang} action at ${width}px`).not.toBe('');
+			expect(copy.overflow, `${lang} overflow at ${width}px`).toBeLessThanOrEqual(1);
+		}
+	}
+});
+
 test('beginner flow is direct and hides optional network and scan controls by default', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto('/index.html?lang=en');

@@ -224,7 +224,7 @@ test('manifest provides installable PNG icons and the service worker precaches t
 		assert.equal(png.readUInt32BE(20), expectedSize);
 	}
 
-	assert.match(serviceWorker, /const CACHE_VERSION = 'v30';/);
+	assert.match(serviceWorker, /const CACHE_VERSION = 'v31';/);
 });
 
 test('release assets bypass an older shell cache before diagnostics are enabled', async () => {

@@ -129,7 +129,20 @@ test('landing keeps the primary flow direct and caveats inside form notes', () =
 		assert.equal(window.I18N[lang]['form.disclaimer'], disclaimer);
 		assert.ok([...window.I18N[lang]['hero.title']].length <= 65, `${lang}.hero.title is too long`);
 		assert.ok(window.I18N[lang]['hero.tagline'].length < 90, `${lang}.hero.tagline is too long`);
+		assert.doesNotMatch(window.I18N[lang]['hero.pill'], /DNS/i, `${lang}.hero.pill should describe the user task, not the implementation`);
+		assert.notEqual(window.I18N[lang]['hero.pill'], window.I18N[lang]['form.title'], `${lang} must not repeat the same heading`);
 	}
+
+	const banglaLandingCopy = [
+		'form.title', 'form.deep', 'form.moreInfo', 'form.privacy', 'form.resolver',
+		'form.resolver.custom', 'form.resolverNotice', 'rua.link.label', 'rua.link.spec',
+		'links.standards', 'links.guides', 'links.ai', 'tools.header', 'tools.ruaAnalyzer', 'tools.authGraph'
+	].map((key) => window.I18N.bn[key]).join(' ');
+	assert.doesNotMatch(
+		banglaLandingCopy,
+		/\b(?:Custom|service|query|request|Standards|provider|guide|machine|access|Header|Analyzer|Authentication|Graph)\b/i,
+		'Bangla landing copy must not fall back to English UI terms'
+	);
 
 	for (const file of ['index.html', 'index_enterprise.html']) {
 		const html = fs.readFileSync(path.join(PROJECT_ROOT, file), 'utf8');
@@ -282,7 +295,7 @@ test('localized network boundaries and Null MX guidance remain semantically comp
 		et: /registri RDAP/i,
 		zh: /注册局 RDAP/,
 		ru: /RDAP реестра/i,
-		bn: /registry RDAP/i
+		bn: /রেজিস্ট্রি RDAP/
 	};
 
 	for (const lang of languages) {
